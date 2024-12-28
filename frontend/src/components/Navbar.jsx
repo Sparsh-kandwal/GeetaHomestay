@@ -6,7 +6,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true); // To track navbar visibility
   const location = useLocation();
-  const navItems = ["Home", "Rooms", "Gallery", "Profile"];
+  const navItems = ["Home", "Bookings", "Gallery", "Profile"];
 
   // Handle scroll event
   useEffect(() => {
@@ -33,7 +33,7 @@ const Navbar = () => {
   return (
     <div>
       <header
-        className={`flex justify-between items-center h-16 px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
+        className={`flex justify-between items-center h-20 px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
           isNavbarVisible
             ? "opacity-100"
             : "opacity-0 pointer-events-none"
