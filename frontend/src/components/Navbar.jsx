@@ -31,11 +31,11 @@ const Navbar = () => {
   return (
     <div>
       <header
-        className={`flex justify-between items-center h-24 px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
+        className={`flex justify-between items-center h-17 px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
           isNavbarVisible
             ? "opacity-100"
             : "opacity-0 pointer-events-none"
-        } ${isHomePage ? "backdrop-blur-md" : "bg-indigo-700"}`}
+        } ${isHomePage ? "" : "bg-indigo-700"}`}
       >
         <h1 className="text-3xl text-white">Logo</h1>
         {/* Hamburger menu for mobile */}
