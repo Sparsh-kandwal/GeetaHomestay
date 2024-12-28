@@ -1,42 +1,77 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true); // To track navbar visibility
+  const location = useLocation();
+  const navItems = ["Home", "Rooms", "Gallery", "Profile"];
+
+  // Handle scroll event
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > window.innerHeight) {
+        setIsNavbarVisible(false); // Hide navbar after scrolling past the height of the screen
+      } else {
+        setIsNavbarVisible(true); // Show navbar when back within the screen height
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Determine if the current page is Home
+  const isHomePage = location.pathname === "/" || location.pathname === "/home";
+
   return (
-    <div
-      className="h-[500px] bg-cover bg-center"
-      style={{ backgroundImage: "url('https://via.placeholder.com/1920x1080')" }} 
-    >
-      {/* Navbar */}
-      <div className="h-[70px] flex items-center justify-between px-6 bg-opacity-75 bg-gray-800 text-white">
-        {/* Brand */}
-        <div className="text-xl font-bold">MyBrand</div>
-
-        {/* Links */}
-        <div className="hidden md:flex space-x-6">
-          <a href="#home" className="hover:text-gray-300">Home</a>
-          <a href="#about" className="hover:text-gray-300">About</a>
-          <a href="#services" className="hover:text-gray-300">Services</a>
-          <a href="#contact" className="hover:text-gray-300">Contact</a>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button className="block md:hidden">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16m-7 6h7"
-            />
-          </svg>
+    <div>
+      <header
+        className={`flex justify-between items-center h-24 px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
+          isNavbarVisible
+            ? "opacity-100"
+            : "opacity-0 pointer-events-none"
+        } ${isHomePage ? "backdrop-blur-md" : "bg-indigo-700"}`}
+      >
+        <h1 className="text-3xl text-white">Logo</h1>
+        {/* Hamburger menu for mobile */}
+        <button
+          className="block md:hidden text-white text-3xl"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          ☰
         </button>
-      </div>
+        {/* Navigation menu */}
+        <nav
+          className={`fixed top-0 right-0 h-full bg-indigo-700 p-8 transition-transform duration-300 ${
+            isMenuOpen ? "translate-x-0" : "translate-x-full"
+          } md:static md:flex md:bg-transparent md:h-auto md:translate-x-0`}
+        >
+          <button
+            className="block md:hidden text-white text-2xl mb-6"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            ✕
+          </button>
+          <ul className="flex flex-col gap-6 md:flex-row md:gap-6">
+            {navItems.map((item) => (
+              <li key={item}>
+                <a
+                  href={`/${item.toLowerCase()}`}
+                  className="text-lg font-semibold text-white hover:bg-indigo-600 px-4 py-2 rounded-full transition duration-300"
+                  onClick={() => setIsMenuOpen(false)} // Close menu on click
+                >
+                  {item}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </header>
     </div>
   );
 };
