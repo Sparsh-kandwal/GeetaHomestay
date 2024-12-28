@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,6 +26,7 @@ const Navbar = () => {
     };
   }, []);
 
+
   // Determine if the current page is Home
   const isHomePage = location.pathname === "/" || location.pathname === "/home";
 
@@ -37,7 +39,13 @@ const Navbar = () => {
             : "opacity-0 pointer-events-none"
         } ${isHomePage ? "backdrop-blur-md" : "bg-indigo-700"}`}
       >
-        <h1 className="text-3xl text-white">Logo</h1>
+       <h1 className="text-3xl text-white">
+        <Link to={"/home"}>
+        
+          <img src="/static/logo.png" alt="Logo" className="w-auto h-36" />
+        </Link>
+
+      </h1>
         {/* Hamburger menu for mobile */}
         <button
           className="block md:hidden text-white text-3xl"
@@ -60,13 +68,13 @@ const Navbar = () => {
           <ul className="flex flex-col gap-6 md:flex-row md:gap-6">
             {navItems.map((item) => (
               <li key={item}>
-                <a
-                  href={`/${item.toLowerCase()}`}
+               <Link
+                  to={`/${item.toLowerCase()}`} // Use react-router Link for client-side navigation
                   className="text-lg font-semibold text-white hover:bg-indigo-600 px-4 py-2 rounded-full transition duration-300"
-                  onClick={() => setIsMenuOpen(false)} // Close menu on click
                 >
                   {item}
-                </a>
+                </Link>
+                 
               </li>
             ))}
           </ul>

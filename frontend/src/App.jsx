@@ -32,6 +32,8 @@ const AnimatedRoutes = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/rooms" element={<Rooms />} />
+            <Route path="/rooms/:name" element={<Rooms />} />
+
           </Routes>
         </div>
       </CSSTransition>

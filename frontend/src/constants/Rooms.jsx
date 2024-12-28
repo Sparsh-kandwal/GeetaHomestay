@@ -4,7 +4,13 @@ export const rooms = [
     price: 1200,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/v1735288533/deluxe_double_bed_2nd_rkdilc.jpg",
     description: "Spacious room with a comfortable double bed, perfect for couples or solo travelers.",
-    amenities: ["Air Conditioning", "Free Wi-Fi", "Flat-screen TV", "Private Bathroom", "Mini Fridge"],
+    amenities: [
+      { name: "Air Conditioning", icon: "❄️" },
+      { name: "Free Wi-Fi", icon: "📶" },
+      { name: "Flat-screen TV", icon: "📺" },
+      { name: "Private Bathroom", icon: "🚿" },
+      { name: "Mini Fridge", icon: "🧊" }
+    ],
     maxAdults: 3,
     maxChildren: 2,
     totalRooms: 3,
@@ -21,7 +27,14 @@ export const rooms = [
     price: 1600,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/v1735289485/20241221_175226_pjtexs.jpg",
     description: "Luxurious room with a premium double bed and additional amenities for a more comfortable stay.",
-    amenities: ["Air Conditioning", "Free Wi-Fi", "Large Flat-screen TV", "Private Bathroom with Jacuzzi", "Mini Bar", "Coffee Maker"],
+    amenities: [
+      { name: "Air Conditioning", icon: "❄️" },
+      { name: "Free Wi-Fi", icon: "📶" },
+      { name: "Large Flat-screen TV", icon: "📺" },
+      { name: "Private Bathroom with Jacuzzi", icon: "🛁" },
+      { name: "Mini Bar", icon: "🍸" },
+      { name: "Coffee Maker", icon: "☕" }
+    ],
     maxAdults: 3,
     maxChildren: 2,
     totalRooms: 2,
@@ -38,7 +51,14 @@ export const rooms = [
     price: 1600,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/v1735290068/20241221_174525_pquo5i.jpg",
     description: "Spacious room with four comfortable beds, ideal for families or groups of friends.",
-    amenities: ["Air Conditioning", "Free Wi-Fi", "Flat-screen TV", "Private Bathroom", "Mini Fridge", "Seating Area"],
+    amenities: [
+      { name: "Air Conditioning", icon: "❄️" },
+      { name: "Free Wi-Fi", icon: "📶" },
+      { name: "Flat-screen TV", icon: "📺" },
+      { name: "Private Bathroom", icon: "🚿" },
+      { name: "Mini Fridge", icon: "🧊" },
+      { name: "Seating Area", icon: "🛋️" }
+    ],
     maxAdults: 6,
     maxChildren: 6,
     totalRooms: 2,
@@ -55,7 +75,15 @@ export const rooms = [
     price: 2500,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/v1735290499/20241221_175629_sxpfez.jpg",
     description: "Luxurious room with three premium beds and additional space for ultimate comfort.",
-    amenities: ["Air Conditioning", "Free Wi-Fi", "Large Flat-screen TV", "Private Bathroom with Bathtub", "Mini Bar", "Coffee Maker", "Work Desk"],
+    amenities: [
+      { name: "Air Conditioning", icon: "❄️" },
+      { name: "Free Wi-Fi", icon: "📶" },
+      { name: "Large Flat-screen TV", icon: "📺" },
+      { name: "Private Bathroom with Bathtub", icon: "🛁" },
+      { name: "Mini Bar", icon: "🍸" },
+      { name: "Coffee Maker", icon: "☕" },
+      { name: "Work Desk", icon: "💻" }
+    ],
     maxAdults: 5,
     maxChildren: 4,
     totalRooms: 2,
@@ -65,7 +93,7 @@ export const rooms = [
       "https://res.cloudinary.com/dgcdngt04/image/upload/v1735290501/20241221_175645_eedlsa.jpg",
       "https://res.cloudinary.com/dgcdngt04/image/upload/v1735290508/20241221_175848_zgekhw.jpg",
       "https://res.cloudinary.com/dgcdngt04/image/upload/v1735290515/20241221_175910_wzjgko.jpg",
-      "https://res.cloudinary.com/dgcdngt04/image/upload/v1735290497/20241221_175451_obfujn.jpg",
+      "https://res.cloudinary.com/dgcdngt04/image/upload/v1735290497/20241221_175451_obfujn.jpg"
     ]
   },
   {
@@ -73,7 +101,16 @@ export const rooms = [
     price: 3400,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/v1735291051/20241221_172904_n79o14.jpg",
     description: "Our most luxurious offering with three top-quality beds and a range of premium amenities.",
-    amenities: ["Air Conditioning", "Free High-speed Wi-Fi", "65-inch Smart TV", "Private Bathroom with Jacuzzi and Rain Shower", "Fully Stocked Mini Bar", "Espresso Machine", "Work Desk", "Lounge Area"],
+    amenities: [
+      { name: "Air Conditioning", icon: "❄️" },
+      { name: "Free High-speed Wi-Fi", icon: "📶" },
+      { name: "65-inch Smart TV", icon: "📺" },
+      { name: "Private Bathroom with Jacuzzi and Rain Shower", icon: "🛁" },
+      { name: "Fully Stocked Mini Bar", icon: "🍸" },
+      { name: "Espresso Machine", icon: "☕" },
+      { name: "Work Desk", icon: "💻" },
+      { name: "Lounge Area", icon: "🛋️" }
+    ],
     maxAdults: 5,
     maxChildren: 4,
     totalRooms: 1,
@@ -88,4 +125,3 @@ export const rooms = [
     ]
   }
 ];
-
