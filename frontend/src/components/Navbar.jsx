@@ -33,7 +33,7 @@ const Navbar = () => {
   return (
     <div>
       <header
-        className={`flex justify-between items-center h-17 px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
+        className={`flex justify-between items-center h-16 px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
           isNavbarVisible
             ? "opacity-100"
             : "opacity-0 pointer-events-none"
