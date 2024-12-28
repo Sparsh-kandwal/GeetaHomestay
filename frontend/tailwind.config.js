@@ -5,7 +5,12 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        grand: ['"Grand Hotel"', 'cursive'], // Grand Hotel
+        merriweather: ['"Merriweather Sans"', 'sans-serif'], // Merriweather Sans
+      },
+    },
   },
   plugins: [],
-}
+};
