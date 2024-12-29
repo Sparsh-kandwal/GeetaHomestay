@@ -6,12 +6,15 @@ import Rooms from './pages/Rooms';
 import Navbar from './components/Navbar'; // Assuming you have a Navbar component
 import Footer from './components/Footer'; // Assuming you have a Footer component
 import './App.css';  // Ensure the appropriate CSS file for transitions
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const App = () => {
   return (
     <Router>
-      <Navbar />
-      <AnimatedRoutes />
+      <GoogleOAuthProvider clientId="1087462481925-43vqlkhqv232k6p5773d8j66sbnfbcve.apps.googleusercontent.com">
+        <Navbar />  
+        <AnimatedRoutes />
+      </GoogleOAuthProvider>
       <Footer />
     </Router>
   );
