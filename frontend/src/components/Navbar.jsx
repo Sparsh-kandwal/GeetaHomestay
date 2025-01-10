@@ -8,23 +8,7 @@ const Navbar = () => {
   const location = useLocation();
   const navItems = ["Home", "Bookings", "Gallery", "Profile"];
 
-  // Handle scroll event
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > window.innerHeight) {
-        setIsNavbarVisible(false); // Hide navbar after scrolling past the height of the screen
-      } else {
-        setIsNavbarVisible(true); // Show navbar when back within the screen height
-      }
-    };
 
-    window.addEventListener("scroll", handleScroll);
-
-    // Cleanup event listener
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
 
   // Determine if the current page is Home

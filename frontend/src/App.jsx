@@ -1,18 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { SwitchTransition, CSSTransition } from 'react-transition-group';
 import HomePage from './pages/HomePage';
 import Rooms from './pages/Rooms';
-import Navbar from './components/Navbar'; // Assuming you have a Navbar component
-import Footer from './components/Footer'; // Assuming you have a Footer component
-import './App.css';  // Ensure the appropriate CSS file for transitions
+import Navbar from './components/Navbar'; 
+import Footer from './components/Footer'; 
+import './App.css'; 
 
 const App = () => {
+
+
+
   return (
     <Router>
-      <Navbar />
-      <AnimatedRoutes />
-      <Footer />
+       (
+        <div>
+          <Navbar />
+          <AnimatedRoutes />
+          <Footer />
+        </div>
+      )
     </Router>
   );
 };
@@ -33,7 +40,6 @@ const AnimatedRoutes = () => {
             <Route path="/home" element={<HomePage />} />
             <Route path="/bookings" element={<Rooms />} />
             <Route path="/rooms/:name" element={<Rooms />} />
-
           </Routes>
         </div>
       </CSSTransition>

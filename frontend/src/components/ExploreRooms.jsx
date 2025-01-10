@@ -1,16 +1,20 @@
 import React from 'react';
-import RoomCard from './RoomCard';
-import { rooms } from '../constants/Rooms';
 
-const ExploreRooms = () => {
+const ExploreRooms = ({ rooms }) => {
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">Explore Our Rooms</h2>
-      <div className="flex flex-col gap-8">
-        {rooms.map((room, index) => (
-          <RoomCard key={index} room={room} />
-        ))}
-      </div>
+    <div className="p-4">
+      <h2 className="text-lg font-bold mb-4">Available Rooms</h2>
+      {rooms.length === 0 ? (
+        <p>No rooms available. Please search to see results.</p>
+      ) : (
+        <ul className="space-y-2">
+          {rooms.map((room) => (
+            <li key={room.roomID} className="border p-2 rounded-md shadow">
+              Room ID: {room.roomID}, Count: {room.count}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 export const rooms = [
   {
+    id: 1,
     name: "Deluxe Double Bed Room",
     price: 1200,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/v1735288533/deluxe_double_bed_2nd_rkdilc.jpg",
@@ -23,6 +24,7 @@ export const rooms = [
     ]
   },
   {
+    id: 2,
     name: "Premium Double Bed Room",
     price: 1600,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/v1735289485/20241221_175226_pjtexs.jpg",
@@ -47,6 +49,7 @@ export const rooms = [
     ]
   },
   {
+    id: 3,
     name: "Deluxe Four Bed Room",
     price: 1600,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/v1735290068/20241221_174525_pquo5i.jpg",
@@ -71,6 +74,7 @@ export const rooms = [
     ]
   },
   {
+    id: 4,
     name: "Premium 3 Bed Room",
     price: 2500,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/v1735290499/20241221_175629_sxpfez.jpg",
@@ -97,6 +101,7 @@ export const rooms = [
     ]
   },
   {
+    id: 5,
     name: "Luxury 3 Bed Room",
     price: 3400,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/v1735291051/20241221_172904_n79o14.jpg",
