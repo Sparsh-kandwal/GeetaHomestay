@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import ReactSlider from 'react-slider';
 
-const SearchFilter = ({ priceRange, setPriceRange, capacity, setCapacity, setSearchTerm, acAvailable, setAcAvailable }) => {
-  const [sliderValue, setSliderValue] = useState(priceRange.max);
-
+const SearchFilter = ({ priceRange, setPriceRange, capacity, setCapacity, acAvailable, setAcAvailable }) => {
+  const [sliderValue, setSliderValue] = useState(priceRange);
+  const [peopleCount, setPeopleCount] = useState(capacity || 1); 
   const handleSliderChange = (value) => {
     setSliderValue(value);
-    setPriceRange({ min: priceRange.min, max: value });
+    setPriceRange(value);
   };
 
-  const handleMaxPriceChange = (e) => {
-    const value = Math.max(priceRange.min, Math.min(e.target.value, 5000));
-    setPriceRange({ min: priceRange.min, max: value });
-    setSliderValue(value);
+
+  const handlePeopleChange = (value) => {
+    setPeopleCount(value);
+    setCapacity(value); // Update the capacity based on peopleCount
   };
 
   return (
@@ -20,13 +20,7 @@ const SearchFilter = ({ priceRange, setPriceRange, capacity, setCapacity, setSea
       
       {/* Search Bar */}
       <div className="mb-4">
-        <label className="block text-lg font-semibold text-gray-800 mb-2">Search Rooms</label>
-        <input
-          type="text"
-          className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 placeholder-gray-500"
-          placeholder="Enter room details"
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <label className="block text-xl font-bold text-gray-800 mb-2">Filters</label>
       </div>
 
       {/* Price Range */}
@@ -41,7 +35,7 @@ const SearchFilter = ({ priceRange, setPriceRange, capacity, setCapacity, setSea
           min={0}
           max={5000}
           step={100}
-          renderTrack={(props, state) => (
+          renderTrack={(props) => (
             <div {...props} className="h-2 bg-indigo-200 rounded-full" />
           )}
           renderThumb={(props) => (
@@ -50,41 +44,35 @@ const SearchFilter = ({ priceRange, setPriceRange, capacity, setCapacity, setSea
         />
         
         <div className="flex justify-between mt-2 text-xs text-gray-700">
-          <span>${priceRange.min}</span>
-          <span>${sliderValue}</span>
-        </div>
-
-        {/* Max Price Input */}
-        <div className="mt-4">
-          <input
-            type="number"
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Max Price"
-            value={sliderValue}
-            onChange={handleMaxPriceChange}
-          />
+          <span className="text-xl mt-4 font-semibold text-indigo-600">₹{sliderValue}</span> {/* Make slider value noticeable */}
         </div>
       </div>
 
-      {/* Capacity */}
+      {/* Number of People */}
       <div className="mb-4">
-        <label className="block text-lg font-semibold text-gray-800 mb-2">Capacity</label>
-        <div className="text-sm text-gray-600 mb-2">Specify the number of guests</div>
-        <div className="flex gap-4">
-          <input
-            type="number"
-            className="w-1/2 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 placeholder-gray-500"
-            placeholder="Adults"
-            value={capacity.adults}
-            onChange={(e) => setCapacity({ ...capacity, adults: e.target.value })}
-          />
-          <input
-            type="number"
-            className="w-1/2 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 placeholder-gray-500"
-            placeholder="Children"
-            value={capacity.children}
-            onChange={(e) => setCapacity({ ...capacity, children: e.target.value })}
-          />
+        <label className="block text-lg font-semibold text-gray-800 mb-2">Number of People</label>
+        <div className="text-sm text-gray-600 mb-2">Specify the total number of people</div>
+        
+        <ReactSlider
+          className="w-full"
+          value={peopleCount}
+          onChange={handlePeopleChange}
+          min={1}
+          max={10}  // You can adjust the max value as needed
+          step={1}
+          renderTrack={(props) => (
+            <div {...props} className="h-2 bg-indigo-200 rounded-full" />
+          )}
+          renderThumb={(props) => (
+            <div {...props} className="w-6 h-6 bg-indigo-500 rounded-full cursor-pointer" />
+          )}
+          renderMark={(props) => (
+            <div {...props} className="w-3 h-3 bg-indigo-600 rounded-full" /> // Blot for each step
+          )}
+        />
+
+        <div className="flex justify-between mt-2 text-xs text-gray-700">
+          <span className="text-xl mt-4 font-semibold text-indigo-600">{peopleCount}</span> {/* Make slider value noticeable */}
         </div>
       </div>
 
