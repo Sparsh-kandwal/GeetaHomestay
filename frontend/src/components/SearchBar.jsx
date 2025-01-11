@@ -9,7 +9,7 @@ const SearchBar = () => {
     alert(`Searching for:
     Check-in: ${checkInDate}
     Check-out: ${checkOutDate}
-    Guests: ${guests}`);
+    `)
   };
 
   return (
@@ -32,16 +32,7 @@ const SearchBar = () => {
           className="px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
         />
       </div>
-      <div className="flex flex-col">
-        <label className="text-gray-700 text-sm mb-1">Guests</label>
-        <input
-          type="number"
-          value={guests}
-          min="1"
-          onChange={(e) => setGuests(e.target.value)}
-          className="px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-        />
-      </div>
+     
       <button
         onClick={handleSearch}
         className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
