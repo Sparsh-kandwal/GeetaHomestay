@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import './App.css';
 import RoomDetails from './pages/RoomDetails';
 import { rooms } from './constants/Rooms';
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const App = () => {
 
@@ -16,13 +17,11 @@ const App = () => {
 
   return (
     <Router>
-       (
-        <div>
-          <Navbar />
-          <AnimatedRoutes />
-          <Footer />
-        </div>
-      )
+      <GoogleOAuthProvider clientId="1087462481925-43vqlkhqv232k6p5773d8j66sbnfbcve.apps.googleusercontent.com">
+        <Navbar />  
+        <AnimatedRoutes />
+      </GoogleOAuthProvider>
+      <Footer />
     </Router>
   );
 };
@@ -37,7 +36,7 @@ const AnimatedRoutes = () => {
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />
             <Route path="/home" element={<HomePage />} />
-            <Route path="/bookings" element={<Rooms />} />
+            <Route path="/rooms" element={<Rooms />} />
             
             <Route path="/rooms/:id" element={<RoomDetails />} />
           </Routes>

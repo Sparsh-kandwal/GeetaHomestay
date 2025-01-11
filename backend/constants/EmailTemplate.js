@@ -1,4 +1,4 @@
-const emailTemplate = () => `
+export const emailTemplate = (guestName) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -47,7 +47,7 @@ const emailTemplate = () => `
             <h1>Welcome to Geeta Home Stay!</h1>
         </div>
         <div class="content">
-            <p>Dear Guest,</p>
+            <p>Dear ${guestName},</p>
             <p>We are thrilled to have you as part of our Geeta Home Stay family! Thank you for choosing us for your stay. We are committed to making your experience comfortable, memorable, and truly special.</p>
             <p>Whether you're here for a relaxing vacation or an adventurous getaway, our team is here to assist you at every step. If you have any special requests or need assistance, please do not hesitate to reach out.</p>
             <p>Here’s to a wonderful and rejuvenating stay!</p>
