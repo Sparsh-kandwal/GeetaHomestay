@@ -1,12 +1,22 @@
-import React from 'react'
-import ExploreRooms from '../components/ExploreRooms'
+import React, { useState, useCallback } from 'react';
+import ExploreRooms from '../components/ExploreRooms';
+import SearchBar from '../components/SearchBar';
 
 const Rooms = () => {
-  return (
-    <div className='mt-24'>
-      <ExploreRooms />
-    </div>
-  )
-}
+  const [roomData, setRoomData] = useState([]);
 
-export default Rooms
+  const handleSearchResults = useCallback((data) => {
+    setRoomData(data);
+  }, []); 
+
+  return (
+    <div className="mt-24">
+      <div className="flex flex-col items-center gap-6">
+        <SearchBar onSearch={handleSearchResults} />
+      </div>
+      <ExploreRooms roomData={roomData} />
+    </div>
+  );
+};
+
+export default Rooms;
