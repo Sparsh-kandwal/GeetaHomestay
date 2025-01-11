@@ -11,11 +11,18 @@ import RoomDetails from './pages/RoomDetails';
 import { rooms } from './constants/Rooms';
 
 const App = () => {
+
+
+
   return (
     <Router>
-      <Navbar />
-      <AnimatedRoutes />
-      <Footer />
+       (
+        <div>
+          <Navbar />
+          <AnimatedRoutes />
+          <Footer />
+        </div>
+      )
     </Router>
   );
 };

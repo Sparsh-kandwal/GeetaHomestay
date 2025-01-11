@@ -1,28 +1,33 @@
 
 /* App.css */
 
-/* Page transition styles */
-.page-enter {
+/* Fade transition for route changes */
+.fade-enter {
   opacity: 0;
+  transform: translateY(20px);
 }
-
-.page-enter-active {
+.fade-enter-active {
   opacity: 1;
-  transition: opacity 500ms ease-in-out;
+  transform: translateY(0);
+  transition: opacity 500ms ease-in-out, transform 500ms ease-in-out;
 }
-
-.page-exit {
+.fade-exit {
   opacity: 1;
+  transform: translateY(0);
 }
-
-.page-exit-active {
+.fade-exit-active {
   opacity: 0;
-  transition: opacity 500ms ease-in-out;
+  transform: translateY(-20px);
+  transition: opacity 500ms ease-in-out, transform 500ms ease-in-out;
 }
 
+/* Ensuring page styling */
 .page {
-  position: relative;
+  min-height: calc(100vh - 80px); /* Adjust for navbar/footer */
+  display: flex;
+  flex-direction: column;
 }
+
 
 
 .content{

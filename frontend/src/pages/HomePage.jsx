@@ -4,6 +4,7 @@ import Testimonials from '../components/Testimonials';
 import Facilities from '../components/Facilities';
 import { MapPin, Calendar } from "lucide-react";
 import { Link } from 'react-router-dom';
+import SearchBar from '../components/SearchBar';
 
 const HomePage = () => {
   useEffect(() => {
@@ -28,6 +29,7 @@ const HomePage = () => {
         {/* <img src="static/bush2.png" alt="Bush 2" className="bush2 absolute bottom-0 w-full pointer-events-none" /> */}
         <div className="title absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white font-extrabold drop-shadow-md">
         <div className="flex flex-col items-center gap-6">
+
       {/* Title */}
       <span className="text-5xl md:text-7xl lg:text-9xl text-center">
         Geeta HomeStay
