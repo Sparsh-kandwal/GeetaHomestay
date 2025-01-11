@@ -24,8 +24,8 @@ const HomePage = () => {
   return (
     <div>
       <section className="h-screen bg-gradient-to-t from-blue-200 to-blue-400 relative overflow-hidden">
-        <img src="static/mount1.png" alt="Mountain 1" className="mount1 absolute bottom-0 w-full pointer-events-none" />
-        <img src="static/bush2.png" alt="Bush 2" className="bush2 absolute bottom-0 w-full pointer-events-none" />
+        <img src="static/mount1.jpg" alt="Mountain 1" className="mount1 absolute bottom-0 w-full pointer-events-none" />
+        {/* <img src="static/bush2.png" alt="Bush 2" className="bush2 absolute bottom-0 w-full pointer-events-none" /> */}
         <div className="title absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white font-extrabold drop-shadow-md">
         <div className="flex flex-col items-center gap-6">
       {/* Title */}
@@ -54,9 +54,9 @@ const HomePage = () => {
       </div>
     </div>
         </div>
-        <img src="static/bush1.png" alt="Bush 1" className="bush1 absolute bottom-0 w-full pointer-events-none" />
-        <img src="static/leaf2.png" alt="Leaf 2" className="leaf2 absolute bottom-0 w-full pointer-events-none" />
-        <img src="static/leaf1.png" alt="Leaf 1" className="leaf1 absolute bottom-0 w-full pointer-events-none" />
+        {/* <img src="static/bush1.png" alt="Bush 1" className="bush1 absolute bottom-0 w-full pointer-events-none" /> */}
+        {/* <img src="static/leaf2.png" alt="Leaf 2" className="leaf2 absolute bottom-0 w-full pointer-events-none" /> */}
+        {/* <img src="static/leaf1.png" alt="Leaf 1" className="leaf1 absolute bottom-0 w-full pointer-events-none" /> */}
       </section>
 
       <div className="font-merriweather">
