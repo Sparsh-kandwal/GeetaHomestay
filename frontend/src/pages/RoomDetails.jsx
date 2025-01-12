@@ -1,3 +1,4 @@
+// src/components/RoomDetails.jsx
 
 import React, { useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
@@ -12,10 +13,37 @@ import {
   FaMinus,
   FaArrowLeft,
   FaCheck,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaCartPlus
 } from 'react-icons/fa';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { useCart } from '../contexts/CartContext';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// Within handleAddToCart
+const handleAddToCart = () => {
+  if (isInvalidDateRange() || !arrivalDate || !departureDate) {
+    toast.error('Please select valid arrival and departure dates before adding to cart.');
+    return;
+  }
+
+  const cartItem = {
+    room,
+    bookingDetails: {
+      arrivalDate,
+      departureDate,
+      adults,
+      children,
+      roomCount,
+      totalPrice: calculateTotalPrice()
+    }
+  };
+
+  addToCart(cartItem);
+  // toast.success('Room added to cart!'); // Already handled in context
+};
 
 const RoomDetails = () => {
   const { id } = useParams();
@@ -32,6 +60,9 @@ const RoomDetails = () => {
   const [children, setChildren] = useState(0);
   const [roomCount, setRoomCount] = useState(1);
 
+  // Access cart context
+  const { addToCart } = useCart();
+
   // Option 1: Use location.state if navigated from RoomCard
   const roomFromState = location.state?.room;
 
@@ -39,7 +70,7 @@ const RoomDetails = () => {
   const room = roomFromState || rooms.find((r) => r.id === id);
 
   if (!room) {
-    return <div className="container mx-auto px-4 py-24">Room not found.</div>;
+    return <div className="container mx-auto px-4 py-24 text-center text-red-500">Room not found.</div>;
   }
 
   const {
@@ -101,8 +132,31 @@ const RoomDetails = () => {
     navigate('/booking-confirmation', { state: { room, bookingDetails: { arrivalDate, departureDate, adults, children, roomCount, totalPrice: calculateTotalPrice() } } });
   };
 
+  // Handler for adding to cart
+  const handleAddToCart = () => {
+    if (isInvalidDateRange() || !arrivalDate || !departureDate) {
+      alert('Please select valid arrival and departure dates before adding to cart.');
+      return;
+    }
+
+    const cartItem = {
+      room,
+      bookingDetails: {
+        arrivalDate,
+        departureDate,
+        adults,
+        children,
+        roomCount,
+        totalPrice: calculateTotalPrice()
+      }
+    };
+
+    addToCart(cartItem);
+    alert('Room added to cart!');
+  };
+
   return (
-    <div className="container mx-auto px-4 py-24">
+    <div className="container mx-auto px-4 py-12 lg:py-24">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -112,15 +166,17 @@ const RoomDetails = () => {
         Back
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Image Gallery */}
         <div className="relative">
-          <img
-            src={gallery[currentImageIndex]}
-            alt={`${name} Image ${currentImageIndex + 1}`}
-            className="w-full h-80 lg:h-96 object-cover rounded-lg shadow-lg transition-transform duration-500 transform hover:scale-105"
-            loading="lazy"
-          />
+          <div className="aspect-w-4 aspect-h-3">
+            <img
+              src={gallery[currentImageIndex]}
+              alt={`${name} Image ${currentImageIndex + 1}`}
+              className="w-full h-full object-cover rounded-lg shadow-lg transition-transform duration-500 transform hover:scale-105"
+              loading="lazy"
+            />
+          </div>
           {gallery.length > 1 && (
             <>
               <button
@@ -140,18 +196,20 @@ const RoomDetails = () => {
             </>
           )}
           {/* Image Indicators */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-            {gallery.map((_, index) => (
-              <span
-                key={index}
-                className={`w-3 h-3 rounded-full cursor-pointer ${
-                  index === currentImageIndex ? 'bg-indigo-600' : 'bg-gray-300'
-                }`}
-                onClick={() => setCurrentImageIndex(index)}
-                aria-label={`Go to image ${index + 1}`}
-              ></span>
-            ))}
-          </div>
+          {gallery.length > 1 && (
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+              {gallery.map((_, index) => (
+                <span
+                  key={index}
+                  className={`w-3 h-3 rounded-full cursor-pointer ${
+                    index === currentImageIndex ? 'bg-indigo-600' : 'bg-gray-300'
+                  }`}
+                  onClick={() => setCurrentImageIndex(index)}
+                  aria-label={`Go to image ${index + 1}`}
+                ></span>
+              ))}
+            </div>
+          )}
           {/* Favorite Button */}
           <button
             onClick={toggleFavorite}
@@ -166,13 +224,13 @@ const RoomDetails = () => {
 
         {/* Room Details and Booking */}
         <div className="flex flex-col">
-          <h1 className="text-4xl font-bold mb-4 text-gray-800">{name}</h1>
-          <p className="text-2xl font-semibold text-indigo-600 mb-6">₹{price} per night</p>
+          <h1 className="text-3xl lg:text-4xl font-bold mb-4 text-gray-800">{name}</h1>
+          <p className="text-xl lg:text-2xl font-semibold text-indigo-600 mb-6">₹{price.toLocaleString()} per night</p>
           <p className="text-gray-700 mb-6">{description}</p>
 
           {/* Room Availability */}
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-3 text-gray-800">Room Availability</h2>
+            <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Room Availability</h2>
             <p className="mb-3 text-gray-700">Total rooms available: <span className="font-medium">{totalRooms}</span></p>
             <div className="flex items-center space-x-4">
               <label className="font-medium text-gray-700" htmlFor="roomCount">Number of rooms:</label>
@@ -191,7 +249,7 @@ const RoomDetails = () => {
                   onChange={(e) => handleRoomCountChange(Math.min(Math.max(1, parseInt(e.target.value) || 1), totalRooms))}
                   min="1"
                   max={totalRooms}
-                  className="w-16 text-center border-t border-b border-gray-300"
+                  className="w-16 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   aria-label="Room count"
                 />
                 <button
@@ -207,7 +265,7 @@ const RoomDetails = () => {
 
           {/* Select Dates */}
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-3 text-gray-800">Select Dates</h2>
+            <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Select Dates</h2>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="arrivalDate">Arrival Date</label>
@@ -248,7 +306,7 @@ const RoomDetails = () => {
 
           {/* Occupancy Controls */}
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-3 text-gray-800">Number of Guests</h2>
+            <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Number of Guests</h2>
             <div className="flex flex-col md:flex-row gap-6">
               {/* Adults */}
               <div className="flex-1">
@@ -268,7 +326,7 @@ const RoomDetails = () => {
                     onChange={(e) => setAdults(Math.min(Math.max(1, parseInt(e.target.value) || 1), maxAdults))}
                     min="1"
                     max={maxAdults}
-                    className="w-16 text-center border-t border-b border-gray-300"
+                    className="w-16 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     aria-label="Number of adults"
                   />
                   <button
@@ -298,7 +356,7 @@ const RoomDetails = () => {
                     onChange={(e) => setChildren(Math.min(Math.max(0, parseInt(e.target.value) || 0), maxChildren))}
                     min="0"
                     max={maxChildren}
-                    className="w-16 text-center border-t border-b border-gray-300"
+                    className="w-16 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     aria-label="Number of children"
                   />
                   <button
@@ -315,32 +373,48 @@ const RoomDetails = () => {
 
           {/* Total Price */}
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-2 text-gray-800">Total Price</h2>
+            <h2 className="text-xl lg:text-2xl font-semibold mb-2 text-gray-800">Total Price</h2>
             <p className="text-xl font-bold text-indigo-600">
-              ₹{calculateTotalPrice()} 
-              <span className="text-gray-600"> for {roomCount} room(s)</span>
+              ₹{calculateTotalPrice().toLocaleString()} 
+              <span className="text-gray-600"> for {roomCount} room{roomCount > 1 ? 's' : ''}</span>
             </p>
           </div>
 
-          {/* Booking Button */}
-          <button
-            onClick={handleBookNow}
-            className={`w-full bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200 ${
-              isInvalidDateRange() || !arrivalDate || !departureDate
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
-            }`}
-            disabled={isInvalidDateRange() || !arrivalDate || !departureDate}
-          >
-            Book Now
-          </button>
+          {/* Booking and Add to Cart Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Book Now Button */}
+            <button
+              onClick={handleBookNow}
+              className={`w-full sm:w-1/2 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200 ${
+                isInvalidDateRange() || !arrivalDate || !departureDate
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
+              }`}
+              disabled={isInvalidDateRange() || !arrivalDate || !departureDate}
+            >
+              Book Now
+            </button>
+
+            {/* Add to Cart Button */}
+            <button
+              onClick={handleAddToCart}
+              className={`w-full sm:w-1/2 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-200`}
+              disabled={isInvalidDateRange() || !arrivalDate || !departureDate}
+              aria-label="Add to Cart"
+            >
+              <div className="flex items-center justify-center">
+                <FaCartPlus className="mr-2" />
+                Add to Cart
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Amenities */}
       <div className="mt-12">
-        <h2 className="text-3xl font-semibold mb-6 text-gray-800">Amenities</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <h2 className="text-2xl lg:text-3xl font-semibold mb-6 text-gray-800">Amenities</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {amenities.map((amenity, index) => (
             <span
               key={index}

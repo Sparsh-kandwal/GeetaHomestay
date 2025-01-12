@@ -10,6 +10,8 @@ import './App.css';
 import RoomDetails from './pages/RoomDetails';
 import { rooms } from './constants/Rooms';
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { CartProvider } from './contexts/CartContext';
+import Cart from './components/Cart';
 
 const App = () => {
 
@@ -30,6 +32,7 @@ const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
+    <CartProvider>
     <SwitchTransition mode="out-in">
       <CSSTransition key={location.pathname} classNames="fade" timeout={500} >
         <div className="page">
@@ -39,10 +42,12 @@ const AnimatedRoutes = () => {
             <Route path="/rooms" element={<Rooms />} />
             
             <Route path="/rooms/:id" element={<RoomDetails />} />
+            <Route path="/cart" element={<Cart />} />
           </Routes>
         </div>
       </CSSTransition>
     </SwitchTransition>
+    </CartProvider>
   );
 };
 
