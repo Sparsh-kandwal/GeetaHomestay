@@ -43,7 +43,7 @@ const HomePage = () => {
             <div className="flex gap-4">
               <button
                 onClick={() =>
-                  window.open("https://maps.app.goo.gl/HBiUXg1QDpgUy2F2A", "_blank")
+                  window.open("https://maps.app.goo.gl/tr8YhF4AuSyNbhWh9", "_blank")
                 }
                 className="bg-white text-blue-600 px-6 py-2 rounded-md border border-blue-600 hover:bg-blue-50 transition duration-300 flex items-center"
               >
