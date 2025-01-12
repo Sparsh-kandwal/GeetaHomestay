@@ -210,7 +210,7 @@ const RoomDetails = () => {
               {gallery.map((image, index) => (
                 <SwiperSlide key={index}>
                   <img
-                    src={image}
+                    src={import.meta.env.VITE_CLOUDINARY_CLOUD+image}
                     alt={`${name} Image ${index + 1}`}
                     className="w-full h-full object-cover rounded-lg shadow-lg"
                     loading="lazy"

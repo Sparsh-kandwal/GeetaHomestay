@@ -1,96 +1,118 @@
-import React, { useState } from 'react';
-import ReactSlider from 'react-slider';
+import React, { useState, useMemo } from 'react';
 
-const SearchFilter = ({ priceRange, setPriceRange, capacity, setCapacity, acAvailable, setAcAvailable }) => {
-  const [sliderValue, setSliderValue] = useState(priceRange);
-  const [peopleCount, setPeopleCount] = useState(capacity || 1); 
-  const handleSliderChange = (value) => {
-    setSliderValue(value);
-    setPriceRange(value);
+const SearchFilter = ({ searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput, amenitiesOptions, setSearchTermInput, setSelectedAmenitiesInput, setMaxPriceInput, setGuestCountInput }) => {
+  // Handle amenity selection (input state)
+  const handleAmenityChangeInput = (amenity) => {
+    setSelectedAmenitiesInput((prev) =>
+      prev.includes(amenity)
+        ? prev.filter((a) => a !== amenity)
+        : [...prev, amenity]
+    );
+  };
+
+  // Handle Reset button click
+  const handleReset = () => {
+    // Reset input states
+    setSearchTermInput('');
+    setSelectedAmenitiesInput([]);
+    setMaxPriceInput(4000);
+    setGuestCountInput('');
   };
 
 
-  const handlePeopleChange = (value) => {
-    setPeopleCount(value);
-    setCapacity(value); // Update the capacity based on peopleCount
-  };
 
   return (
-    <div className="space-y-6 bg-gray-50 p-8 rounded-lg shadow-xl max-w-lg mx-auto transition-all duration-300">
-      
-      {/* Search Bar */}
-      <div className="mb-4">
-        <label className="block text-xl font-bold text-gray-800 mb-2">Filters</label>
-      </div>
+    <div className="md:sticky top-20 h-fit w-full lg:w-1/4 p-6 bg-white shadow-md rounded-lg">
+          <h3 className="text-lg font-semibold mb-6">Search & Filters</h3>
+          {/* Search by Name */}
+          <div className="mb-6">
+            <input
+              type="text"
+              placeholder="Search by room name..."
+              value={searchTermInput}
+              onChange={(e) => setSearchTermInput(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
 
-      {/* Price Range */}
-      <div className="mb-4">
-        <label className="block text-lg font-semibold text-gray-800 mb-2">Price Range</label>
-        <div className="text-sm text-gray-600 mb-2">Adjust the price range</div>
-        
-        <ReactSlider
-          className="w-full"
-          value={sliderValue}
-          onChange={handleSliderChange}
-          min={0}
-          max={5000}
-          step={100}
-          renderTrack={(props) => (
-            <div {...props} className="h-2 bg-indigo-200 rounded-full" />
-          )}
-          renderThumb={(props) => (
-            <div {...props} className="w-6 h-6 bg-indigo-500 rounded-full cursor-pointer" />
-          )}
-        />
-        
-        <div className="flex justify-between mt-2 text-xs text-gray-700">
-          <span className="text-xl mt-4 font-semibold text-indigo-600">₹{sliderValue}</span> {/* Make slider value noticeable */}
+          {/* Filter by Amenities */}
+          <div className="mb-6">
+            <h4 className="text-md font-semibold mb-2">Filter by Amenities</h4>
+            <div className="space-y-2">
+              {amenitiesOptions.map((amenity, index) => (
+                <label key={index} className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedAmenitiesInput.includes(amenity)}
+                    onChange={() => handleAmenityChangeInput(amenity)}
+                    className="form-checkbox h-5 w-5 text-indigo-600"
+                  />
+                  <span className="ml-3 text-gray-700">{amenity}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          
+          {/* Filter by Price Range (Max Price Only) */}
+          <div className="mb-6">
+            <h4 className="text-md font-semibold mb-3">Filter by Price (₹)</h4>
+            <div className="flex flex-col space-y-4">
+              <div>
+                <label
+                  className="block text-gray-700 text-sm mb-1"
+                  htmlFor="maxPrice"
+                >
+                  Max Price: ₹{maxPriceInput}
+                </label>
+                <input
+                  type="range"
+                  id="maxPrice"
+                  min="1200"
+                  max="4000" // Adjusted max based on data
+                  step="100"
+                  value={maxPriceInput}
+                  onChange={(e) => setMaxPriceInput(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Filter by Guest Count */}
+          <div className="mb-6">
+            <h4 className="text-md font-semibold mb-3">Filter by Guest Count</h4>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700">Total Guests</label>
+                <select
+                  value={guestCountInput}
+                  onChange={(e) => setGuestCountInput(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">Any</option>
+                  <option value="1">1 Guest</option>
+                  <option value="2">2 Guests</option>
+                  <option value="3">3 Guests</option>
+                  <option value="4">4 Guests</option>
+                  <option value="5">5 Guests</option>
+                  <option value="6">6 Guests</option>
+                  <option value="7">7 Guests</option>
+                  <option value="8">8 Guests</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Reset Button */}
+          <div className="mt-4">
+            <button
+              onClick={handleReset}
+              className="w-full bg-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-400 transition duration-200"
+            >
+              Reset
+            </button>
+          </div>
         </div>
-      </div>
-
-      {/* Number of People */}
-      <div className="mb-4">
-        <label className="block text-lg font-semibold text-gray-800 mb-2">Number of People</label>
-        <div className="text-sm text-gray-600 mb-2">Specify the total number of people</div>
-        
-        <ReactSlider
-          className="w-full"
-          value={peopleCount}
-          onChange={handlePeopleChange}
-          min={1}
-          max={10}  // You can adjust the max value as needed
-          step={1}
-          renderTrack={(props) => (
-            <div {...props} className="h-2 bg-indigo-200 rounded-full" />
-          )}
-          renderThumb={(props) => (
-            <div {...props} className="w-6 h-6 bg-indigo-500 rounded-full cursor-pointer" />
-          )}
-          renderMark={(props) => (
-            <div {...props} className="w-3 h-3 bg-indigo-600 rounded-full" /> // Blot for each step
-          )}
-        />
-
-        <div className="flex justify-between mt-2 text-xs text-gray-700">
-          <span className="text-xl mt-4 font-semibold text-indigo-600">{peopleCount}</span> {/* Make slider value noticeable */}
-        </div>
-      </div>
-
-      {/* Air Conditioner Availability */}
-      <div>
-        <label className="block text-lg font-semibold text-gray-800 mb-2">Air Conditioner</label>
-        <div className="text-sm text-gray-600 mb-2">Check if you prefer rooms with air conditioning</div>
-        <label className="inline-flex items-center text-sm font-medium text-gray-700">
-          <input
-            type="checkbox"
-            className="form-checkbox text-indigo-500 focus:ring-indigo-500"
-            checked={acAvailable}
-            onChange={(e) => setAcAvailable(e.target.checked)}
-          />
-          <span className="ml-2">Air Conditioner Available</span>
-        </label>
-      </div>
-    </div>
   );
 };
 

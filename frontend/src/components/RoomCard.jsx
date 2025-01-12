@@ -17,11 +17,9 @@ const RoomCard = ({ room }) => {
     price,
     description,
     amenities,
-    maxAdults,
     maxGuests,
-    maxChildren,
     gallery,
-    roomsAvailable, // Assuming this prop exists
+    roomsAvailable, // Assuming this property exists
   } = room;
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -69,8 +67,8 @@ const RoomCard = ({ room }) => {
       {/* Image Gallery */}
       <div className="relative md:w-1/3 w-full h-56 md:h-auto">
         <img
-          src={gallery[currentImageIndex]}
-          alt={`${name} Image ${currentImageIndex + 1}`} // Fixed: Used template literals
+          src={import.meta.env.VITE_CLOUDINARY_CLOUD + gallery[currentImageIndex]}
+          alt={`${name} Image ${currentImageIndex + 1}`}
           className="w-full h-56 md:h-full object-cover"
           loading="lazy"
         />
@@ -155,8 +153,6 @@ const RoomCard = ({ room }) => {
             </span>
           </div>
 
-          
-
           {/* Rooms Available */}
           <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-sm mb-3">
             <FaBed className="text-purple-500" />
@@ -192,15 +188,13 @@ RoomCard.propTypes = {
     description: PropTypes.string,
     amenities: PropTypes.arrayOf(
       PropTypes.shape({
-        name: PropTypes.string,
-        icon: PropTypes.node, // Changed to node for React elements
+        name: PropTypes.string.isRequired,
+        icon: PropTypes.node.isRequired, // React element for icons
       })
-    ),
-    maxAdults: PropTypes.number,
-    maxGuests: PropTypes.number,
-    maxChildren: PropTypes.number,
-    gallery: PropTypes.arrayOf(PropTypes.string),
-    roomsAvailable: PropTypes.number, // Added assuming it's needed
+    ).isRequired,
+    maxGuests: PropTypes.number.isRequired,
+    gallery: PropTypes.arrayOf(PropTypes.string).isRequired,
+    roomsAvailable: PropTypes.number.isRequired,
   }).isRequired,
 };
 
