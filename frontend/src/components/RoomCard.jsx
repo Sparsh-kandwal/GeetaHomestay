@@ -61,7 +61,7 @@ const RoomCard = ({ room }) => {
         <img
           src={gallery[currentImageIndex]}
           alt={`${name} Image ${currentImageIndex + 1}`} // Fixed: Used template literals
-          className="w-full h-56 md:h-full object-cover transition-transform duration-500 transform hover:scale-105"
+          className="w-full h-56 md:h-full object-cover"
           loading="lazy"
         />
         {/* Navigation Buttons */}

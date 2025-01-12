@@ -173,7 +173,7 @@ const RoomDetails = () => {
             <img
               src={gallery[currentImageIndex]}
               alt={`${name} Image ${currentImageIndex + 1}`}
-              className="w-full h-full object-cover rounded-lg shadow-lg transition-transform duration-500 transform hover:scale-105"
+              className="w-full h-full object-cover rounded-lg shadow-lg"
               loading="lazy"
             />
           </div>
@@ -228,40 +228,8 @@ const RoomDetails = () => {
           <p className="text-xl lg:text-2xl font-semibold text-indigo-600 mb-6">₹{price.toLocaleString()} per night</p>
           <p className="text-gray-700 mb-6">{description}</p>
 
-          {/* Room Availability */}
-          <div className="mb-6">
-            <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Room Availability</h2>
-            <p className="mb-3 text-gray-700">Total rooms available: <span className="font-medium">{totalRooms}</span></p>
-            <div className="flex items-center space-x-4">
-              <label className="font-medium text-gray-700" htmlFor="roomCount">Number of rooms:</label>
-              <div className="flex items-center">
-                <button
-                  onClick={() => handleRoomCountChange(Math.max(1, roomCount - 1))}
-                  className="bg-gray-200 p-2 rounded-l hover:bg-gray-300 transition duration-300 focus:outline-none"
-                  aria-label="Decrease room count"
-                >
-                  <FaMinus />
-                </button>
-                <input
-                  type="number"
-                  id="roomCount"
-                  value={roomCount}
-                  onChange={(e) => handleRoomCountChange(Math.min(Math.max(1, parseInt(e.target.value) || 1), totalRooms))}
-                  min="1"
-                  max={totalRooms}
-                  className="w-16 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  aria-label="Room count"
-                />
-                <button
-                  onClick={() => handleRoomCountChange(Math.min(roomCount + 1, totalRooms))}
-                  className="bg-gray-200 p-2 rounded-r hover:bg-gray-300 transition duration-300 focus:outline-none"
-                  aria-label="Increase room count"
-                >
-                  <FaPlus />
-                </button>
-              </div>
-            </div>
-          </div>
+          
+          
 
           {/* Select Dates */}
           <div className="mb-6">
@@ -304,13 +272,67 @@ const RoomDetails = () => {
             )}
           </div>
 
+          {/* Room Availability */}
+          <div className="mb-6">
+
+            
+          <div className="mb-6">
+          <label
+            htmlFor="quantity-input"
+            className="font-medium text-gray-700"
+          >
+            Rooms:
+          </label>
+          <div className="relative flex items-center max-w-[8rem]">
+            <button
+              type="button"
+              onClick={() => handleRoomCountChange(roomCount - 1)}
+              disabled={roomCount <= 1} // Disable if room count is already 1
+              className="mt-2 bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+            >
+              <svg
+                className="w-3 h-3 text-gray-900 dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 18 2"
+              >
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h16" />
+              </svg>
+            </button>
+            <input
+              type="number"
+              id="quantity-input"
+              value={roomCount}
+              readOnly
+              className="mt-2 bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            />
+            <button
+              type="button"
+              onClick={() => handleRoomCountChange(roomCount + 1)}
+              disabled={roomCount >= totalRooms} // Disable if room count exceeds total available
+              className="mt-2 bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+            >
+              <svg
+                className="w-3 h-3 text-gray-900 dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 18 18"
+              >
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16m8-8H1" />
+              </svg>
+            </button>
+          </div>
+        </div>
+          </div>
           {/* Occupancy Controls */}
           <div className="mb-6">
-            <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Number of Guests</h2>
+          <label className="font-medium text-gray-700">Number of Guests: </label>
             <div className="flex flex-col md:flex-row gap-6">
               {/* Adults */}
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="adults">Adults (Max: {maxAdults})</label>
+                {/* <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="adults">Adults (Max: {maxAdults})</label> */}
                 <div className="flex items-center">
                   <button
                     onClick={() => setAdults(Math.max(1, adults - 1))}
@@ -333,36 +355,6 @@ const RoomDetails = () => {
                     onClick={() => setAdults(Math.min(adults + 1, maxAdults))}
                     className="bg-gray-200 p-2 rounded-r hover:bg-gray-300 transition duration-300 focus:outline-none"
                     aria-label="Increase adults"
-                  >
-                    <FaPlus />
-                  </button>
-                </div>
-              </div>
-              {/* Children */}
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="children">Children (Max: {maxChildren})</label>
-                <div className="flex items-center">
-                  <button
-                    onClick={() => setChildren(Math.max(0, children - 1))}
-                    className="bg-gray-200 p-2 rounded-l hover:bg-gray-300 transition duration-300 focus:outline-none"
-                    aria-label="Decrease children"
-                  >
-                    <FaMinus />
-                  </button>
-                  <input
-                    type="number"
-                    id="children"
-                    value={children}
-                    onChange={(e) => setChildren(Math.min(Math.max(0, parseInt(e.target.value) || 0), maxChildren))}
-                    min="0"
-                    max={maxChildren}
-                    className="w-16 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    aria-label="Number of children"
-                  />
-                  <button
-                    onClick={() => setChildren(Math.min(children + 1, maxChildren))}
-                    className="bg-gray-200 p-2 rounded-r hover:bg-gray-300 transition duration-300 focus:outline-none"
-                    aria-label="Increase children"
                   >
                     <FaPlus />
                   </button>

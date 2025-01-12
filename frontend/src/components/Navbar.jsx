@@ -40,7 +40,7 @@ const Navbar = () => {
     onSuccess: responseGoogle,
     onError: responseGoogle,
     flow: "auth-code",
-    scope: "openid profile email https://www.googleapis.com/auth/user.phonenumbers.read https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.addresses.read",
+    scope: "openid profile email",
   });
 
   useEffect(() => {
