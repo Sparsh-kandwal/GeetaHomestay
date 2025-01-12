@@ -17,6 +17,7 @@ const RoomCard = ({ room }) => {
     description,
     amenities,
     maxAdults,
+    maxGuests,
     maxChildren,
     gallery
   } = room;
@@ -136,16 +137,20 @@ const RoomCard = ({ room }) => {
         </div>
 
         {/* Capacity */}
-        <div className="mb-4 flex flex-wrap items-center text-gray-700 text-sm">
-          <div className="flex items-center mr-4 mb-2 sm:mb-0">
-            <FaBed className="mr-1" />
-            <span>{maxAdults} Adults</span>
+        <div className="mb-6 flex flex-wrap items-center text-gray-600 text-sm">
+          {/* Maximum Guests */}
+          <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-sm mr-4 mb-3">
+            <FaBed className="text-blue-500" />
+            <span className="font-medium">{maxGuests} Maximum Guests</span>
           </div>
-          <div className="flex items-center mr-4 mb-2 sm:mb-0">
-            <FaUserFriends className="mr-1" />
-            <span>{maxChildren} Children</span>
+
+          {/* Total Rooms Available */}
+          <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-sm mb-3">
+            <FaBed className="text-green-500" />
+            <span className="font-medium">{} Rooms Available</span>
           </div>
         </div>
+
 
         {/* Call to Action */}
         <div className="mt-auto flex justify-end">

@@ -1,36 +1,28 @@
-
 import React, { useState } from 'react';
 import RoomCard from './RoomCard';
 import { rooms } from '../constants/Rooms';
+// Import a slider library. You can use 'rc-slider' or 'react-slider'.
+// Here, we'll use a basic HTML range input for simplicity.
 
 const ExploreRooms = () => {
   // States for filter inputs
   const [searchTermInput, setSearchTermInput] = useState('');
-  const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
-  const [priceRangeInput, setPriceRangeInput] = useState({ min: '', max: '' });
+  const [priceRangeInput, setPriceRangeInput] = useState({ min: 0, max: 10000 }); // Adjust max as per your data
   const [capacityInput, setCapacityInput] = useState({ adults: '', children: '' });
+  const [acInput, setAcInput] = useState(null); // null: any, true: AC, false: Non-AC
 
   // States for applied filters
   const [appliedFilters, setAppliedFilters] = useState({
     searchTerm: '',
-    selectedAmenities: [],
-    priceRange: { min: '', max: '' },
+    priceRange: { min: 0, max: 10000 },
     capacity: { adults: '', children: '' },
+    ac: null,
   });
 
-  // Extract unique amenities for filter options
-  const allAmenities = Array.from(
-    new Set(rooms.flatMap(room => room.amenities.map(amenity => amenity.name)))
-  );
-
-  // Handle amenity selection (input state)
-  const handleAmenityChangeInput = (amenity) => {
-    setSelectedAmenitiesInput(prev =>
-      prev.includes(amenity)
-        ? prev.filter(a => a !== amenity)
-        : [...prev, amenity]
-    );
-  };
+  // Determine the global min and max price for the slider
+  const prices = rooms.map(room => room.price);
+  const globalMinPrice = Math.min(...prices);
+  const globalMaxPrice = Math.max(...prices);
 
   // Handle capacity changes (input state)
   const handleCapacityChangeInput = (type, value) => {
@@ -40,13 +32,18 @@ const ExploreRooms = () => {
     }));
   };
 
+  // Handle AC selection
+  const handleAcChangeInput = (value) => {
+    setAcInput(value);
+  };
+
   // Handle Search button click
   const handleSearch = () => {
     setAppliedFilters({
       searchTerm: searchTermInput.trim(),
-      selectedAmenities: selectedAmenitiesInput,
       priceRange: { ...priceRangeInput },
       capacity: { ...capacityInput },
+      ac: acInput,
     });
   };
 
@@ -54,51 +51,47 @@ const ExploreRooms = () => {
   const handleReset = () => {
     // Reset input states
     setSearchTermInput('');
-    setSelectedAmenitiesInput([]);
-    setPriceRangeInput({ min: '', max: '' });
+    setPriceRangeInput({ min: globalMinPrice, max: globalMaxPrice });
     setCapacityInput({ adults: '', children: '' });
+    setAcInput(null);
 
     // Reset applied filters
     setAppliedFilters({
       searchTerm: '',
-      selectedAmenities: [],
-      priceRange: { min: '', max: '' },
+      priceRange: { min: globalMinPrice, max: globalMaxPrice },
       capacity: { adults: '', children: '' },
+      ac: null,
     });
   };
 
   // Filter rooms based on applied filters
   const filteredRooms = rooms.filter(room => {
-    const { searchTerm, selectedAmenities, priceRange, capacity } = appliedFilters;
+    const { searchTerm, priceRange, capacity, ac } = appliedFilters;
 
     // 1. Match room name if searchTerm is provided
     const matchesName = searchTerm
       ? room.name.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
 
-    // 2. Match selected amenities if any are selected
-    const matchesAmenities = selectedAmenities.length > 0
-      ? selectedAmenities.every(amenity =>
-          room.amenities.some(a => a.name === amenity)
-        )
-      : true;
-
-    // 3. Match price range if min or max is provided
+    // 2. Match price range
     const matchesPrice =
-      (priceRange.min === '' || room.price >= Number(priceRange.min)) &&
-      (priceRange.max === '' || room.price <= Number(priceRange.max));
+      room.price >= Number(priceRange.min) &&
+      room.price <= Number(priceRange.max);
 
-    // 4. Match capacity for adults if specified
+    // 3. Match capacity for adults if specified
     const matchesAdults = capacity.adults
       ? room.maxAdults >= Number(capacity.adults)
       : true;
 
-    // 5. Match capacity for children if specified
+    // 4. Match capacity for children if specified
     const matchesChildren = capacity.children
       ? room.maxChildren >= Number(capacity.children)
       : true;
 
-    return matchesName && matchesAmenities && matchesPrice && matchesAdults && matchesChildren;
+    // 5. Match AC preference
+    const matchesAc = ac !== null ? room.ac === ac : true;
+
+    return matchesName && matchesPrice && matchesAdults && matchesChildren && matchesAc;
   });
 
   return (
@@ -121,44 +114,46 @@ const ExploreRooms = () => {
             />
           </div>
 
-          {/* Filter by Amenities */}
-          <div className="mb-6">
-            <h4 className="text-md font-semibold mb-2">Filter by Amenities</h4>
-            <div className="max-h-40 overflow-y-auto space-y-2">
-              {allAmenities.map((amenity, index) => (
-                <label key={index} className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedAmenitiesInput.includes(amenity)}
-                    onChange={() => handleAmenityChangeInput(amenity)}
-                    className="form-checkbox h-5 w-5 text-indigo-600"
-                  />
-                  <span className="ml-3 text-gray-700">{amenity}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Filter by Price Range */}
+          {/* Filter by Price Range Using Slider */}
           <div className="mb-6">
             <h4 className="text-md font-semibold mb-3">Filter by Price (₹)</h4>
-            <div className="flex space-x-3">
-              <input
-                type="number"
-                placeholder="Min"
-                value={priceRangeInput.min}
-                onChange={(e) => setPriceRangeInput(prev => ({ ...prev, min: e.target.value }))}
-                className="w-1/2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                min="0"
-              />
-              <input
-                type="number"
-                placeholder="Max"
-                value={priceRangeInput.max}
-                onChange={(e) => setPriceRangeInput(prev => ({ ...prev, max: e.target.value }))}
-                className="w-1/2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                min="0"
-              />
+            <div className="flex flex-col space-y-4">
+              <div className="flex justify-between">
+                <span>Min: ₹{priceRangeInput.min}</span>
+                <span>Max: ₹{priceRangeInput.max}</span>
+              </div>
+              {/* Min Price Slider */}
+              <div>
+                <input
+                  type="range"
+                  min={globalMinPrice}
+                  max={priceRangeInput.max}
+                  value={priceRangeInput.min}
+                  onChange={(e) =>
+                    setPriceRangeInput(prev => ({
+                      ...prev,
+                      min: Number(e.target.value)
+                    }))
+                  }
+                  className="w-full"
+                />
+              </div>
+              {/* Max Price Slider */}
+              <div>
+                <input
+                  type="range"
+                  min={priceRangeInput.min}
+                  max={globalMaxPrice}
+                  value={priceRangeInput.max}
+                  onChange={(e) =>
+                    setPriceRangeInput(prev => ({
+                      ...prev,
+                      max: Number(e.target.value)
+                    }))
+                  }
+                  className="w-full"
+                />
+              </div>
             </div>
           </div>
 
@@ -202,6 +197,46 @@ const ExploreRooms = () => {
             </div>
           </div>
 
+          {/* Filter by AC */}
+          <div className="mb-6">
+            <h4 className="text-md font-semibold mb-3">Filter by AC</h4>
+            <div className="space-y-2">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="ac"
+                  value="any"
+                  checked={acInput === null}
+                  onChange={() => handleAcChangeInput(null)}
+                  className="form-radio h-5 w-5 text-indigo-600"
+                />
+                <span className="ml-3 text-gray-700">Any</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="ac"
+                  value="ac"
+                  checked={acInput === true}
+                  onChange={() => handleAcChangeInput(true)}
+                  className="form-radio h-5 w-5 text-indigo-600"
+                />
+                <span className="ml-3 text-gray-700">AC</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="ac"
+                  value="non-ac"
+                  checked={acInput === false}
+                  onChange={() => handleAcChangeInput(false)}
+                  className="form-radio h-5 w-5 text-indigo-600"
+                />
+                <span className="ml-3 text-gray-700">Non-AC</span>
+              </label>
+            </div>
+          </div>
+
           {/* Search and Reset Buttons */}
           <div className="mt-4 flex space-x-3">
             <button
@@ -222,7 +257,7 @@ const ExploreRooms = () => {
         {/* Room Cards */}
         <div className="w-full lg:w-3/4 flex flex-col gap-8">
           {filteredRooms.length > 0 ? (
-            filteredRooms.map((room) => ( // Removed index and used room.id
+            filteredRooms.map((room) => (
               <RoomCard key={room.id} room={room} />
             ))
           ) : (
