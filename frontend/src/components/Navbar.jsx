@@ -40,7 +40,7 @@ const Navbar = () => {
     onSuccess: responseGoogle,
     onError: responseGoogle,
     flow: "auth-code",
-    scope: "openid profile email https://www.googleapis.com/auth/user.phonenumbers.read https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.addresses.read",
+    scope: "openid profile email",
   });
 
   useEffect(() => {
@@ -90,7 +90,7 @@ const Navbar = () => {
       {/* Logo */}
       <h1 className="text-3xl text-white">
         <Link to="/home">
-          <img src="/static/logo.png" alt="Logo" className="w-auto h-12" />
+          <img src="/static/logo.png" alt="Logo" className="mt-2 h-20 scale-150" />
         </Link>
       </h1>
 
