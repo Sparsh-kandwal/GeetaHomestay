@@ -22,6 +22,8 @@ import 'react-toastify/dist/ReactToastify.css';
 // Import Swiper React components and required modules
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import { useDateContext } from '../contexts/DateContext';
+
 
 // Import Swiper styles
 import 'swiper/css';
@@ -35,10 +37,31 @@ const RoomDetails = () => {
   const navigate = useNavigate();
 
   const [isFavorite, setIsFavorite] = useState(false);
+
+  let { checkInDate, setCheckInDate, checkOutDate, setCheckOutDate } = useDateContext();
+  
+  
+  const [minCheckOutDate, setMinCheckOutDate] = useState('');
+
+  // Set the minimum date for check-in and check-out dynamically
+  useEffect(() => {
+    if (!checkInDate) {
+      const today = new Date().toISOString().split('T')[0];
+      setCheckInDate(today);
+      setMinCheckOutDate(today);
+    }
+  }, [checkInDate, setCheckInDate]);
+
+  // Update the minimum check-out date when the check-in date changes
+  useEffect(() => {
+    if (checkInDate) {
+      const nextDay = new Date(checkInDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setMinCheckOutDate(nextDay.toISOString().split('T')[0]);
+    }
+  }, [checkInDate]);
   
   // State for booking
-  const [arrivalDate, setArrivalDate] = useState(null);
-  const [departureDate, setDepartureDate] = useState(null);
   const [guests, setGuests] = useState(1); // Unified guests state
   const [roomCount, setRoomCount] = useState(1);
 
@@ -85,19 +108,22 @@ const RoomDetails = () => {
   };
 
   const isInvalidDateRange = () => {
-    return arrivalDate && departureDate && arrivalDate >= departureDate;
+    return checkInDate && checkOutDate && checkInDate >= checkOutDate;
   };
 
   const calculateTotalPrice = () => {
-    if (!arrivalDate || !departureDate) return 0;
-    const timeDiff = departureDate.getTime() - arrivalDate.getTime();
+    if (!checkInDate || !checkOutDate) return 0;
+    checkInDate = new Date(checkInDate)
+    checkOutDate = new Date(checkOutDate)
+
+    const timeDiff = checkOutDate - checkInDate;
     const dayCount = Math.ceil(timeDiff / (1000 * 3600 * 24));
     return dayCount * price * roomCount;
   };
 
   const handleBookNow = () => {
-    if (isInvalidDateRange() || !arrivalDate || !departureDate) {
-      toast.error('Please select valid arrival and departure dates before booking.');
+    if (isInvalidDateRange() || !checkInDate || !checkOutDate) {
+      toast.error('Please select valid check-in and check-out dates before booking.');
       return;
     }
 
@@ -107,8 +133,8 @@ const RoomDetails = () => {
       state: { 
         room, 
         bookingDetails: { 
-          arrivalDate, 
-          departureDate, 
+          checkInDate, 
+          checkOutDate, 
           guests, 
           roomCount, 
           totalPrice: calculateTotalPrice() 
@@ -121,16 +147,16 @@ const RoomDetails = () => {
 
   // Handler for adding to cart
   const handleAddToCart = () => {
-    if (isInvalidDateRange() || !arrivalDate || !departureDate) {
-      toast.error('Please select valid arrival and departure dates before adding to cart.');
+    if (isInvalidDateRange() || !checkInDate || !checkOutDate) {
+      toast.error('Please select valid check-in and check-out dates before adding to cart.');
       return;
     }
 
     const cartItem = {
       room,
       bookingDetails: {
-        arrivalDate,
-        departureDate,
+        checkInDate,
+        checkOutDate,
         guests,
         roomCount,
         totalPrice: calculateTotalPrice()
@@ -162,22 +188,7 @@ const RoomDetails = () => {
     speed: 1000, // Transition speed in ms
   };
 
-  // Inside RoomDetails component
-  useEffect(() => {
-    if (!arrivalDate) {
-      const today = new Date().toISOString().split('T')[0];
-      setArrivalDate(new Date(today));
-    }
-  }, [arrivalDate]);
-
-  useEffect(() => {
-    if (arrivalDate) {
-      const nextDay = new Date(arrivalDate);
-      nextDay.setDate(nextDay.getDate() + 1);
-      setDepartureDate(departureDate && departureDate <= nextDay ? null : departureDate); // Reset if invalid
-    }
-  }, [arrivalDate]);
-
+  
 
   return (
     <div className="container mx-auto px-4 py-12 lg:py-24">
@@ -237,34 +248,26 @@ const RoomDetails = () => {
           <div className="mb-6">
             {/* <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Select Dates</h2> */}
             <div className="relative flex items-center md:flex-row gap-10">
-              <div className="">
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="arrivalDate">Checkin</label>
-                <DatePicker
-                  selected={arrivalDate}
-                  onChange={(date) => setArrivalDate(date)}
-                  selectsStart
-                  startDate={arrivalDate}
-                  endDate={departureDate}
-                  minDate={new Date()}
-                  dateFormat="dd/MM/yyyy"
-                  id="arrivalDate"
-                  className="w-[8rem] p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-              </div>
-              <div className="">
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="departureDate">Checkout</label>
-                <DatePicker
-                  selected={departureDate}
-                  onChange={(date) => setDepartureDate(date)}
-                  selectsEnd
-                  startDate={arrivalDate}
-                  endDate={departureDate}
-                  minDate={arrivalDate ? new Date(arrivalDate.getTime() + 24 * 60 * 60 * 1000) : new Date()}
-                  dateFormat="dd/MM/yyyy"
-                  id="departureDate"
-                  className="w-[8rem] p-2 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-              </div>
+            <div className="flex flex-col w-full md:w-auto">
+              <label className="text-gray-700 text-sm mb-1">Check-in</label>
+              <input
+                type="date"
+                value={checkInDate}
+                min={new Date().toISOString().split('T')[0]}
+                onChange={(e) => setCheckInDate(e.target.value)}
+                className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+              />
+            </div>
+            <div className="flex flex-col w-full md:w-auto">
+              <label className="text-gray-700 text-sm mb-1">Check-out</label>
+              <input
+                type="date"
+                value={checkOutDate}
+                min={minCheckOutDate}
+                onChange={(e) => setCheckOutDate(e.target.value)}
+                className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+              />
+            </div>
             </div>
             {isInvalidDateRange() && (
               <div className="mt-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded flex items-center">
@@ -401,11 +404,11 @@ const RoomDetails = () => {
             <button
               onClick={handleBookNow}
               className={`w-full sm:w-1/2 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200 ${
-                isInvalidDateRange() || !arrivalDate || !departureDate
+                isInvalidDateRange() || !checkInDate || !checkOutDate
                   ? 'opacity-50 cursor-not-allowed'
                   : ''
               }`}
-              disabled={isInvalidDateRange() || !arrivalDate || !departureDate}
+              disabled={isInvalidDateRange() || !checkInDate || !checkOutDate}
             >
               Book Now
             </button>
@@ -414,7 +417,7 @@ const RoomDetails = () => {
             <button
               onClick={handleAddToCart}
               className={`w-full sm:w-1/2 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-200`}
-              disabled={isInvalidDateRange() || !arrivalDate || !departureDate}
+              disabled={isInvalidDateRange() || !checkInDate || !checkOutDate}
               aria-label="Add to Cart"
             >
               <div className="flex items-center justify-center">
