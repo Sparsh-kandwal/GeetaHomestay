@@ -24,16 +24,6 @@ const SearchFilter = ({ searchTermInput, selectedAmenitiesInput, maxPriceInput, 
   return (
     <div className="sticky top-20 h-fit w-full lg:w-1/4 p-6 bg-white shadow-md rounded-lg">
           <h3 className="text-lg font-semibold mb-6">Search & Filters</h3>
-          {/* Search by Name */}
-          <div className="mb-6">
-            <input
-              type="text"
-              placeholder="Search by room name..."
-              value={searchTermInput}
-              onChange={(e) => setSearchTermInput(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
 
           {/* Filter by Amenities */}
           <div className="mb-6">
@@ -45,9 +35,9 @@ const SearchFilter = ({ searchTermInput, selectedAmenitiesInput, maxPriceInput, 
                     type="checkbox"
                     checked={selectedAmenitiesInput.includes(amenity)}
                     onChange={() => handleAmenityChangeInput(amenity)}
-                    className="form-checkbox h-5 w-5 text-indigo-600"
-                  />
-                  <span className="ml-3 text-gray-700">{amenity}</span>
+                    className="h-5 w-5"
+                  />  
+                  <span className="ml-1 mr-3 text-gray-700">{amenity}</span>
                 </label>
               ))}
             </div>

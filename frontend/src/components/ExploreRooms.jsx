@@ -11,43 +11,44 @@ const ExploreRooms = () => {
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
   const [maxPriceInput, setMaxPriceInput] = useState(4000); // Only max price
   const [guestCountInput, setGuestCountInput] = useState('');
-  const amenitiesOptions = ['Air Conditioning', 'Non-AC'];
+  const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
 
 
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {
-      // 1. Match room name if searchTerm is provided
-      const matchesName = searchTermInput
-        ? room.name.toLowerCase().includes(searchTermInput.toLowerCase())
-        : true;
-
       // 2. Match selected amenities if any are selected
       let matchesAmenities = true;
       if (selectedAmenitiesInput.length > 0) {
         const hasAC = room.amenities.some(
           (a) => a.name.trim().toLowerCase() === 'air conditioning'
         );
-        const filterAC = selectedAmenitiesInput.includes('Air Conditioning');
+        const hasBalcony = room.amenities.some(
+          (a) => a.name.trim().toLowerCase() === 'balcony' || a.name.trim().toLowerCase() === 'private balcony'
+          );
+        const hasCoffeKettle = room.amenities.some(
+          (a) => a.name.trim().toLowerCase() === 'hot-water/coffee kettle'
+          );
+        if (selectedAmenitiesInput.includes('Balcony')) matchesAmenities &= hasBalcony;
+        if (selectedAmenitiesInput.includes('Coffe-Kettle')) matchesAmenities &= hasCoffeKettle;
+        const filterAC = selectedAmenitiesInput.includes('AC');
         const filterNonAC = selectedAmenitiesInput.includes('Non-AC');
-
+        
         if (filterAC && filterNonAC) {
-          matchesAmenities = true; // Both filters selected, include all rooms
+          matchesAmenities &= true; // Both filters selected, include all rooms
         } else if (filterAC) {
-          matchesAmenities = hasAC;
+          matchesAmenities &= hasAC;
         } else if (filterNonAC) {
-          matchesAmenities = !hasAC;
+          matchesAmenities &= !hasAC;
         }
       }
 
-      // 3. Match price range (only max price)
       const matchesPrice = room.price <= Number(maxPriceInput);
 
-      // 4. Match guest count if specified
       const matchesGuests = guestCountInput
         ? room.maxGuests >= Number(guestCountInput)
         : true;
 
-      return matchesName && matchesAmenities && matchesPrice && matchesGuests;
+      return matchesAmenities && matchesPrice && matchesGuests;
     });
   }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput]);
   // States for filter inputs
