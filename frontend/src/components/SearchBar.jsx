@@ -1,22 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDateContext } from '../contexts/DateContext';
 
 const SearchBar = () => {
-  const [checkInDate, setCheckInDate] = useState('');
-  const [checkOutDate, setCheckOutDate] = useState('');
+  const {
+    checkInDate,
+    setCheckInDate,
+    checkOutDate,
+    setCheckOutDate,
+  } = useDateContext();
+
   const [minCheckOutDate, setMinCheckOutDate] = useState('');
 
   // Set the minimum date for check-in and check-out dynamically
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0]; // Current date
-    setCheckInDate(today);
-    setMinCheckOutDate(today);
-  }, []);
+    if (!checkInDate) {
+      const today = new Date().toISOString().split('T')[0];
+      setCheckInDate(today);
+      setMinCheckOutDate(today);
+    }
+  }, [checkInDate, setCheckInDate]);
 
   // Update the minimum check-out date when the check-in date changes
   useEffect(() => {
     if (checkInDate) {
       const nextDay = new Date(checkInDate);
-      nextDay.setDate(nextDay.getDate() + 1); // Day after check-in
+      nextDay.setDate(nextDay.getDate() + 1);
       setMinCheckOutDate(nextDay.toISOString().split('T')[0]);
     }
   }, [checkInDate]);
@@ -40,7 +48,7 @@ const SearchBar = () => {
         <input
           type="date"
           value={checkInDate}
-          min={new Date().toISOString().split('T')[0]} // Ensure today or future date
+          min={new Date().toISOString().split('T')[0]}
           onChange={(e) => setCheckInDate(e.target.value)}
           className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
         />
@@ -52,7 +60,7 @@ const SearchBar = () => {
         <input
           type="date"
           value={checkOutDate}
-          min={minCheckOutDate} // Ensure day after check-in
+          min={minCheckOutDate}
           onChange={(e) => setCheckOutDate(e.target.value)}
           className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
         />

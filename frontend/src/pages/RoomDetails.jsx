@@ -162,6 +162,23 @@ const RoomDetails = () => {
     speed: 1000, // Transition speed in ms
   };
 
+  // Inside RoomDetails component
+  useEffect(() => {
+    if (!arrivalDate) {
+      const today = new Date().toISOString().split('T')[0];
+      setArrivalDate(new Date(today));
+    }
+  }, [arrivalDate]);
+
+  useEffect(() => {
+    if (arrivalDate) {
+      const nextDay = new Date(arrivalDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setDepartureDate(departureDate && departureDate <= nextDay ? null : departureDate); // Reset if invalid
+    }
+  }, [arrivalDate]);
+
+
   return (
     <div className="container mx-auto px-4 py-12 lg:py-24">
       {/* Back Button */}
