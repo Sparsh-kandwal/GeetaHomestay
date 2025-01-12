@@ -1,3 +1,5 @@
+// src/data/rooms.js
+
 export const rooms = [
   {
     id: 'deluxe-double-bed',
@@ -6,15 +8,13 @@ export const rooms = [
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/q_10,f_auto,w_300/v1735288533/deluxe_double_bed_2nd_rkdilc.jpg",
     description: "Experience comfort and elegance in our Deluxe Double Bed Room, featuring a spacious double bed, modern amenities, stylish interiors, and a serene ambiance—perfect for a relaxing stay",
     amenities: [
-      { name: "Air Conditioning", icon: "❄️" },
-      { name: "Free Wi-Fi", icon: "📶" },
+      { name: "High-speed Wi-Fi", icon: "📶" },
       { name: "Flat-screen TV", icon: "📺" },
-      { name: "Private Bathroom", icon: "🚿" },
-      { name: "Mini Fridge", icon: "🧊" }
+      { name: "Private Bathroom and Rain Shower", icon: "🚿" },
+      { name: "Work Desk", icon: "💻" }
     ],
-    maxAdults: 3,
-    maxChildren: 2,
-    totalRooms: 3,
+    maxGuests:3 ,
+    totalRooms: 4,
     gallery: [
       "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735288533/deluxe_double_bed_2nd_rkdilc.jpg",
       "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735288535/deluxe_double_bed_4th_pvtcp1.jpg",
@@ -30,16 +30,14 @@ export const rooms = [
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735289485/20241221_175226_pjtexs.jpg",
     description: "Stay in style with our Premium Double Bed Room, offering a spacious layout, modern design, premium amenities, and unmatched comfort for a luxurious experience.",
     amenities: [
-      { name: "Air Conditioning", icon: "❄️" },
-      { name: "Free Wi-Fi", icon: "📶" },
+      { name: "High-speed Wi-Fi", icon: "📶" },
       { name: "Large Flat-screen TV", icon: "📺" },
-      { name: "Private Bathroom with Jacuzzi", icon: "🛁" },
-      { name: "Mini Bar", icon: "🍸" },
-      { name: "Coffee Maker", icon: "☕" }
+      { name: "Private Bathroom and Rain Shower ", icon: "🛁" },
+      { name: "Work Desk", icon: "💻" },
+      { name: "Hot-Water/Coffee Kettle", icon: "☕" },
     ],
-    maxAdults: 3,
-    maxChildren: 2,
-    totalRooms: 2,
+    maxGuests: 3,
+    totalRooms: 1,
     gallery: [
       "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735289485/20241221_175226_pjtexs.jpg",
       "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735289488/premiu_sh5hyd.jpg",
@@ -55,16 +53,14 @@ export const rooms = [
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735290068/20241221_174525_pquo5i.jpg",
     description: "Spacious room with four comfortable beds, ideal for families or groups of friends.",
     amenities: [
-      { name: "Air Conditioning", icon: "❄️" },
-      { name: "Free Wi-Fi", icon: "📶" },
+      { name: "Air Conditioning", icon: "❄" },
+      { name: "High-speed Wi-Fi", icon: "📶" },
       { name: "Flat-screen TV", icon: "📺" },
-      { name: "Private Bathroom", icon: "🚿" },
-      { name: "Mini Fridge", icon: "🧊" },
-      { name: "Seating Area", icon: "🛋️" }
+      { name: "Private Bathroom and Rain Shower", icon: "🚿" },
+      { name: "Work Desk", icon: "💻" }
     ],
-    maxAdults: 6,
-    maxChildren: 6,
-    totalRooms: 2,
+    maxGuests: 6,
+    totalRooms: 1,
     gallery: [
       "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735290068/20241221_174525_pquo5i.jpg",
       "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735290073/20241221_174554_c4qcyi.jpg",
@@ -75,21 +71,19 @@ export const rooms = [
   },
   {
     id: 'premium-three-bed',
-    name: "Premium 3 Bed Room",
+    name: "Premium Triple Bed Room",
     price: 2500,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735290499/20241221_175629_sxpfez.jpg",
     description: "Discover luxury in our Premium Three-Bed Room, a spacious and modern retreat with stunning city views and beautiful sceneries from the windows—perfect for a comfortable and memorable stay.",
     amenities: [
-      { name: "Air Conditioning", icon: "❄️" },
-      { name: "Free Wi-Fi", icon: "📶" },
+      { name: "High-speed Wi-Fi", icon: "📶" },
       { name: "Large Flat-screen TV", icon: "📺" },
-      { name: "Private Bathroom with Bathtub", icon: "🛁" },
-      { name: "Mini Bar", icon: "🍸" },
-      { name: "Coffee Maker", icon: "☕" },
-      { name: "Work Desk", icon: "💻" }
+      { name: "Private Bathroom and Rain Shower", icon: "🛁" },
+      { name: "Hot-Water/Coffee Kettle", icon: "☕" },
+      { name: "Work Desk", icon: "💻" },
+      { name: "Balcony" }
     ],
-    maxAdults: 5,
-    maxChildren: 4,
+    maxGuests: 4,
     totalRooms: 2,
     gallery: [
       "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735290499/20241221_175629_sxpfez.jpg",
@@ -102,22 +96,20 @@ export const rooms = [
   },
   {
     id: 'luxury-three-bed',
-    name: "Luxury 3 Bed Room",
+    name: "Luxury Triple Bed Room",
     price: 3600,
     image: "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735291051/20241221_172904_n79o14.jpg",
     description: "Indulge in our Luxury Three-Bedroom suite, offering spacious modern interiors, stunning city views, beautiful sceneries from large windows, and a private balcony for a truly luxurious stay.",
     amenities: [
-      { name: "Air Conditioning", icon: "❄️" },
-      { name: "Free High-speed Wi-Fi", icon: "📶" },
-      { name: "65-inch Smart TV", icon: "📺" },
-      { name: "Private Bathroom with Jacuzzi and Rain Shower", icon: "🛁" },
-      { name: "Fully Stocked Mini Bar", icon: "🍸" },
-      { name: "Espresso Machine", icon: "☕" },
-      { name: "Work Desk", icon: "💻" },
-      { name: "Lounge Area", icon: "🛋️" }
+      { name: "Air Conditioning", icon: "❄" },
+      { name: "Private Balcony", icon: " " },
+      { name: "High-speed Wi-Fi", icon: "📶" },
+      { name: "Private Bathroom and Rain Shower", icon: "🛁" },
+      { name: "Flat-screen TV", icon: "📺" },
+      { name: "Hot-Water/Coffee Kettle", icon: "☕" },
+      { name: "Work Desk", icon: "💻" }
     ],
-    maxAdults: 5,
-    maxChildren: 4,
+    maxGuests: 4,
     totalRooms: 1,
     gallery: [
       "https://res.cloudinary.com/dgcdngt04/image/upload/f_auto,w_500/v1735291051/20241221_172904_n79o14.jpg",
