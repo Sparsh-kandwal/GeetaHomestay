@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import {
   FaChevronLeft,
   FaChevronRight,
   FaBed,
   FaUserFriends,
-  FaHeart
+  FaHeart,
+  FaRegHeart,
 } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
@@ -19,50 +20,58 @@ const RoomCard = ({ room }) => {
     maxAdults,
     maxGuests,
     maxChildren,
-    gallery
+    gallery,
+    roomsAvailable, // Assuming this prop exists
   } = room;
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false); // For favorite functionality
+  const [isFavorite, setIsFavorite] = useState(false);
   const navigate = useNavigate();
 
   // Handle image navigation in the gallery
   const prevImage = (e) => {
-    e.stopPropagation(); // Prevent triggering the card's onClick
-    setCurrentImageIndex(prevIndex =>
+    e.stopPropagation();
+    setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? gallery.length - 1 : prevIndex - 1
     );
   };
 
   const nextImage = (e) => {
-    e.stopPropagation(); // Prevent triggering the card's onClick
-    setCurrentImageIndex(prevIndex =>
+    e.stopPropagation();
+    setCurrentImageIndex((prevIndex) =>
       prevIndex === gallery.length - 1 ? 0 : prevIndex + 1
     );
   };
 
   // Toggle favorite state
   const toggleFavorite = (e) => {
-    e.stopPropagation(); // Prevent triggering the card's onClick
+    e.stopPropagation();
     setIsFavorite(!isFavorite);
+    // You can also handle favorite logic here, like updating a backend
   };
 
   // Handle card click to navigate to RoomDetails
   const handleCardClick = () => {
-    navigate(`/rooms/${id}`, { state: { room } }); // Fixed: Used backticks
+    navigate(`/rooms/${id}`, { state: { room } });
   };
 
   return (
     <div
       className="w-full bg-white shadow-lg rounded-lg overflow-hidden flex flex-col md:flex-row hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
       onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      onKeyPress={(e) => {
+        if (e.key === 'Enter') handleCardClick();
+      }}
+      aria-label={`View details for ${name}`}
     >
       {/* Image Gallery */}
-      <div className="relative md:w-1/3">
+      <div className="relative md:w-1/3 w-full h-56 md:h-auto">
         <img
           src={gallery[currentImageIndex]}
-          alt={`${name} Image ${currentImageIndex + 1}`} // Fixed: Used template literals
-          className="w-full h-56 md:h-full object-cover transition-transform duration-500 transform hover:scale-105"
+          alt={`${name} Image ${currentImageIndex + 1}`}
+          className="w-full h-full object-cover transition-transform duration-500 transform hover:scale-105"
           loading="lazy"
         />
         {/* Navigation Buttons */}
@@ -88,11 +97,13 @@ const RoomCard = ({ room }) => {
         <button
           onClick={toggleFavorite}
           className="absolute top-3 right-3 bg-white bg-opacity-75 text-red-500 p-2 rounded-full hover:bg-opacity-100 transition"
-          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
-          <FaHeart
-            className={`${isFavorite ? 'text-red-600' : 'text-gray-400'} transition-colors duration-200`}
-          />
+          {isFavorite ? (
+            <FaHeart className="text-red-600 transition-colors duration-200" />
+          ) : (
+            <FaRegHeart className="text-gray-400 transition-colors duration-200" />
+          )}
         </button>
       </div>
 
@@ -127,9 +138,7 @@ const RoomCard = ({ room }) => {
                 key={index}
                 className="flex items-center text-gray-700 text-sm bg-gray-100 px-2 py-1 rounded-full"
               >
-                <span className="text-base mr-1">
-                  {amenity.icon}
-                </span>
+                <span className="text-base mr-1">{amenity.icon}</span>
                 {amenity.name}
               </span>
             ))}
@@ -140,21 +149,32 @@ const RoomCard = ({ room }) => {
         <div className="mb-6 flex flex-wrap items-center text-gray-600 text-sm">
           {/* Maximum Guests */}
           <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-sm mr-4 mb-3">
-            <FaBed className="text-blue-500" />
-            <span className="font-medium">{maxGuests} Maximum Guests</span>
+            <FaUserFriends className="text-blue-500" />
+            <span className="font-medium">
+              {maxGuests} Guests
+            </span>
           </div>
 
-          {/* Total Rooms Available */}
+          
+
+          {/* Rooms Available */}
           <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-sm mb-3">
-            <FaBed className="text-green-500" />
-            <span className="font-medium">{} Rooms Available</span>
+            <FaBed className="text-purple-500" />
+            <span className="font-medium">
+              {roomsAvailable} Rooms Available
+            </span>
           </div>
         </div>
 
-
         {/* Call to Action */}
         <div className="mt-auto flex justify-end">
-          <button className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+          <button
+            className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/rooms/${id}`, { state: { room } });
+            }}
+          >
             Book Now
           </button>
         </div>
@@ -166,20 +186,22 @@ const RoomCard = ({ room }) => {
 // PropTypes for type checking
 RoomCard.propTypes = {
   room: PropTypes.shape({
-    id: PropTypes.string.isRequired, // Ensure each room has a unique 'id'
+    id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     price: PropTypes.number.isRequired,
     description: PropTypes.string,
     amenities: PropTypes.arrayOf(
       PropTypes.shape({
         name: PropTypes.string,
-        icon: PropTypes.string // Changed to string since icons are emojis
+        icon: PropTypes.node, // Changed to node for React elements
       })
     ),
     maxAdults: PropTypes.number,
+    maxGuests: PropTypes.number,
     maxChildren: PropTypes.number,
-    gallery: PropTypes.arrayOf(PropTypes.string)
-  }).isRequired
+    gallery: PropTypes.arrayOf(PropTypes.string),
+    roomsAvailable: PropTypes.number, // Added assuming it's needed
+  }).isRequired,
 };
 
-export default RoomCard;
+export default memo(RoomCard);

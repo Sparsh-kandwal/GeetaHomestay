@@ -1,18 +1,15 @@
 // src/components/RoomDetails.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { rooms } from '../constants/Rooms';
 import { 
   FaChevronLeft, 
   FaChevronRight, 
   FaBed, 
-  FaUserFriends, 
   FaHeart, 
   FaPlus, 
   FaMinus,
-  FaArrowLeft,
-  FaCheck,
   FaExclamationTriangle,
   FaCartPlus
 } from 'react-icons/fa';
@@ -22,42 +19,27 @@ import { useCart } from '../contexts/CartContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Within handleAddToCart
-const handleAddToCart = () => {
-  if (isInvalidDateRange() || !arrivalDate || !departureDate) {
-    toast.error('Please select valid arrival and departure dates before adding to cart.');
-    return;
-  }
+// Import Swiper React components and required modules
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 
-  const cartItem = {
-    room,
-    bookingDetails: {
-      arrivalDate,
-      departureDate,
-      adults,
-      children,
-      roomCount,
-      totalPrice: calculateTotalPrice()
-    }
-  };
-
-  addToCart(cartItem);
-  // toast.success('Room added to cart!'); // Already handled in context
-};
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 
 const RoomDetails = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   
   // State for booking
   const [arrivalDate, setArrivalDate] = useState(null);
   const [departureDate, setDepartureDate] = useState(null);
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
+  const [guests, setGuests] = useState(1); // Unified guests state
   const [roomCount, setRoomCount] = useState(1);
 
   // Access cart context
@@ -70,7 +52,12 @@ const RoomDetails = () => {
   const room = roomFromState || rooms.find((r) => r.id === id);
 
   if (!room) {
-    return <div className="container mx-auto px-4 py-24 text-center text-red-500">Room not found.</div>;
+    return (
+      <div className="container mx-auto px-4 py-24 text-center text-red-500">
+        <FaExclamationTriangle className="mx-auto mb-4 text-4xl" />
+        <p>Room not found.</p>
+      </div>
+    );
   }
 
   const {
@@ -78,36 +65,19 @@ const RoomDetails = () => {
     price,
     description,
     amenities,
-    maxAdults,
-    maxChildren,
+    maxGuests,
     gallery,
     totalRooms
   } = room;
 
-  // Image navigation handlers
-  const prevImage = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? gallery.length - 1 : prevIndex - 1
-    );
-  };
-
-  const nextImage = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === gallery.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
+    // Optionally, handle favorite logic (e.g., update backend)
   };
 
   // Handlers for booking
-  const handleOccupancyChange = (type, value) => {
-    if (type === 'adults') {
-      setAdults(value);
-    } else if (type === 'children') {
-      setChildren(value);
-    }
+  const handleGuestsChange = (value) => {
+    setGuests(value);
   };
 
   const handleRoomCountChange = (value) => {
@@ -126,16 +96,33 @@ const RoomDetails = () => {
   };
 
   const handleBookNow = () => {
-    // Implement booking logic here
-    console.log('Booking Confirmed');
-    // Navigate to a confirmation page or show a modal
-    navigate('/booking-confirmation', { state: { room, bookingDetails: { arrivalDate, departureDate, adults, children, roomCount, totalPrice: calculateTotalPrice() } } });
+    if (isInvalidDateRange() || !arrivalDate || !departureDate) {
+      toast.error('Please select valid arrival and departure dates before booking.');
+      return;
+    }
+
+    // Implement booking logic here (e.g., backend API call)
+    // For now, navigate to a confirmation page
+    navigate('/booking-confirmation', { 
+      state: { 
+        room, 
+        bookingDetails: { 
+          arrivalDate, 
+          departureDate, 
+          guests, 
+          roomCount, 
+          totalPrice: calculateTotalPrice() 
+        } 
+      } 
+    });
+
+    toast.success('Booking confirmed!');
   };
 
   // Handler for adding to cart
   const handleAddToCart = () => {
     if (isInvalidDateRange() || !arrivalDate || !departureDate) {
-      alert('Please select valid arrival and departure dates before adding to cart.');
+      toast.error('Please select valid arrival and departure dates before adding to cart.');
       return;
     }
 
@@ -144,15 +131,35 @@ const RoomDetails = () => {
       bookingDetails: {
         arrivalDate,
         departureDate,
-        adults,
-        children,
+        guests,
         roomCount,
         totalPrice: calculateTotalPrice()
       }
     };
 
     addToCart(cartItem);
-    alert('Room added to cart!');
+    toast.success('Room added to cart!');
+  };
+
+  // Ensure that guests do not exceed maxGuests per room
+  useEffect(() => {
+    if (guests > maxGuests * roomCount) {
+      setGuests(maxGuests * roomCount);
+    }
+  }, [guests, maxGuests, roomCount]);
+
+  // Define Swiper settings
+  const swiperSettings = {
+    modules: [Autoplay, Navigation, Pagination, EffectFade],
+    autoplay: {
+      delay: 5000, // 5 seconds
+      disableOnInteraction: false,
+    },
+    navigation: true,
+    pagination: { clickable: true },
+    effect: 'fade', // Change to 'slide', 'cube', etc., for different effects
+    loop: true,
+    speed: 1000, // Transition speed in ms
   };
 
   return (
@@ -167,71 +174,50 @@ const RoomDetails = () => {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Image Gallery */}
+        {/* Image Gallery with Swiper */}
         <div className="relative">
-          <div className="aspect-w-4 aspect-h-3">
-            <img
-              src={gallery[currentImageIndex]}
-              alt={`${name} Image ${currentImageIndex + 1}`}
-              className="w-full h-full object-cover rounded-lg shadow-lg transition-transform duration-500 transform hover:scale-105"
-              loading="lazy"
-            />
-          </div>
-          {gallery.length > 1 && (
-            <>
-              <button
-                onClick={prevImage}
-                className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition"
-                aria-label="Previous Image"
-              >
-                <FaChevronLeft />
-              </button>
-              <button
-                onClick={nextImage}
-                className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition"
-                aria-label="Next Image"
-              >
-                <FaChevronRight />
-              </button>
-            </>
-          )}
-          {/* Image Indicators */}
-          {gallery.length > 1 && (
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-              {gallery.map((_, index) => (
-                <span
-                  key={index}
-                  className={`w-3 h-3 rounded-full cursor-pointer ${
-                    index === currentImageIndex ? 'bg-indigo-600' : 'bg-gray-300'
-                  }`}
-                  onClick={() => setCurrentImageIndex(index)}
-                  aria-label={`Go to image ${index + 1}`}
-                ></span>
+          {/* Wrapping Swiper to maintain 4:3 aspect ratio */}
+          <div className="w-full aspect-w-4 aspect-h-3 relative">
+            <Swiper {...swiperSettings}>
+              {gallery.map((image, index) => (
+                <SwiperSlide key={index}>
+                  <img
+                    src={image}
+                    alt={`${name} Image ${index + 1}`}
+                    className="w-full h-full object-cover rounded-lg shadow-lg"
+                    loading="lazy"
+                  />
+                </SwiperSlide>
               ))}
-            </div>
-          )}
-          {/* Favorite Button */}
-          <button
-            onClick={toggleFavorite}
-            className="absolute top-4 right-4 bg-white bg-opacity-75 text-red-500 p-3 rounded-full hover:bg-opacity-100 transition"
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-          >
-            <FaHeart
-              className={`${isFavorite ? 'text-red-600' : 'text-gray-400'} transition-colors duration-200`}
-            />
-          </button>
+            </Swiper>
+
+            {/* Favorite Button */}
+            <button
+              onClick={toggleFavorite}
+              className="absolute top-4 right-4 bg-white bg-opacity-75 text-red-500 p-3 rounded-full hover:bg-opacity-100 transition"
+              aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              <FaHeart
+                className={`${isFavorite ? 'text-red-600' : 'text-gray-400'} transition-colors duration-200`}
+              />
+            </button>
+          </div>
         </div>
 
         {/* Room Details and Booking */}
         <div className="flex flex-col">
           <h1 className="text-3xl lg:text-4xl font-bold mb-4 text-gray-800">{name}</h1>
-          <p className="text-xl lg:text-2xl font-semibold text-indigo-600 mb-6">₹{price.toLocaleString()} per night</p>
+          <p className="text-xl lg:text-2xl font-semibold text-indigo-600 mb-6">
+            ₹{price.toLocaleString()} per night
+          </p>
           <p className="text-gray-700 mb-6">{description}</p>
 
           {/* Room Availability */}
           <div className="mb-6">
             <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Room Availability</h2>
-            <p className="mb-3 text-gray-700">Total rooms available: <span className="font-medium">{totalRooms}</span></p>
+            <p className="mb-3 text-gray-700">
+              Total rooms available: <span className="font-medium">{totalRooms}</span>
+            </p>
             <div className="flex items-center space-x-4">
               <label className="font-medium text-gray-700" htmlFor="roomCount">Number of rooms:</label>
               <div className="flex items-center">
@@ -246,7 +232,10 @@ const RoomDetails = () => {
                   type="number"
                   id="roomCount"
                   value={roomCount}
-                  onChange={(e) => handleRoomCountChange(Math.min(Math.max(1, parseInt(e.target.value) || 1), totalRooms))}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 1;
+                    handleRoomCountChange(Math.min(Math.max(1, value), totalRooms));
+                  }}
                   min="1"
                   max={totalRooms}
                   className="w-16 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -308,65 +297,42 @@ const RoomDetails = () => {
           <div className="mb-6">
             <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Number of Guests</h2>
             <div className="flex flex-col md:flex-row gap-6">
-              {/* Adults */}
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="adults">Adults (Max: {maxAdults})</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="guests">
+                  Guests (Max: {maxGuests * roomCount})
+                </label>
                 <div className="flex items-center">
                   <button
-                    onClick={() => setAdults(Math.max(1, adults - 1))}
+                    onClick={() => setGuests(Math.max(1, guests - 1))}
                     className="bg-gray-200 p-2 rounded-l hover:bg-gray-300 transition duration-300 focus:outline-none"
-                    aria-label="Decrease adults"
+                    aria-label="Decrease guests"
                   >
                     <FaMinus />
                   </button>
                   <input
                     type="number"
-                    id="adults"
-                    value={adults}
-                    onChange={(e) => setAdults(Math.min(Math.max(1, parseInt(e.target.value) || 1), maxAdults))}
+                    id="guests"
+                    value={guests}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 1;
+                      setGuests(Math.min(Math.max(1, value), maxGuests * roomCount));
+                    }}
                     min="1"
-                    max={maxAdults}
+                    max={maxGuests * roomCount}
                     className="w-16 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    aria-label="Number of adults"
+                    aria-label="Number of guests"
                   />
                   <button
-                    onClick={() => setAdults(Math.min(adults + 1, maxAdults))}
+                    onClick={() => setGuests(Math.min(guests + 1, maxGuests * roomCount))}
                     className="bg-gray-200 p-2 rounded-r hover:bg-gray-300 transition duration-300 focus:outline-none"
-                    aria-label="Increase adults"
+                    aria-label="Increase guests"
                   >
                     <FaPlus />
                   </button>
                 </div>
-              </div>
-              {/* Children */}
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="children">Children (Max: {maxChildren})</label>
-                <div className="flex items-center">
-                  <button
-                    onClick={() => setChildren(Math.max(0, children - 1))}
-                    className="bg-gray-200 p-2 rounded-l hover:bg-gray-300 transition duration-300 focus:outline-none"
-                    aria-label="Decrease children"
-                  >
-                    <FaMinus />
-                  </button>
-                  <input
-                    type="number"
-                    id="children"
-                    value={children}
-                    onChange={(e) => setChildren(Math.min(Math.max(0, parseInt(e.target.value) || 0), maxChildren))}
-                    min="0"
-                    max={maxChildren}
-                    className="w-16 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    aria-label="Number of children"
-                  />
-                  <button
-                    onClick={() => setChildren(Math.min(children + 1, maxChildren))}
-                    className="bg-gray-200 p-2 rounded-r hover:bg-gray-300 transition duration-300 focus:outline-none"
-                    aria-label="Increase children"
-                  >
-                    <FaPlus />
-                  </button>
-                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Maximum {maxGuests} guests per room.
+                </p>
               </div>
             </div>
           </div>

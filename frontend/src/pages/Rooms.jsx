@@ -13,8 +13,9 @@ const Rooms = () => {
     <div className="mt-24">
       <div className="flex flex-col items-center gap-6">
         <SearchBar onSearch={handleSearchResults} />
+        <ExploreRooms roomData={roomData} />
       </div>
-      <ExploreRooms roomData={roomData} />
+     
     </div>
   );
 };
