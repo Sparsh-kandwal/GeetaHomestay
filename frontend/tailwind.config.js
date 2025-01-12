@@ -10,6 +10,9 @@ export default {
         grand: ['"Grand Hotel"', 'cursive'], // Grand Hotel
         merriweather: ['"Merriweather Sans"', 'sans-serif'], // Merriweather Sans
       },
+      screens: {
+        'xg': '1400px', // Custom breakpoint if needed
+      },
     },
   },
   plugins: [],
