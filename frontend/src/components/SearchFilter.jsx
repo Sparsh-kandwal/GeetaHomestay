@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 
-const SearchFilter = ({ searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput, amenitiesOptions, setSearchTermInput, setSelectedAmenitiesInput, setMaxPriceInput, setGuestCountInput }) => {
+const SearchFilter = ({ bedOptions, maxPriceInput, guestCountInput, amenitiesOptions, setSearchTermInput, setSelectedAmenitiesInput, setMaxPriceInput, setGuestCountInput }) => {
   // Handle amenity selection (input state)
   const handleAmenityChangeInput = (amenity) => {
     setSelectedAmenitiesInput((prev) =>
@@ -19,11 +19,24 @@ const SearchFilter = ({ searchTermInput, selectedAmenitiesInput, maxPriceInput, 
     setGuestCountInput('');
   };
 
-
-
   return (
     <div className="sticky top-20 h-fit w-full lg:w-1/4 p-6 bg-white shadow-md rounded-lg">
           <h3 className="text-lg font-semibold mb-6">Search & Filters</h3>
+          <div className="mb-6">
+            <h4 className="text-md font-semibold mb-2">Filter by Beds</h4>
+            <div className="space-y-2">
+              {bedOptions.map((beds, index) => (
+                <label key={index} className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    onChange={() => handleAmenityChangeInput(beds)}
+                    className="h-5 w-5"
+                  />  
+                  <span className="ml-1 mr-3 text-gray-700">{beds}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
           {/* Filter by Amenities */}
           <div className="mb-6">
@@ -33,7 +46,6 @@ const SearchFilter = ({ searchTermInput, selectedAmenitiesInput, maxPriceInput, 
                 <label key={index} className="inline-flex items-center">
                   <input
                     type="checkbox"
-                    checked={selectedAmenitiesInput.includes(amenity)}
                     onChange={() => handleAmenityChangeInput(amenity)}
                     className="h-5 w-5"
                   />  
@@ -86,8 +98,6 @@ const SearchFilter = ({ searchTermInput, selectedAmenitiesInput, maxPriceInput, 
                   <option value="4">4 Guests</option>
                   <option value="5">5 Guests</option>
                   <option value="6">6 Guests</option>
-                  <option value="7">7 Guests</option>
-                  <option value="8">8 Guests</option>
                 </select>
               </div>
             </div>
