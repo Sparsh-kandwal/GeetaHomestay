@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from "../models/user.js";
+import { emailTemplate } from '../constants/EmailTemplate.js';
+import { transporter } from '../utils/MailClient.js';
 
 export const googleAuth = async (req, res) => {
     const code = req.body.code; // Authorization code sent from the frontend
@@ -45,6 +47,7 @@ export const googleAuth = async (req, res) => {
 
         const userInfo = await userInfoResponse.json();
         let user = await User.findOne({ id: userInfo.id });
+        let isNewUser = false;
         if (!user) {
             user = await User.create({
                 id: userInfo.id,
@@ -52,6 +55,7 @@ export const googleAuth = async (req, res) => {
                 email: userInfo.email,
                 photo: userInfo.picture,
             });
+            isNewUser = true;
         }
 
         const tokenPayload = { id: user._id, email: user.email };
@@ -64,6 +68,25 @@ export const googleAuth = async (req, res) => {
             sameSite: 'strict',
         });
 
+
+        // abhi isko only for new user karunga,  testing ke liye chodd rkha 
+        try {
+            const emailContent = emailTemplate(userInfo.name);
+    
+            const info = await transporter.sendMail({
+                from: '"Geeta Home Stay" <techlovers110@gmail.com>',
+                to: userInfo.email,
+                subject: "Welcome to Geeta Home Stay!",
+                text: "Testing going on",
+                html: emailContent,
+            });
+    
+            console.log("Welcome email sent successfully to:", userInfo.email);
+        } catch (emailError) {
+            console.error("Error sending welcome email:", emailError.message);
+        }
+        
+        
         res.status(200).json({
             message: "User info retrieved successfully",
             user: user,
