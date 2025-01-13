@@ -16,6 +16,7 @@ const ExploreRooms = () => {
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
 
   const filteredRooms = useMemo(() => {
+    console.log(rooms)
     return rooms.filter((room) => {
       // 2. Match selected amenities if any are selected
       let matchesAmenities = true;

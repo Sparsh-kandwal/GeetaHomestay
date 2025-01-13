@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { rooms } from '../constants/Rooms';
 import { 
   FaChevronLeft, 
   FaChevronRight, 
@@ -36,11 +35,21 @@ const RoomDetails = () => {
   const navigate = useNavigate();
 
   const [isFavorite, setIsFavorite] = useState(false);
+    const [rooms, setRooms] = useState([]);
+  
 
   let { checkInDate, setCheckInDate, checkOutDate, setCheckOutDate } = useDateContext();
   
   
   const [minCheckOutDate, setMinCheckOutDate] = useState('');
+
+  useEffect(() => {
+      // Fetch rooms from sessionStorage
+      const rooms = sessionStorage.getItem('rooms');
+      if (rooms) {
+        setRooms(JSON.parse(rooms));
+      }
+    }, []);
 
   // Set the minimum date for check-in and check-out dynamically
   useEffect(() => {
@@ -209,7 +218,7 @@ const RoomDetails = () => {
               {gallery.map((image, index) => (
                 <SwiperSlide key={index}>
                   <img
-                    src={image}
+                    src={import.meta.env.VITE_CLOUDINARY_CLOUD+image}
                     alt={`${name} Image ${index + 1}`}
                     className="w-full h-full object-cover rounded-lg shadow-lg"
                     loading="lazy"
