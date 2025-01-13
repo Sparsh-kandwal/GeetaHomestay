@@ -31,12 +31,6 @@ export const testimonials = [
     "image": "https://lh3.googleusercontent.com/a-/ALV-UjWfexw3fopiCaggOX2obT__m8qwd5rKjaFBPr5-rJN2WgA29bJX=w45-h45-p-rp-mo-br100"
   },
   {
-    "username": "LAXMI KANTA",
-    "testimonial": "Gita bhaban and gita home stay is in same building.hime stay is little expansive and normal stay I pay 1500 per night.the room i stayed in bed sheet and kambals are not clean,wash room is little open to another rooms wash room.check the video.old soap covers are not cleared. Check the video.",
-    "rating": "3 stars",
-    "image": "https://lh3.googleusercontent.com/a-/ALV-UjX0ltjSengldIBBQmMUNhNCIHLwgLvgDL2C-xw2t8b687AW0dbH=w45-h45-p-rp-mo-ba5-br100"
-  },
-  {
     "username": "Amar Singh",
     "testimonial": "Nice and comfort family stay. Its provide room service lounch ,dinner and break fast",
     "rating": "5 stars",
@@ -59,5 +53,11 @@ export const testimonials = [
     "testimonial": "Nice owner,airy room,good for family",
     "rating": "5 stars",
     "image": "https://lh3.googleusercontent.com/a-/ALV-UjV1uM21pLAvdGRFAamQZKePvWy5UXn2gIKJIz3RQjDpghKCU5A=w45-h45-p-rp-mo-br100"
+  },
+  {
+    "username": "Aman Bhatt",
+    "testimonial": "Great experience thak you\u2764\ufe0f",
+    "rating": "5 stars",
+    "image": "https://lh3.googleusercontent.com/a-/ALV-UjUSrW5Ssk1C8gGQnEzljaHDETeneO4QeGLBuYTxllwJ5RtqG_nkGg=w45-h45-p-rp-mo-br100"
   }
 ];

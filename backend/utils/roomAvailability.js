@@ -11,7 +11,6 @@ export const calculateRoomAvailability = async (checkIn, checkOut) => {
     const availability = {};
     for (const room of rooms) {
         availability[room.roomType] = {
-            ...room.toObject(),
             availableRooms: room.totalRooms,
         };
     }

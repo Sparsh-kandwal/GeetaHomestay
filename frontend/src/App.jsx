@@ -11,6 +11,9 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { CartProvider } from './contexts/CartContext';
 import { DateProvider } from './contexts/DateContext';
 import Cart from './components/Cart';
+import BookingConfirmation from './pages/BookingConfirmation';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   return (
@@ -21,10 +24,12 @@ const App = () => {
             <Navbar />
             <AnimatedRoutes />
             <Footer />
+            <ToastContainer />
           </Router>
         </DateProvider>
       </CartProvider>
     </GoogleOAuthProvider>
+    
   );
 };
 
@@ -45,6 +50,7 @@ const AnimatedRoutes = () => {
 
             <Route path="/rooms" element={<Rooms />} />
             <Route path="/rooms/:id" element={<RoomDetails />} />
+            <Route path="/booking-confirmation" element={<BookingConfirmation />} />
             <Route path="/cart" element={<Cart />} />
           </Routes>
         </div>

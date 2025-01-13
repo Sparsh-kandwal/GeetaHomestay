@@ -83,7 +83,7 @@ const Navbar = () => {
 
   return (
     <header
-      className={`flex justify-between items-center h-20 px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
+      className={`flex justify-between items-center h-[65px]  px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
         isHomePage ? "" : "bg-indigo-700 shadow-lg"
       }`}
     >
