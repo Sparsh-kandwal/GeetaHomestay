@@ -2,11 +2,12 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RoomCard from './RoomCard';
 import SearchFilter from './SearchFilter';
+import SearchBar from './SearchBar';
 
 const ExploreRooms = () => {
   const [searchTermInput, setSearchTermInput] = useState('');
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
-  const [maxPriceInput, setMaxPriceInput] = useState(4000); // Only max price
+  const [maxPriceInput, setMaxPriceInput] = useState(4000);
   const [guestCountInput, setGuestCountInput] = useState('');
   const [rooms, setRooms] = useState([]);
   const amenitiesOptions = ['Air Conditioning', 'Non-AC'];
@@ -22,44 +23,43 @@ const ExploreRooms = () => {
   const filteredRooms = useMemo(() => {
     console.log(rooms)
     return rooms.filter((room) => {
-      // 1. Match room name if searchTerm is provided
-      const matchesName = searchTermInput
-        ? room.name.toLowerCase().includes(searchTermInput.toLowerCase())
-        : true;
-
-      // 2. Match selected amenities if any are selected
       let matchesAmenities = true;
       if (selectedAmenitiesInput.length > 0) {
         const hasAC = room.amenities.some(
           (a) => a.name.trim().toLowerCase() === 'air conditioning'
         );
-        const filterAC = selectedAmenitiesInput.includes('Air Conditioning');
+        const hasBalcony = room.amenities.some(
+          (a) => a.name.trim().toLowerCase() === 'balcony' || a.name.trim().toLowerCase() === 'private balcony'
+        );
+        const hasCoffeeKettle = room.amenities.some(
+          (a) => a.name.trim().toLowerCase() === 'hot-water/coffee kettle'
+        );
+        if (selectedAmenitiesInput.includes('Balcony')) matchesAmenities &= hasBalcony;
+        if (selectedAmenitiesInput.includes('Coffee-Kettle')) matchesAmenities &= hasCoffeeKettle;
+        const filterAC = selectedAmenitiesInput.includes('AC');
         const filterNonAC = selectedAmenitiesInput.includes('Non-AC');
 
         if (filterAC && filterNonAC) {
-          matchesAmenities = true; // Both filters selected, include all rooms
+          matchesAmenities &= true;
         } else if (filterAC) {
-          matchesAmenities = hasAC;
+          matchesAmenities &= hasAC;
         } else if (filterNonAC) {
-          matchesAmenities = !hasAC;
+          matchesAmenities &= !hasAC;
         }
       }
 
-      // 3. Match price range (only max price)
       const matchesPrice = room.price <= Number(maxPriceInput);
-
-      // 4. Match guest count if specified
       const matchesGuests = guestCountInput
         ? room.maxGuests >= Number(guestCountInput)
         : true;
 
-      return matchesName && matchesAmenities && matchesPrice && matchesGuests;
+      return matchesAmenities && matchesPrice && matchesGuests;
     });
   }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput, rooms]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">
+    <div className="relative min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <h2 className="text-2xl sm:text-3xl font-semibold text-center text-gray-800 mb-6 sm:mb-10">
         Explore Our Rooms
       </h2>
 
@@ -107,6 +107,10 @@ const ExploreRooms = () => {
             )}
           </AnimatePresence>
         </div>
+      </div>
+
+      <div className="sticky bottom-5 w-2/4 max-w-7xl mx-auto px-4">
+        <SearchBar />
       </div>
     </div>
   );
