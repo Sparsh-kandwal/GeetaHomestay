@@ -11,17 +11,11 @@ const ExploreRooms = () => {
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
   const [maxPriceInput, setMaxPriceInput] = useState(4000);
   const [guestCountInput, setGuestCountInput] = useState('');
-  const [rooms, setRooms] = useState([]);
+  const storedRooms = sessionStorage.getItem('rooms');
+  const [rooms, setRooms] = useState(JSON.parse(storedRooms));
   const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
 
-  useEffect(() => {
-    // Fetch rooms from sessionStorage
-    const storedRooms = sessionStorage.getItem('rooms');
-    if (storedRooms) {
-      setRooms(JSON.parse(storedRooms));
-    }
-  }, []);
 
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {
