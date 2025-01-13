@@ -1,22 +1,29 @@
 // src/components/ExploreRooms.jsx
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RoomCard from './RoomCard';
-import { rooms } from '../constants/Rooms';// Adjusted import path based on your data file
 import SearchFilter from './SearchFilter';
 import SearchBar from './SearchBar';
 
 const ExploreRooms = () => {
   const [searchTermInput, setSearchTermInput] = useState('');
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
-  const [maxPriceInput, setMaxPriceInput] = useState(4000); // Only max price
+  const [maxPriceInput, setMaxPriceInput] = useState(4000);
   const [guestCountInput, setGuestCountInput] = useState('');
+  const [rooms, setRooms] = useState([]);
   const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
 
+  useEffect(() => {
+    // Fetch rooms from sessionStorage
+    const storedRooms = sessionStorage.getItem('rooms');
+    if (storedRooms) {
+      setRooms(JSON.parse(storedRooms));
+    }
+  }, []);
+
   const filteredRooms = useMemo(() => {
-    console.log(rooms)
     return rooms.filter((room) => {
       // 2. Match selected amenities if any are selected
       let matchesAmenities = true;

@@ -20,7 +20,7 @@ const SearchFilter = ({ bedOptions, maxPriceInput, guestCountInput, amenitiesOpt
   };
 
   return (
-    <div className="sticky top-20 h-fit w-full lg:w-1/4 p-6 bg-white shadow-md rounded-lg">
+    <div className="md:sticky top-20 h-fit w-full lg:w-1/4 p-6 bg-white shadow-md rounded-lg">
           <h3 className="text-lg font-semibold mb-6">Search & Filters</h3>
           <div className="mb-6">
             <h4 className="text-md font-semibold mb-2">Filter by Beds</h4>
