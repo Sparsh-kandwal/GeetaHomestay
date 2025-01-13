@@ -36,7 +36,7 @@ const Testimonials = () => {
           {/* Previous button */}
           <button
             onClick={goToPrevious}
-            className="text-white bg-[#3a328c] p-3 rounded-full hover:bg-[#4d65b4]"
+            className="text-white bg-[#3a328c] p-3 rounded-full hover:bg-[#4d65b4] focus:outline-none focus:ring-2 focus:ring-[#3a328c]"
           >
             &lt;
           </button>
@@ -46,12 +46,13 @@ const Testimonials = () => {
             username={testimonials[currentIndex].username}
             testimonial={testimonials[currentIndex].testimonial}
             rating={testimonials[currentIndex].rating}
+            image={testimonials[currentIndex].image || 'https://via.placeholder.com/64'}  // Fallback image
           />
 
           {/* Next button */}
           <button
             onClick={goToNext}
-            className="text-white bg-[#3a328c] p-3 rounded-full hover:bg-[#4d65b4]"
+            className="text-white bg-[#3a328c] p-3 rounded-full hover:bg-[#4d65b4] focus:outline-none focus:ring-2 focus:ring-[#3a328c]"
           >
             &gt;
           </button>
