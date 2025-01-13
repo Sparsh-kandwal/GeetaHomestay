@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 
 const SearchFilter = ({ bedOptions, maxPriceInput, guestCountInput, amenitiesOptions, setSearchTermInput, setSelectedAmenitiesInput, setMaxPriceInput, setGuestCountInput }) => {
   // Handle amenity selection (input state)
@@ -103,16 +103,16 @@ const SearchFilter = ({ bedOptions, maxPriceInput, guestCountInput, amenitiesOpt
             </div>
           </div>
 
-      {/* Reset Button */}
-      <div className="mt-4">
-        <button
-          onClick={handleReset}
-          className="w-full bg-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-400 transition duration-200"
-        >
-          Reset
-        </button>
-      </div>
-    </div>
+          {/* Reset Button */}
+          <div className="mt-4">
+            <button
+              onClick={handleReset}
+              className="w-full bg-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-400 transition duration-200"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
   );
 };
 

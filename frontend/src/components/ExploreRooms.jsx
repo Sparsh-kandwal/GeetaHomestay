@@ -1,20 +1,23 @@
-import React, { useState, useMemo, useCallback } from 'react';
+// src/components/ExploreRooms.jsx
+
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RoomCard from './RoomCard';
-import { rooms } from '../constants/Rooms';
+import { rooms } from '../constants/Rooms';// Adjusted import path based on your data file
 import SearchFilter from './SearchFilter';
 import SearchBar from './SearchBar';
 
 const ExploreRooms = () => {
   const [searchTermInput, setSearchTermInput] = useState('');
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
-  const [maxPriceInput, setMaxPriceInput] = useState(4000);
+  const [maxPriceInput, setMaxPriceInput] = useState(4000); // Only max price
   const [guestCountInput, setGuestCountInput] = useState('');
   const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
 
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {
+      // 2. Match selected amenities if any are selected
       let matchesAmenities = true;
 
       if (selectedAmenitiesInput.length > 0) {
@@ -27,15 +30,11 @@ const ExploreRooms = () => {
         const hasBalcony = room.amenities.some(
           (a) => a.name.trim().toLowerCase() === 'balcony' || a.name.trim().toLowerCase() === 'private balcony'
         );
-        const hasCoffeeKettle = room.amenities.some(
-        );
         const hasCoffeKettle = room.amenities.some(
           (a) => a.name.trim().toLowerCase() === 'hot-water/coffee kettle'
         );
-        );
   
         if (selectedAmenitiesInput.includes('Balcony')) matchesAmenities &= hasBalcony;
-        if (selectedAmenitiesInput.includes('Coffee-Kettle')) matchesAmenities &= hasCoffeeKettle;
         if (selectedAmenitiesInput.includes('Coffe-Kettle')) matchesAmenities &= hasCoffeKettle;
   
         const filter2bed = selectedAmenitiesInput.includes('2 Bed');
@@ -52,10 +51,8 @@ const ExploreRooms = () => {
   
         const filterAC = selectedAmenitiesInput.includes('AC');
         const filterNonAC = selectedAmenitiesInput.includes('Non-AC');
-
   
         if (filterAC && filterNonAC) {
-          matchesAmenities &= true;
           matchesAmenities &= true; // Include all rooms if both are selected
         } else if (filterAC) {
           matchesAmenities &= hasAC;
@@ -65,33 +62,20 @@ const ExploreRooms = () => {
       }
 
       const matchesPrice = room.price <= Number(maxPriceInput);
+
       const matchesGuests = guestCountInput
         ? room.maxGuests >= Number(guestCountInput)
         : true;
 
       return matchesAmenities && matchesPrice && matchesGuests;
     });
-  }, [selectedAmenitiesInput, maxPriceInput, guestCountInput]);
-
+  }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput]);
+  // States for filter inputs
   return (
-    <div className="relative min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-2xl sm:text-3xl font-semibold text-center text-gray-800 mb-6 sm:mb-10">
+    <div className="mt-12 min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">
         Explore Our Rooms
       </h2>
-      <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 pb-16 sm:pb-24">
-        <SearchFilter
-          searchTermInput={searchTermInput}
-          selectedAmenitiesInput={selectedAmenitiesInput}
-          maxPriceInput={maxPriceInput}
-          guestCountInput={guestCountInput}
-          amenitiesOptions={amenitiesOptions}
-          setSearchTermInput={setSearchTermInput}
-          setSelectedAmenitiesInput={setSelectedAmenitiesInput}
-          setMaxPriceInput={setMaxPriceInput}
-          setGuestCountInput={setGuestCountInput}
-        />
-
-        <div className="w-full lg:w-3/4 xl:w-4/5 flex flex-col gap-6 sm:gap-8">
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Search and Filters Component */}
@@ -128,10 +112,9 @@ const ExploreRooms = () => {
           </AnimatePresence>
         </div>
       </div>
-
       <div className="sticky bottom-5 w-2/4 max-w-7xl mx-auto px-4">
         <SearchBar />
-      </div>
+      </div> 
     </div>
   );
 };
