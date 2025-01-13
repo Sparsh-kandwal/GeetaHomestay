@@ -31,7 +31,7 @@ const Cart = () => {
           {cartItems.map((item, index) => (
             <div key={index} className="flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-sm">
               <div className="flex items-center">
-                <img src={item.room.gallery[0]} alt={item.room.name} className="w-24 h-16 object-cover rounded-md mr-4" />
+                <img src={import.meta.env.VITE_CLOUDINARY_CLOUD +item.room.gallery[0]} alt={item.room.name} className="w-24 h-16 object-cover rounded-md mr-4" />
                 <div>
                   <h2 className="text-xl font-semibold">{item.room.name}</h2>
                   <p className="text-gray-600">₹{item.bookingDetails.totalPrice.toLocaleString()}</p>
