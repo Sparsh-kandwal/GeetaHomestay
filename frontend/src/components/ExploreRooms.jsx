@@ -1,10 +1,11 @@
 // src/components/ExploreRooms.jsx
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RoomCard from './RoomCard';
 import SearchFilter from './SearchFilter';
 import SearchBar from './SearchBar';
+import { RoomContext } from '../auth/Userprovider';
 
 const ExploreRooms = () => {
   const [searchTermInput, setSearchTermInput] = useState('');
@@ -15,7 +16,14 @@ const ExploreRooms = () => {
   const [rooms, setRooms] = useState(JSON.parse(storedRooms));
   const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
+  const { fetchRooms } = useContext(RoomContext);
 
+  useEffect(() => {
+    if (!storedRooms) {
+      fetchRooms();
+      setRooms(JSON.parse(sessionStorage.getItem('rooms')));
+    }
+  }, []);
 
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {
@@ -23,9 +31,9 @@ const ExploreRooms = () => {
       let matchesAmenities = true;
 
       if (selectedAmenitiesInput.length > 0) {
-        const bed2 = room.name.trim().toLowerCase().includes('double');
-        const bed3 = room.name.trim().toLowerCase().includes('triple');
-        const bed4 = room.name.trim().toLowerCase().includes('four');
+        const bed2 = room.roomName.trim().toLowerCase().includes('double');
+        const bed3 = room.roomName.trim().toLowerCase().includes('triple');
+        const bed4 = room.roomName.trim().toLowerCase().includes('four');
         const hasAC = room.amenities.some(
           (a) => a.name.trim().toLowerCase() === 'air conditioning'
         );
@@ -66,7 +74,7 @@ const ExploreRooms = () => {
       const matchesPrice = room.price <= Number(maxPriceInput);
 
       const matchesGuests = guestCountInput
-        ? room.maxGuests >= Number(guestCountInput)
+        ? room.maxAdults >= Number(guestCountInput)
         : true;
 
       return matchesAmenities && matchesPrice && matchesGuests;
@@ -74,7 +82,7 @@ const ExploreRooms = () => {
   }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput]);
   // States for filter inputs
   return (
-    <div className="mt-12 min-h-screen w-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="mt-12 min-h-screen max-w-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">
         Explore Our Rooms
       </h2>
@@ -89,7 +97,7 @@ const ExploreRooms = () => {
             {filteredRooms.length > 0 ? (
               filteredRooms.map((room) => (
                 <motion.div
-                  key={room.id}
+                  key={room.roomType}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -106,7 +114,7 @@ const ExploreRooms = () => {
                 exit={{ opacity: 0 }}
                 className="col-span-full"
               >
-                <p className="text-center text-gray-500">
+                <p className="text-center text-gray-500 min-w-screen">
                   No rooms match your search criteria.
                 </p>
               </motion.div>
