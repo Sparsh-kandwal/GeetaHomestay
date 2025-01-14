@@ -15,7 +15,7 @@ const LocationComponent = () => {
       </div>
 
       {/* Carousel */}
-      <div className="flex justify-center items-center rounded-lg">
+      <div className="flex justify-center items-center ">
         <HomeCarousel />
 
       </div>

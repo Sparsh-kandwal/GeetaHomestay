@@ -34,7 +34,7 @@ const HomeCarousel = () => {
   };
 
   return (
-    <div className="relative w-[800px] h-96 md:h-[500px]">
+    <div className="relative md:w-[800px] h-96 md:h-[500px] ">
       <img
         src={currentItem.image}
         alt={`${currentItem.title} Image`}
