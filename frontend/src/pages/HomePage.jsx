@@ -5,6 +5,7 @@ import Facilities from '../components/Facilities';
 import { MapPin, Calendar } from "lucide-react";
 import { Link } from 'react-router-dom';
 import ScrollPrompt from '../components/ScrollPrompt';
+import LocationComponent from '../components/LocationComponent';
 
 const HomePage = () => {
   useEffect(() => {
@@ -83,9 +84,8 @@ const HomePage = () => {
 
       {showScrollPrompt && <ScrollPrompt />}
 
-      <div className="font-merriweather">
-        <AboutSection id="about" />
-      </div>
+      <LocationComponent />
+      
 
       <Facilities />
 

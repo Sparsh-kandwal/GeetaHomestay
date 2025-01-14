@@ -88,7 +88,7 @@ const ExploreRooms = () => {
     return <div>Loading...</div>;
   }
   return (
-    <div className="mt-12 min-h-screen max-w-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="mt-12 min-h-screen w-full bg-gray-50 py-8 px-8">
       <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">
         Explore Our Rooms
       </h2>
@@ -128,9 +128,12 @@ const ExploreRooms = () => {
           </AnimatePresence>
         </div>
       </div>
-      <div className="sticky bottom-5 w-2/4 max-w-7xl mx-auto px-4">
+      
+      <div className='sticky bottom-5'>
         <SearchBar />
-      </div> 
+
+      </div>
+    
     </div>
   );
 };

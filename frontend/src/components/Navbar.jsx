@@ -11,7 +11,7 @@ const Navbar = () => {
   const logoutMenuRef = useRef(null);
   const location = useLocation();
 
-  const navItems = ["Home", "Rooms", "Gallery","Cart"];
+  const navItems = ["Home", "Rooms","Cart"];
   const { user, isLoading, setUser, setIsLoading } = useContext(UserContext);
 
   const responseGoogle = async (authResult) => {
