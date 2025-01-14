@@ -6,6 +6,7 @@ import RoomCard from './RoomCard';
 import SearchFilter from './SearchFilter';
 import SearchBar from './SearchBar';
 import { RoomContext } from '../auth/Userprovider';
+import SkeletonRoom from './SkeletonRoom';
 
 const ExploreRooms = () => {
   const [searchTermInput, setSearchTermInput] = useState('');
@@ -14,8 +15,6 @@ const ExploreRooms = () => {
   const [guestCountInput, setGuestCountInput] = useState('');
   const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
-  // const [rooms, setRooms] = useState([]);
-
 
   const { fetchRooms, rooms, setRooms, roomsLoading } = useContext(RoomContext);
 
@@ -23,14 +22,13 @@ const ExploreRooms = () => {
     const storedRooms = sessionStorage.getItem('rooms');
     if (storedRooms) {
       setRooms(JSON.parse(storedRooms));
-    } 
-    else {
+    } else {
       fetchRooms();
     }
   }, [fetchRooms]);
+
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {
-      // 2. Match selected amenities if any are selected
       let matchesAmenities = true;
 
       if (selectedAmenitiesInput.length > 0) {
@@ -46,27 +44,26 @@ const ExploreRooms = () => {
         const hasCoffeKettle = room.amenities.some(
           (a) => a.name.trim().toLowerCase() === 'hot-water/coffee kettle'
         );
-  
+
         if (selectedAmenitiesInput.includes('Balcony')) matchesAmenities &= hasBalcony;
         if (selectedAmenitiesInput.includes('Coffe-Kettle')) matchesAmenities &= hasCoffeKettle;
-  
+
         const filter2bed = selectedAmenitiesInput.includes('2 Bed');
         const filter3bed = selectedAmenitiesInput.includes('3 Bed');
         const filter4bed = selectedAmenitiesInput.includes('4 Bed');
-  
-        // Combine filters for beds using logical OR
+
         if (filter2bed || filter3bed || filter4bed) {
           matchesAmenities &=
             (filter2bed && bed2) ||
             (filter3bed && bed3) ||
             (filter4bed && bed4);
         }
-  
+
         const filterAC = selectedAmenitiesInput.includes('AC');
         const filterNonAC = selectedAmenitiesInput.includes('Non-AC');
-  
+
         if (filterAC && filterNonAC) {
-          matchesAmenities &= true; // Include all rooms if both are selected
+          matchesAmenities &= true;
         } else if (filterAC) {
           matchesAmenities &= hasAC;
         } else if (filterNonAC) {
@@ -83,10 +80,8 @@ const ExploreRooms = () => {
       return matchesAmenities && matchesPrice && matchesGuests;
     });
   }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput, rooms]);
+
   // States for filter inputs
-  if (roomsLoading) {
-    return <div>Loading...</div>;
-  }
   return (
     <div className="mt-12 min-h-screen w-full bg-gray-50 py-8 px-8">
       <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">
@@ -95,12 +90,38 @@ const ExploreRooms = () => {
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Search and Filters Component */}
-        <SearchFilter bedOptions={bedOptions} searchTermInput={searchTermInput} selectedAmenitiesInput={searchTermInput} maxPriceInput={maxPriceInput} guestCountInput={guestCountInput} amenitiesOptions={amenitiesOptions} setSearchTermInput={setSearchTermInput} setSelectedAmenitiesInput={setSelectedAmenitiesInput} setMaxPriceInput={setMaxPriceInput} setGuestCountInput={setGuestCountInput} />
+        <SearchFilter
+          bedOptions={bedOptions}
+          searchTermInput={searchTermInput}
+          selectedAmenitiesInput={selectedAmenitiesInput}
+          maxPriceInput={maxPriceInput}
+          guestCountInput={guestCountInput}
+          amenitiesOptions={amenitiesOptions}
+          setSearchTermInput={setSearchTermInput}
+          setSelectedAmenitiesInput={setSelectedAmenitiesInput}
+          setMaxPriceInput={setMaxPriceInput}
+          setGuestCountInput={setGuestCountInput}
+        />
 
         {/* Room Cards */}
         <div className="w-full xl:w-4/5 lg:w-3/4 flex flex-col gap-8">
           <AnimatePresence>
-            {filteredRooms.length > 0 ? (
+            {roomsLoading ? (
+              // Show skeleton loader when rooms are loading
+              Array(3)
+                .fill(0)
+                .map((_, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <SkeletonRoom />
+                  </motion.div>
+                ))
+            ) : filteredRooms.length > 0 ? (
               filteredRooms.map((room) => (
                 <motion.div
                   key={room.roomType}
@@ -110,6 +131,7 @@ const ExploreRooms = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <RoomCard room={room} />
+
                 </motion.div>
               ))
             ) : (
@@ -128,12 +150,10 @@ const ExploreRooms = () => {
           </AnimatePresence>
         </div>
       </div>
-      
-      <div className='sticky bottom-5'>
-        <SearchBar />
 
+      <div className="sticky bottom-5">
+        <SearchBar />
       </div>
-    
     </div>
   );
 };
