@@ -1,28 +1,58 @@
 // src/components/Cart.jsx
 
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { FaTrashAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { RoomContext } from '../auth/Userprovider';
+
 
 const Cart = () => {
-  const { cartItems, removeFromCart, clearCart } = useCart();
-  const navigate = useNavigate();
+  const [cartItems, setCartItems] = useState({});
+  const [rooms, setRooms] = useState([]);
+  const { fetchRooms } = useContext(RoomContext);
 
-  const totalAmount = cartItems.reduce((acc, item) => acc + item.bookingDetails.totalPrice, 0);
-
-  const handleProceedToCheckout = () => {
-    if (cartItems.length === 0) {
-      alert('Your cart is empty.');
-      return;
+  useEffect(() => {
+    // Fetch rooms from sessionStorage
+    const rooms = sessionStorage.getItem('rooms');
+    if (rooms) {
+      setRooms(JSON.parse(rooms));
     }
-    // Navigate to booking confirmation or checkout page
-    navigate('/checkout', { state: { cartItems, totalAmount } });
-  };
+    else {
+      fetchRooms();
+    }
+  }, []);
+  
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/getCart`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include"
+        });
+
+        const data = await response.json();
+        console.log(data);
+        setCartItems(data.cart);
+        
+      } catch (error) {
+        console.error("Error Fetching Cart Items", error);
+      }
+    };
+    fetchCart();
+  }, []);
+  
+  // const totalAmount = cartItems.reduce((acc, item) => acc + item.bookingDetails.totalPrice, 0);
+  // const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const totalAmount = 0;
 
   return (
     <div className="container mx-auto px-4 py-12 lg:py-24">
-      <h1 className="text-3xl lg:text-4xl font-bold mb-6 text-gray-800">Your Cart</h1>
+      {/* <h1 className="text-3xl lg:text-4xl font-bold mb-6 text-gray-800">Your Cart</h1>
 
       {cartItems.length === 0 ? (
         <p className="text-gray-700">Your cart is empty.</p>
@@ -65,7 +95,7 @@ const Cart = () => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
