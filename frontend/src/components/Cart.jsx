@@ -9,7 +9,6 @@ const Cart = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch rooms from sessionStorage or fallback to context
     const storedRooms = sessionStorage.getItem('rooms');
     if (storedRooms) {
       setRooms(JSON.parse(storedRooms));
@@ -31,7 +30,6 @@ const Cart = () => {
 
         const data = await response.json();
         if (data.cart) {
-          // Enrich cart with room details from session storage
           const enrichedCart = data.cart.map((item) => {
             const roomDetails = rooms.find((room) => room.roomType === item.roomType);
             return {
@@ -49,7 +47,7 @@ const Cart = () => {
     fetchCart();
   }, [rooms, fetchRooms]);
 
-  const removeFromCart = async (roomId) => {
+  const removeFromCart = async (roomType) => {
     try {
       const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/removeFromCart`, {
         method: 'POST',
@@ -57,11 +55,11 @@ const Cart = () => {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ roomId }),
+        body: JSON.stringify({ roomType }),
       });
 
       if (response.ok) {
-        setCartItems((prev) => prev.filter((item) => item.room.id !== roomId));
+        setCartItems((prev) => prev.filter((item) => item.room.roomType !== roomType));
       } else {
         console.error('Failed to remove item from cart.');
       }
@@ -94,7 +92,11 @@ const Cart = () => {
     navigate('/checkout');
   };
 
-  const totalAmount = cartItems.reduce((acc, item) => acc + item.price, 0);
+  const totalAmount = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+
   return (
     <div className="container mx-auto px-4 py-12 lg:py-24">
       <h1 className="text-3xl lg:text-4xl font-bold mb-6 text-gray-800">Your Cart</h1>
@@ -104,17 +106,30 @@ const Cart = () => {
       ) : (
         <div className="space-y-6">
           {cartItems.map((item, index) => (
-            <div key={index} className="flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-sm">
+            <div
+              key={index}
+              className="flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-sm"
+            >
               <div className="flex items-center">
                 <img
                   src={import.meta.env.VITE_CLOUDINARY_CLOUD + item.room.coverImage}
-                  alt={item.room.name || 'Room'}
+                  alt={item.room.roomName || 'Room'}
                   className="w-24 h-16 object-cover rounded-md mr-4"
                 />
                 <div>
                   <h2 className="text-xl font-semibold">{item.room.roomName || 'Room'}</h2>
+                  <p className="text-gray-600">₹{(item.price).toLocaleString()} per room</p>
                   <p className="text-gray-600">
-                    ₹{(item.price).toLocaleString()}
+                    Quantity: {item.quantity}
+                  </p>
+                  <p className="text-gray-600">
+                    Check-in: {new Date(item.checkIn).toLocaleDateString()}
+                  </p>
+                  <p className="text-gray-600">
+                    Check-out: {new Date(item.checkOut).toLocaleDateString()}
+                  </p>
+                  <p className="text-gray-700 font-semibold">
+                    Total Price: ₹{(item.price * item.quantity).toLocaleString()}
                   </p>
                 </div>
               </div>

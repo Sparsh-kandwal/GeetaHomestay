@@ -69,6 +69,43 @@ export const getCart = async (req, res) => {
     }
 };
 
+
+export const changeQuantity = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { roomType, quantity, checkIn, checkOut } = req.body;
+    if (!roomType || !quantity || !checkIn || !checkOut) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const availability = await calculateRoomAvailability(checkInDate, checkOutDate);
+    if (!availability[roomType]) {
+      return res.status(404).json({ message: 'Invalid room type provided.' });
+    }
+    const availableRooms = availability[roomType].availableRooms;
+    if (quantity > availableRooms) {
+      return res.status(400).json({
+        message: `Only ${availableRooms} rooms are available for the selected dates.`,
+      });
+    }
+    const cartItem = await Cart.findOne({ userId, roomType, checkIn, checkOut });
+    if (!cartItem) {
+      return res.status(404).json({ message: 'Cart item not found for the given criteria.' });
+    }
+    cartItem.quantity = quantity;
+    await cartItem.save();
+    return res.status(200).json({ 
+      message: 'Room quantity updated successfully.',
+      cartItem 
+    });
+  } catch (error) {
+    console.error('Error updating room quantity:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+
 export const updateCart = async (req, res) => {
     try {
         const userId = req.user.id;
