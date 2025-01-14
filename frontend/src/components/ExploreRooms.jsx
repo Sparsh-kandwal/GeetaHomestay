@@ -12,19 +12,22 @@ const ExploreRooms = () => {
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
   const [maxPriceInput, setMaxPriceInput] = useState(4000);
   const [guestCountInput, setGuestCountInput] = useState('');
-  const storedRooms = sessionStorage.getItem('rooms');
-  const [rooms, setRooms] = useState(JSON.parse(storedRooms));
   const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
-  const { fetchRooms } = useContext(RoomContext);
+  // const [rooms, setRooms] = useState([]);
+
+
+  const { fetchRooms, rooms, setRooms, roomsLoading } = useContext(RoomContext);
 
   useEffect(() => {
-    if (!storedRooms) {
+    const storedRooms = sessionStorage.getItem('rooms');
+    if (storedRooms) {
+      setRooms(JSON.parse(storedRooms));
+    } 
+    else {
       fetchRooms();
-      setRooms(JSON.parse(sessionStorage.getItem('rooms')));
     }
-  }, []);
-
+  }, [fetchRooms]);
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {
       // 2. Match selected amenities if any are selected
@@ -79,8 +82,11 @@ const ExploreRooms = () => {
 
       return matchesAmenities && matchesPrice && matchesGuests;
     });
-  }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput]);
+  }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput, rooms]);
   // States for filter inputs
+  if (roomsLoading) {
+    return <div>Loading...</div>;
+  }
   return (
     <div className="mt-12 min-h-screen w-full bg-gray-50 py-8 px-8">
       <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">
