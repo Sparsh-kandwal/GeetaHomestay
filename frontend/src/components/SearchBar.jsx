@@ -68,7 +68,7 @@ const SearchBar = ({setAvailableRooms}) => {
   };
 
   return (
-    <div className="flex flex-row items-center mt-5 gap-3 justify-center p-4 border border-gray-300 rounded-lg bg-white shadow-md w-[95%] md:w-fit mx-auto sticky bottom-5">
+    <div className="flex flex-row items-center mt-5 gap-3 justify-center p-4 border border-gray-300 rounded-lg bg-white shadow-md w-[90%] md:w-fit mx-auto sticky bottom-5">
       {/* Check-in Date */}
       <div className="flex flex-col w-[40%] md:w-full">
         <label className="text-gray-700 text-sm mb-1">Check-in</label>

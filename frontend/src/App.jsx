@@ -52,6 +52,7 @@ const AnimatedRoutes = () => {
             <Route path="/rooms/:id" element={<RoomDetails />} />
             <Route path="/booking-confirmation" element={<BookingConfirmation />} />
             <Route path="/cart" element={<Cart />} />
+            
           </Routes>
         </div>
       </CSSTransition>

@@ -159,7 +159,7 @@ const RoomCard = ({ room }) => {
           <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-sm mb-3">
             <FaBed className="text-purple-500" />
             <span className="font-medium">
-              {availableRooms} Rooms Available
+              {availableRooms || totalRooms} Rooms Available
             </span>
           </div>
         </div>

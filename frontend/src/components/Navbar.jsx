@@ -137,7 +137,12 @@ const Navbar = () => {
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full cursor-pointer"
                 onClick={() => setShowLogoutMenu((prev) => !prev)}
+                onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.src = `/static/user.png`; 
+                }}
               />
+
               {showLogoutMenu && (
                 <div className="absolute right-0 mt-5 w-40 bg-white rounded-lg shadow-lg z-50">
                   <ul className="py-2">

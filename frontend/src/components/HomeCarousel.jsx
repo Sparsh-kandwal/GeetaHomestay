@@ -37,6 +37,7 @@ const HomeCarousel = () => {
     <div className="relative md:w-[800px] h-96 md:h-[500px] ">
       <img
         src={currentItem.image}
+        alt={`${currentItem.title} Image`}
         className="w-full h-full object-cover"
         loading="lazy"
       />
