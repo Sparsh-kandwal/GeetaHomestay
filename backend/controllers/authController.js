@@ -106,7 +106,11 @@ export const googleAuth = async (req, res) => {
 
 export const getMyprofile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }

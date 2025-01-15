@@ -55,7 +55,6 @@ const ExploreRooms = () => {
     } 
   }, [availableRooms]);
   
-
   // Filter rooms based on inputs
   useEffect(() => {
     const filterRooms = () => {
@@ -66,7 +65,6 @@ const ExploreRooms = () => {
               return false;
             }
         }
-
         let matchesAmenities = true;
         if (selectedAmenitiesInput.length > 0) {
           const bed2 = room.roomName.trim().toLowerCase().includes('double');
@@ -111,8 +109,6 @@ const ExploreRooms = () => {
         const matchesGuests = guestCountInput
           ? room.maxAdults >= Number(guestCountInput)
           : true;
-
-
         return matchesAmenities && matchesPrice && matchesGuests;
       });
     };

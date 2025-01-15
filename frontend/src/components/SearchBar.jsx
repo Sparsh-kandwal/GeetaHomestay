@@ -56,6 +56,7 @@ const SearchBar = ({setAvailableRooms}) => {
       const data = await response.json();
   
       if (data.success) {
+        console.log(data.availability)
         setAvailableRooms(data.availability)
       } else {
         alert('Failed to fetch room availability.');
