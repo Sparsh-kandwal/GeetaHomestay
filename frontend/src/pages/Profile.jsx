@@ -29,7 +29,7 @@ const Profile = () => {
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/auth/profile`,
           {
-            method: "GET",
+            method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
