@@ -18,7 +18,7 @@ router.get('/getCart',  verifyToken, getCart);
 router.post('/updateCart', verifyToken, updateCart);
 router.post('/changeQuantity', verifyToken, changeMember);
 router.post('/deleteFromCart', verifyToken, deletefromCart);
-router.post('/checkAvailability', getRoomAvailability);
+router.post('/checkAvailability', verifyToken, getRoomAvailability);
 router.get('/allRooms', getAllRooms)
 router.get('/testimonials',getAllTestimonials )
 export default router;
