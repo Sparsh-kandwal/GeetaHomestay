@@ -133,21 +133,34 @@ const Navbar = () => {
             // Display user's profile image
             <div className="relative" ref={logoutMenuRef}>
               <img
-                src={user.photo}
+                src={user.photo || `/static/user.png`}
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full cursor-pointer"
                 onClick={() => setShowLogoutMenu((prev) => !prev)}
               />
               {showLogoutMenu && (
-                <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg z-50">
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                  >
-                    Logout
-                  </button>
+                <div className="absolute right-0 mt-5 w-40 bg-white rounded-lg shadow-lg z-50">
+                  <ul className="py-2">
+                    <li>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      >
+                        Logout
+                      </button>
+                    </li>
+                    <li>
+                      <Link
+                        to="/profile"
+                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      >
+                        Profile
+                      </Link>
+                    </li>
+                  </ul>
                 </div>
               )}
+
             </div>
           ) : (
             // Show login button if not logged in

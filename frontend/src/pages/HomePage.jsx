@@ -51,10 +51,10 @@ const HomePage = () => {
           backgroundAttachment: 'fixed',
         }}
       >
-        <div className="title absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white font-extrabold drop-shadow-md">
+        <div className="title absolute top-[40%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white font-extrabold drop-shadow-md">
           <div className="flex flex-col items-center gap-6">
             {/* Title */}
-            <span className="text-5xl md:text-7xl lg:text-9xl text-center">
+            <span className="text-7xl font-merriweather md:text-7xl lg:text-9xl text-center">
               Geeta HomeStay
             </span>
 
@@ -66,14 +66,15 @@ const HomePage = () => {
                 }
                 className="bg-white text-blue-600 px-6 py-2 rounded-md border border-blue-600 hover:bg-blue-50 transition duration-300 flex items-center"
               >
-                <MapPin className="w-4 h-4 mr-2" />
+                <MapPin className="w-6 h-6 mr-2" />
                 Locate Us
               </button>
+
               <Link
                 to="/rooms"
                 className="bg-white text-green-600 px-6 py-2 rounded-md border border-green-600 hover:bg-green-50 transition duration-300 flex items-center"
               >
-                <Calendar className="w-4 h-4 mr-2" />
+                <Calendar className="w-6 h-6 mr-2" />
                 Book Now
               </Link>
             </div>
