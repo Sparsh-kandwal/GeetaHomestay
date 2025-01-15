@@ -2,22 +2,24 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { UserContext } from "../auth/Userprovider";
+import { FaUserCircle } from "react-icons/fa";
+import { Transition } from "@headlessui/react";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { user, setUser, isLoading: userLoading } = useContext(UserContext);
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
-    photo: "",
-    // Add other fields as necessary
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // Ensure user is authenticated
     if (!user) {
       setError("You must be logged in to view your profile.");
       setIsLoading(false);
@@ -33,7 +35,7 @@ const Profile = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            credentials: "include", // Assuming you're using cookies for authentication
+            credentials: "include",
           }
         );
 
@@ -45,8 +47,6 @@ const Profile = () => {
         setProfileData({
           name: data.user.name || "",
           email: data.user.email || "",
-          photo: data.user.photo || "",
-          // Populate other fields as necessary
         });
       } catch (err) {
         setError(err.message || "An error occurred while fetching profile data.");
@@ -62,16 +62,6 @@ const Profile = () => {
     setProfileData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    // Implement file upload logic if necessary
-    // For simplicity, we'll handle photo URLs
-    setProfileData((prev) => ({
-      ...prev,
-      photo: URL.createObjectURL(file),
     }));
   };
 
@@ -99,7 +89,7 @@ const Profile = () => {
       }
 
       const data = await response.json();
-      setUser(data.user); // Update user context with new data
+      setUser(data.user);
       setSuccess("Profile updated successfully!");
     } catch (err) {
       setError(err.message || "An error occurred while updating profile.");
@@ -110,115 +100,200 @@ const Profile = () => {
 
   if (isLoading || userLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="w-8 h-8 border-4 border-indigo-700 border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex justify-center items-center h-screen bg-gray-50">
+        <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !success) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-red-500">{error}</p>
+      <div className="flex justify-center items-center h-screen bg-gray-50">
+        <p className="text-red-500 text-lg">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-8 mt-20">
-      <h2 className="text-2xl font-semibold mb-6">Your Profile</h2>
-      {success && <p className="text-green-500 mb-4">{success}</p>}
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-lg bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-      >
-        {/* Profile Photo */}
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Profile Photo
-          </label>
-          <div className="flex items-center">
-            {profileData.photo ? (
-              <img
-                src={profileData.photo}
-                alt="Profile"
-                className="w-16 h-16 rounded-full mr-4"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-gray-300 mr-4 flex items-center justify-center text-white">
-                {/* Placeholder avatar */}
-                {profileData.name ? profileData.name.charAt(0) : "U"}
-              </div>
-            )}
+    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-purple-100 flex items-center justify-center p-6">
+      <div className="w-full max-w-md bg-white shadow-xl rounded-lg p-8">
+        <h2 className="text-3xl font-semibold text-indigo-600 mb-6 text-center">
+          Your Profile
+        </h2>
+
+        <div className="flex justify-center mb-6">
+          {user.photo ? (
+            <img
+              src={user.photo}
+              alt="User Profile"
+              className="w-24 h-24 rounded-full object-cover shadow-md"
+            />
+          ) : (
+            <FaUserCircle className="w-24 h-24 text-gray-400" />
+          )}
+        </div>
+
+        {/* Success Message */}
+        <Transition
+          show={success !== ""}
+          enter="transition-opacity duration-500"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="transition-opacity duration-500"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div
+            className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
+            <strong className="font-bold">Success! </strong>
+            <span className="block sm:inline">{success}</span>
+            <button
+              onClick={() => setSuccess("")}
+              className="absolute top-0 bottom-0 right-0 px-4 py-3"
+            >
+              <svg
+                className="fill-current h-6 w-6 text-green-500"
+                role="button"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <title>Close</title>
+                <path d="M14.348 5.652a.5.5 0 00-.707 0L10 9.293 6.36 5.652a.5.5 0 10-.707.707L9.293 10l-3.64 3.64a.5.5 0 00.707.707L10 10.707l3.64 3.64a.5.5 0 00.707-.707L10.707 10l3.64-3.64a.5.5 0 000-.708z" />
+              </svg>
+            </button>
+          </div>
+        </Transition>
+
+        {/* Error Message */}
+        <Transition
+          show={error !== ""}
+          enter="transition-opacity duration-500"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="transition-opacity duration-500"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div
+            className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
+            <strong className="font-bold">Error! </strong>
+            <span className="block sm:inline">{error}</span>
+            <button
+              onClick={() => setError("")}
+              className="absolute top-0 bottom-0 right-0 px-4 py-3"
+            >
+              <svg
+                className="fill-current h-6 w-6 text-red-500"
+                role="button"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <title>Close</title>
+                <path d="M14.348 5.652a.5.5 0 00-.707 0L10 9.293 6.36 5.652a.5.5 0 10-.707.707L9.293 10l-3.64 3.64a.5.5 0 00.707.707L10 10.707l3.64 3.64a.5.5 0 00.707-.707L10.707 10l3.64-3.64a.5.5 0 000-.708z" />
+              </svg>
+            </button>
+          </div>
+        </Transition>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name */}
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Name<span className="text-red-500">*</span>
+            </label>
             <input
-              type="file"
-              name="photo"
-              accept="image/*"
-              onChange={handlePhotoChange}
-              className="text-sm text-gray-600"
+              type="text"
+              name="name"
+              id="name"
+              value={profileData.name}
+              onChange={handleChange}
+              required
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition"
+              placeholder="Your Name"
             />
           </div>
-        </div>
 
-        {/* Name */}
-        <div className="mb-4">
-          <label
-            htmlFor="name"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Name
-          </label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            value={profileData.name}
-            onChange={handleChange}
-            required
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder="Your Name"
-          />
-        </div>
+          {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Email<span className="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              value={profileData.email}
+              onChange={handleChange}
+              required
+              disabled
+              className="mt-1 block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md cursor-not-allowed text-gray-500"
+              placeholder="Email Address"
+            />
+          </div>
 
-        {/* Email */}
-        <div className="mb-6">
-          <label
-            htmlFor="email"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            value={profileData.email}
-            onChange={handleChange}
-            required
-            disabled // Assuming email is not editable
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight bg-gray-200 cursor-not-allowed"
-            placeholder="Email Address"
-          />
-        </div>
+          {/* Update Profile Button */}
+          <div>
+            <button
+              type="submit"
+              disabled={isUpdating}
+              className={`w-full flex justify-center items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
+                isUpdating
+                  ? "bg-indigo-400 cursor-not-allowed"
+                  : "bg-indigo-600 hover:bg-indigo-700"
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors`}
+            >
+              {isUpdating ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 mr-3 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"
+                    ></path>
+                  </svg>
+                  Updating...
+                </>
+              ) : (
+                "Update Profile"
+              )}
+            </button>
+          </div>
 
-        {/* Add more fields as necessary */}
-
-        <div className="flex items-center justify-between">
-          <button
-            type="submit"
-            disabled={isUpdating}
-            className={`${
-              isUpdating
-                ? "bg-indigo-300 cursor-not-allowed"
-                : "bg-indigo-700 hover:bg-indigo-800"
-            } text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
-          >
-            {isUpdating ? "Updating..." : "Update Profile"}
-          </button>
-        </div>
-
-        {error && <p className="text-red-500 mt-4">{error}</p>}
-      </form>
+          {/* Booking History Button */}
+          <div>
+            <button
+              type="button"
+              onClick={() => navigate("/booking-history")}
+              className="w-full flex justify-center items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+            >
+              View Booking History
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
