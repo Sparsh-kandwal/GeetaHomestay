@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
-import { googleAuth } from "./api";
+import { googleAuth } from "../auth/api";
 import { UserContext } from "../auth/Userprovider";
 
 const Navbar = () => {
@@ -15,20 +15,20 @@ const Navbar = () => {
 
   const responseGoogle = async (authResult) => {
     try {
-      console.log("Auth result received:", authResult);
-      if (authResult.code) {
-        const result = await googleAuth(authResult.code);
-        console.log("Backend response:", result);
-        if (result.data?.user) {
-          setUser(result.data.user);
+        console.log("Auth result received:", authResult);
+        if (authResult.code) {
+            const result = await googleAuth(authResult.code);
+            console.log("Backend response:", result);
+            if (result.data?.user) {
+                setUser(result.data.user);
+            } else {
+                console.error("User data missing in backend response");
+                alert("Error while processing login.");
+            }
         } else {
-          console.error("User data missing in backend response");
-          alert("Error while processing login.");
+            console.error("No authorization code in auth result:", authResult);
+            alert("Google Login failed. Please try again.");
         }
-      } else {
-        console.error("No authorization code in auth result:", authResult);
-        alert("Google Login failed. Please try again.");
-      }
     } catch (error) {
       console.error("Error during Google Login:", error);
       alert("Error during Google Login...");

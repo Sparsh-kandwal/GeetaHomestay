@@ -13,23 +13,42 @@ const ExploreRooms = () => {
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
   const [maxPriceInput, setMaxPriceInput] = useState(4000);
   const [guestCountInput, setGuestCountInput] = useState('');
+  const [availableRooms, setAvailableRooms] = useState(['First'])
   const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
+  let [rooms, SetRooms] = useState([])
 
-  const { fetchRooms, rooms, setRooms, roomsLoading } = useContext(RoomContext);
+  const { fetchRooms, roomsLoading } = useContext(RoomContext);
 
   useEffect(() => {
     const storedRooms = sessionStorage.getItem('rooms');
     if (storedRooms) {
-      setRooms(JSON.parse(storedRooms));
+      const parsedRooms = JSON.parse(storedRooms);
+      SetRooms(parsedRooms);
     } else {
       fetchRooms();
     }
   }, [fetchRooms]);
 
   const filteredRooms = useMemo(() => {
+    console.log(availableRooms)
+
+    
     return rooms.filter((room) => {
+
+      if(!availableRooms[0] == 'First'){
+        if (!availableRooms[room.roomType]) {
+          return false; 
+        }
+  
+        room.price = availableRooms[room.roomType].price
+        room.totalRooms = availableRooms[room.roomType].availableRooms
+  
+      }
+
+     
       let matchesAmenities = true;
+
 
       if (selectedAmenitiesInput.length > 0) {
         const bed2 = room.roomName.trim().toLowerCase().includes('double');
@@ -79,12 +98,12 @@ const ExploreRooms = () => {
 
       return matchesAmenities && matchesPrice && matchesGuests;
     });
-  }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput, rooms]);
+  }, [availableRooms, selectedAmenitiesInput, maxPriceInput, guestCountInput, rooms]);
 
   // States for filter inputs
   return (
     <div className="mt-12 min-h-screen w-full bg-gray-50 py-8 px-8">
-      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">
+      <h2 className="text-5xl font-semibold text-center text-gray-800 mb-10">
         Explore Our Rooms
       </h2>
 
@@ -131,7 +150,6 @@ const ExploreRooms = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <RoomCard room={room} />
-
                 </motion.div>
               ))
             ) : (
@@ -151,10 +169,12 @@ const ExploreRooms = () => {
         </div>
       </div>
 
-      <div className="sticky bottom-5">
-        <SearchBar />
-      </div>
+      
+      <SearchBar setAvailableRooms= {setAvailableRooms} />
+
+     
     </div>
+
   );
 };
 
