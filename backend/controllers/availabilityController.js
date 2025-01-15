@@ -2,7 +2,7 @@ import { calculateRoomAvailability } from '../utils/roomAvailability.js';
 
 const getRoomAvailability = async (req, res) => {
     try {
-        const userId = req?.user.id;
+        const userId = req.user?.id;
         const { checkIn, checkOut } = req.body;
         let availability;
         if (checkIn && checkOut) {

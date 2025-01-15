@@ -5,7 +5,10 @@ import Cart_item from '../models/cart.js';
 
 const createOrder = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
         const cartItems = await Cart_item.find({ userId });
 
         if (!cartItems || cartItems.length === 0) {
