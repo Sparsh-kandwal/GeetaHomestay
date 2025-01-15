@@ -173,20 +173,6 @@ const RoomDetails = () => {
       return;
     }
 
-    // Implement booking logic here (e.g., backend API call)
-    // For now, navigate to a confirmation page
-    // navigate('/booking-confirmation', { 
-    //   state: { 
-    //     room, 
-    //     bookingDetails: { 
-    //       checkInDate, 
-    //       checkOutDate, 
-    //       guests, 
-    //       roomCount, 
-    //       totalPrice: calculateTotalPrice() 
-    //     } 
-    //   } 
-    // });
 
     toast.success('Booking confirmed!');
   };

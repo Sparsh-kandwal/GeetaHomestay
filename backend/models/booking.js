@@ -4,7 +4,7 @@ import User from './user.js';
 const booking = new mongoose.Schema ({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: User, required: true},   // Reference to the user who made the booking
     roomType: {type: String, required: true},   // Room type booked
-    Members: {type: Number, required: true, default: 1},   // Number of adults booked
+    members: {type: Number, required: true, default: 1},   // Number of adults booked
     checkIn: {type: Date, required: true},   // Check-in date
     checkOut: {type: Date, required: true},   // Check-out date
     roomsBooked: {type: Number, required: true},   // Number of rooms booked

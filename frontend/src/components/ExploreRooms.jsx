@@ -11,7 +11,7 @@ const ExploreRooms = () => {
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
   const [maxPriceInput, setMaxPriceInput] = useState(4000);
   const [guestCountInput, setGuestCountInput] = useState('');
-  const [availableRooms, setAvailableRooms] = useState({});
+  const [availableRooms, setAvailableRooms] = useState({first: true});
   const [roomAvailLoading, setRoomAvailLoading] = useState(true);
   const [filteredRooms, setFilteredRooms] = useState([]);
   const [rooms, setRooms] = useState([]);
@@ -55,11 +55,16 @@ const ExploreRooms = () => {
     } 
   }, [availableRooms]);
   
-
   // Filter rooms based on inputs
   useEffect(() => {
     const filterRooms = () => {
       return rooms.filter((room) => {
+
+        if(!availableRooms.first){
+            if(!room.availableRooms){
+              return false;
+            }
+        }
         let matchesAmenities = true;
         if (selectedAmenitiesInput.length > 0) {
           const bed2 = room.roomName.trim().toLowerCase().includes('double');
@@ -104,9 +109,7 @@ const ExploreRooms = () => {
         const matchesGuests = guestCountInput
           ? room.maxAdults >= Number(guestCountInput)
           : true;
-        const isAvailable = room.availableRooms > 0;
-
-        return matchesAmenities && matchesPrice && matchesGuests && isAvailable;
+        return matchesAmenities && matchesPrice && matchesGuests;
       });
     };
 
@@ -118,6 +121,9 @@ const ExploreRooms = () => {
       <h2 className="text-5xl font-semibold text-center text-gray-800 mb-10">
         Explore Our Rooms
       </h2>
+
+      {/* <SearchBar setAvailableRooms= {setAvailableRooms}/> */}
+
 
       <div className="flex flex-col lg:flex-row gap-8">
         <SearchFilter

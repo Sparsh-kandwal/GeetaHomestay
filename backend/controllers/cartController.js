@@ -5,7 +5,10 @@ import Room from "../models/room.js";
 export const addToCart = async (req, res) => {
     try {
         const { members, checkIn, checkOut, roomType, quantity } = req.body;
-        const userId = req.user.id;
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
         const availability = await calculateRoomAvailability(checkIn, checkOut, userId);
         const room = await Room.findOne({ roomType });
         if (room.maxAdults < members) {
@@ -43,7 +46,10 @@ export const addToCart = async (req, res) => {
 
 export const getCart = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
         const cartItems = await Cart_item.find({ userId });
         const removed = [];
         const available = [];
@@ -121,7 +127,10 @@ export const getCart = async (req, res) => {
 
 export const changeMember = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
     const { roomType, members, checkIn, checkOut } = req.body;
     if (!roomType || !checkIn || !checkOut) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -149,7 +158,10 @@ export const changeMember = async (req, res) => {
 
 export const deletefromCart = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
         const { roomType, checkIn, checkOut } = req.body;
         const cartItem = await Cart_item.findOne({ userId, roomType, checkIn, checkOut });
         if (!cartItem) {
@@ -165,9 +177,11 @@ export const deletefromCart = async (req, res) => {
 
 export const updateCart = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user?.id;
         const { updates } = req.body; // Expecting an array of updates with roomType, quantity, checkIn, and checkOut
-
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
         const updatedItems = [];
         const notUpdated = [];
         const deletedItems = [];

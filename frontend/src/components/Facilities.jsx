@@ -13,7 +13,7 @@ const Facilities = () => {
     <div>
       <section  className="bg-gray-100 py-16 scroll-mt-16">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-8 text-center">Our Facilities</h2>
+        <h2 className="text-3xl text-[#3a328c] font-bold mb-8 text-center">Our Facilities</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
           {facilities.map((facility, index) => (
             <div key={index} className="bg-white rounded-lg shadow-md p-4 text-center">

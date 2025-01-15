@@ -5,7 +5,7 @@ export const verifyToken = (req, res, next) => {
     const secretKey = process.env.JWT_SECRET;
 
     if (!token) {
-        return res.status(403).json({ message: 'Access denied, no token provided' });
+        return next();
     }
 
     try {

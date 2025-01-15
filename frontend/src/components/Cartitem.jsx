@@ -32,15 +32,7 @@ const CartItem = ({ item, isRemoved = false, setAvailableItems }) => (
                     {`${item.removedQuantity} room${item.removedQuantity > 1 ? 's' : ''} removed - No longer available`}
                 </div>
             )}
-            {!isRemoved && (
-                <button
-                    onClick={() => removeFromCart(item.roomType, item.checkIn, item.checkOut, setAvailableItems)}
-                    className="absolute top-4 right-4 text-blue-600 hover:text-blue-800 focus:outline-none transition"
-                    aria-label="Remove from cart"
-                >
-                    <FaTrashAlt className="w-5 h-5" />
-                </button>
-            )}
+            
             <div className="flex flex-col md:flex-row items-center gap-6 w-full">
                 <img
                     src={import.meta.env.VITE_CLOUDINARY_CLOUD + item.room.coverImage}
@@ -64,11 +56,30 @@ const CartItem = ({ item, isRemoved = false, setAvailableItems }) => (
                             <p className="text-gray-600">Check-out: {new Date(item.checkOut).toLocaleDateString()}</p>
                         </div>
                     </div>
+                    
+
                     {!isRemoved && (
-                        <p className="text-xl font-semibold text-blue-700 mt-2">
+                        <div className='flex items-center justify-between'>
+
+                       
+                            <p className="text-xl font-semibold text-blue-700 mt-2">
                             Total: ₹{(item.price * item.quantity).toLocaleString()}
-                        </p>
+                            </p>
+
+                            <button
+                            onClick={() => removeFromCart(item.roomType, item.checkIn, item.checkOut, setAvailableItems)}
+                            className="md:absolute md:right-6 md:top-6 text-blue-600 hover:text-blue-800 focus:outline-none transition"
+                            aria-label="Remove from cart"
+                            >
+                            <FaTrashAlt className="w-5 h-5" />
+                            </button>
+                   
+
+                        </div>
                     )}
+
+                        
+
                 </div>
             </div>
         </div>

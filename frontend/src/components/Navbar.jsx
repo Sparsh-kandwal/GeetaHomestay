@@ -15,20 +15,20 @@ const Navbar = () => {
 
   const responseGoogle = async (authResult) => {
     try {
-        console.log("Auth result received:", authResult);
-        if (authResult.code) {
-            const result = await googleAuth(authResult.code);
-            console.log("Backend response:", result);
-            if (result.data?.user) {
-                setUser(result.data.user);
-            } else {
-                console.error("User data missing in backend response");
-                alert("Error while processing login.");
-            }
+      console.log("Auth result received:", authResult);
+      if (authResult.code) {
+        const result = await googleAuth(authResult.code);
+        console.log("Backend response:", result);
+        if (result.data?.user) {
+          setUser(result.data.user);
         } else {
-            console.error("No authorization code in auth result:", authResult);
-            alert("Google Login failed. Please try again.");
+          console.error("User data missing in backend response");
+          alert("Error while processing login.");
         }
+      } else {
+        console.error("No authorization code in auth result:", authResult);
+        alert("Google Login failed. Please try again.");
+      }
     } catch (error) {
       console.error("Error during Google Login:", error);
       alert("Error during Google Login...");
@@ -84,9 +84,8 @@ const Navbar = () => {
 
   return (
     <header
-      className={`flex justify-between items-center h-[65px] px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
-        isHomePage ? "" : "bg-indigo-700 shadow-lg"
-      }`}
+      className={`flex justify-between items-center h-[65px] px-8 fixed top-0 w-full z-50 transition-all duration-300 ${isHomePage ? "" : "bg-indigo-700 shadow-lg"
+        }`}
     >
       {/* Logo */}
       <h1 className="text-3xl text-white">
@@ -106,9 +105,8 @@ const Navbar = () => {
 
       {/* Navigation Menu */}
       <nav
-        className={`fixed top-0 right-0 h-full bg-indigo-700 p-8 transition-transform duration-300 ${
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
-        } md:static md:flex md:bg-transparent md:h-auto md:translate-x-0`}
+        className={`fixed top-0 right-0 h-full bg-indigo-700 p-8 transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "translate-x-full"
+          } md:static md:flex md:bg-transparent md:h-auto md:translate-x-0`}
       >
         <button
           className="block md:hidden text-white text-2xl mb-6"
@@ -123,14 +121,13 @@ const Navbar = () => {
               <Link
                 to={`/${item.toLowerCase()}`}
                 className="text-lg font-semibold text-white hover:bg-indigo-600 px-4 py-2 rounded-full transition duration-300"
-                onClick={() => setIsMenuOpen(false)} // Close menu on link click
               >
                 {item}
               </Link>
             </li>
           ))}
 
-          {/* User Login/Logout Menu */}
+          {/* Add the user login/logout button as another list item */}
           <li>
             {isLoading ? (
               <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -138,36 +135,49 @@ const Navbar = () => {
               // Display user's profile image
               <div className="relative" ref={logoutMenuRef}>
                 <img
-                  src={user.photo}
+                  src={user.photo || `/static/user.png`}
                   alt="User Avatar"
                   className="w-8 h-8 rounded-full cursor-pointer"
                   onClick={() => setShowLogoutMenu((prev) => !prev)}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `/static/user.png`;
+                  }}
                 />
+
                 {showLogoutMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
-                    <Link
-                      to="/profile"
-                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      onClick={() => setShowLogoutMenu(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      to="/booking-history"
-                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      onClick={() => setShowLogoutMenu(false)}
-                    >
-                      Booking History
-                    </Link>
-                  
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                    >
-                      Logout
-                    </button>
+                  <div className="absolute right-0 mt-5 w-40 bg-white rounded-lg shadow-lg z-50">
+                    <ul className="py-2">
+                    <li>
+                        <Link
+                          to="/profile"
+                          className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        >
+                          Profile
+                        </Link>
+                      </li>
+                      <li>
+                      <Link
+                        to="/booking-history"
+                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setShowLogoutMenu(false)}
+                      >
+                        Booking History
+                      </Link>
+                      </li>
+                      <li>
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        >
+                          Logout
+                        </button>
+                      </li>
+                    
+                    </ul>
                   </div>
                 )}
+
               </div>
             ) : (
               // Show login button if not logged in
@@ -180,6 +190,8 @@ const Navbar = () => {
             )}
           </li>
         </ul>
+
+
       </nav>
     </header>
   );

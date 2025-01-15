@@ -23,17 +23,15 @@ import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
 const App = () => {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId= {import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <CartProvider>
-        <DateProvider>
-          <UserProvider>
-            <Router>
-              <Navbar />
-              <AnimatedRoutes />
-              <Footer />
-              <ToastContainer />
-            </Router>
-          </UserProvider>
+        <DateProvider> 
+          <Router>
+            <Navbar />
+            <AnimatedRoutes />
+            <Footer />
+            <ToastContainer />
+          </Router>
         </DateProvider>
       </CartProvider>
     </GoogleOAuthProvider>

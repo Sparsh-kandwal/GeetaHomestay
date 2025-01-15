@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 
 const Footer = () => {
   return (
@@ -14,7 +14,6 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><a href="/" className="hover:text-gray-300">Home</a></li>
               <li><a href="./rooms" className="hover:text-gray-300">Explore Rooms</a></li>
-
             </ul>
           </div>
 
@@ -22,15 +21,14 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-2">
-            <li className="text-sm"><strong>Email:</strong><a href="mailto:geetahomestaykaranprayag@gmail.com" > geetahomestaykaranprayag@gmail.com</a></li>
-            <li className="text-sm"><strong>Phone: </strong><a href="tel:+919756198989" className=" hover:underline">+91 9756198989</a></li>
-
-            <li className="text-sm"><strong>Address:</strong> Geeta HomeStay, near Petrol Pump, Main Market, Karanprayag, Chamoli, Uttarakhand (246444)</li>
+              <li className="text-sm"><strong>Email:</strong><a href="mailto:geetahomestaykaranprayag@gmail.com" className="hover:underline"> geetahomestaykaranprayag@gmail.com</a></li>
+              <li className="text-sm"><strong>Phone: </strong><a href="tel:+919756198989" className="hover:underline">+91 9756198989</a></li>
+              <li className="text-sm"><strong>Address:</strong> Geeta HomeStay, near Petrol Pump, Main Market, Karanprayag, Chamoli, Uttarakhand (246444)</li>
             </ul>
           </div>
           
           {/* Social Media Section */}
-          <div className="flex flex-col items-center">
+          <div className="text-xl font-semibold mb-4">
             <h3 className="text-xl font-semibold mb-4">Follow Us</h3>
             <div className="flex space-x-4">
               <a
@@ -41,7 +39,6 @@ const Footer = () => {
               >
                 <FaFacebookF size={24} /> {/* React Icon for Facebook */}
               </a>
-             
               <a
                 href="https://instagram.com"
                 target="_blank"
@@ -50,7 +47,6 @@ const Footer = () => {
               >
                 <FaInstagram size={24} /> {/* React Icon for Instagram */}
               </a>
-              
             </div>
           </div>
 
