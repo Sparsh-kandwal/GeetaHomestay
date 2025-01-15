@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
-import { googleAuth } from "./api";
+import { googleAuth } from "../auth/api";
 import { UserContext } from "../auth/Userprovider";
 
 const Navbar = () => {
@@ -16,7 +16,6 @@ const Navbar = () => {
 
   const responseGoogle = async (authResult) => {
     try {
-        console.log("Auth result received:", authResult);
         if (authResult.code) {
             const result = await googleAuth(authResult.code);
             console.log("Backend response:", result);
@@ -134,21 +133,39 @@ const Navbar = () => {
             // Display user's profile image
             <div className="relative" ref={logoutMenuRef}>
               <img
-                src={user.photo}
+                src={user.photo || `/static/user.png`}
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full cursor-pointer"
                 onClick={() => setShowLogoutMenu((prev) => !prev)}
+                onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.src = `/static/user.png`; 
+                }}
               />
+
               {showLogoutMenu && (
-                <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg z-50">
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                  >
-                    Logout
-                  </button>
+                <div className="absolute right-0 mt-5 w-40 bg-white rounded-lg shadow-lg z-50">
+                  <ul className="py-2">
+                    <li>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      >
+                        Logout
+                      </button>
+                    </li>
+                    <li>
+                      <Link
+                        to="/profile"
+                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      >
+                        Profile
+                      </Link>
+                    </li>
+                  </ul>
                 </div>
               )}
+
             </div>
           ) : (
             // Show login button if not logged in

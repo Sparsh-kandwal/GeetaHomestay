@@ -1,154 +1,119 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { FaTrashAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { RoomContext } from '../auth/Userprovider';
+import CartItem from './Cartitem'
+import OpacityLoader from './OpacityLoader';
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const { fetchRooms, rooms, setRooms } = useContext(RoomContext);
-  const navigate = useNavigate();
+    const [availableItems, setAvailableItems] = useState([]);
+    const [removedItems, setRemovedItems] = useState([]);
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const { fetchRooms, rooms, setRooms, roomsLoading } = useContext(RoomContext);
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    // Fetch rooms from sessionStorage or fallback to context
-    const storedRooms = sessionStorage.getItem('rooms');
-    if (storedRooms) {
-      setRooms(JSON.parse(storedRooms));
-    } else {
-      fetchRooms();
-    }
-  }, [fetchRooms]);
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/getCart`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-
-        const data = await response.json();
-        if (data.cart) {
-          // Enrich cart with room details from session storage
-          const enrichedCart = data.cart.map((item) => {
-            const roomDetails = rooms.find((room) => room.roomType === item.roomType);
-            return {
-              ...item,
-              room: roomDetails || {},
-            };
-          });
-          setCartItems(enrichedCart);
+    useEffect(() => {
+        const storedRooms = sessionStorage.getItem('rooms');
+        if (storedRooms) {
+            setRooms(JSON.parse(storedRooms));
+        } else {
+            fetchRooms();
         }
-      } catch (error) {
-        console.error('Error Fetching Cart Items', error);
-      }
+    }, [fetchRooms]);
+
+    useEffect(() => {
+        const fetchCart = async () => {
+            try {
+                const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/getCart', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                });
+                const data = await response.json();
+                let Price = 0;
+                if (data.available) {
+                    const enrichedAvailable = data.available.map((item) => ({
+                        ...item,
+                        room: rooms.find((room) => room.roomType === item.roomType) || {},
+                    }));
+                    setAvailableItems(enrichedAvailable);
+                    Price += data.available.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+                }
+                if (data.removed) {
+                    const enrichedRemoved = data.removed.map((item) => ({
+                        ...item,
+                        room: rooms.find((room) => room.roomType === item.roomType) || {},
+                    }));
+                    setRemovedItems(enrichedRemoved);
+                }
+                setTotalAmount(Price || 0);
+            } catch (error) {
+                console.error('Error Fetching Cart Items', error);
+            } finally {
+              setLoading(false);
+            }
+        };
+        if (!roomsLoading) fetchCart();
+    }, [roomsLoading]);
+
+
+    const handleProceedToCheckout = () => {
+        navigate('/checkout');
     };
 
-    fetchCart();
-  }, [rooms, fetchRooms]);
-
-  const removeFromCart = async (roomId) => {
-    try {
-      const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/removeFromCart`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ roomId }),
-      });
-
-      if (response.ok) {
-        setCartItems((prev) => prev.filter((item) => item.room.id !== roomId));
-      } else {
-        console.error('Failed to remove item from cart.');
-      }
-    } catch (error) {
-      console.error('Error removing item from cart', error);
+    if (loading || roomsLoading) {
+      return <OpacityLoader />;
     }
-  };
 
-  const clearCart = async () => {
-    try {
-      const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/clearCart`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
+    return (
+        <div className="container mx-auto px-4 py-12 lg:py-24 mt-5 md:mt-0">
+            <h1 className="text-5xl font-bold mt-5 mb-8 text-blue-900 text-center">Your Cart</h1>
 
-      if (response.ok) {
-        setCartItems([]);
-      } else {
-        console.error('Failed to clear cart.');
-      }
-    } catch (error) {
-      console.error('Error clearing cart', error);
-    }
-  };
-
-  const handleProceedToCheckout = () => {
-    navigate('/checkout');
-  };
-
-  const totalAmount = cartItems.reduce((acc, item) => acc + item.price, 0);
-  return (
-    <div className="container mx-auto px-4 py-12 lg:py-24">
-      <h1 className="text-3xl lg:text-4xl font-bold mb-6 text-gray-800">Your Cart</h1>
-
-      {cartItems.length === 0 ? (
-        <p className="text-gray-700">Your cart is empty.</p>
-      ) : (
-        <div className="space-y-6">
-          {cartItems.map((item, index) => (
-            <div key={index} className="flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-sm">
-              <div className="flex items-center">
-                <img
-                  src={import.meta.env.VITE_CLOUDINARY_CLOUD + item.room.coverImage}
-                  alt={item.room.name || 'Room'}
-                  className="w-24 h-16 object-cover rounded-md mr-4"
-                />
-                <div>
-                  <h2 className="text-xl font-semibold">{item.room.roomName || 'Room'}</h2>
-                  <p className="text-gray-600">
-                    ₹{(item.price).toLocaleString()}
-                  </p>
+            {availableItems.length === 0 && removedItems.length === 0 ? (
+                <p className="text-gray-700 text-center text-lg">Your cart is empty. Start adding rooms to your cart!</p>
+            ) : (
+                <div className="space-y-8">
+                    {removedItems.length > 0 && (
+                        <div className="space-y-4">
+                            <h2 className="text-2xl font-semibold text-red-700">Unavailable Items</h2>
+                            {removedItems.map((item, index) => (
+                                <CartItem key={`removed-${index}`} item={item} isRemoved={true} setAvailableItems={setAvailableItems} />
+                            ))}
+                        </div>
+                    )}
+                    {availableItems.length > 0 && (
+                        <div className="space-y-4">
+                            {availableItems.map((item, index) => (
+                                <CartItem key={`available-${index}`} item={item} setAvailableItems={setAvailableItems}/>
+                            ))}
+                        </div>
+                    )}
+                    {availableItems.length > 0 && (
+                        <div className="border-t border-gray-200 pt-8 mt-8">
+                            <div className="flex justify-between items-center mx-auto max-w-4xl">
+                                <div>
+                                    <div className="text-2xl font-bold text-gray-900">
+                                        Total Amount: ₹{totalAmount.toLocaleString()}
+                                    </div>
+                                    <div className="text-sm font-italic text-gray-500">(inclusive of all taxes)</div>
+                                </div>
+                                <button
+                                    onClick={handleProceedToCheckout}
+                                    className="bg-blue-600 text-white py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors h-fit opacity-50 cursor-not-allowed"
+                                    disabled={true}
+                                >
+                                    Proceed to Checkout
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
-              </div>
-              <button
-                onClick={() => removeFromCart(item.room.roomType)}
-                className="text-red-500 hover:text-red-700 focus:outline-none"
-                aria-label="Remove from cart"
-              >
-                <FaTrashAlt />
-              </button>
-            </div>
-          ))}
-
-          <div className="flex justify-between items-center mt-6">
-            <button
-              onClick={clearCart}
-              className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-200"
-            >
-              Clear Cart
-            </button>
-            <div className="text-xl font-semibold">
-              Total: ₹{totalAmount.toLocaleString()}
-            </div>
-            <button
-              onClick={handleProceedToCheckout}
-              className="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-colors duration-200"
-            >
-              Proceed to Checkout
-            </button>
-          </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default Cart;

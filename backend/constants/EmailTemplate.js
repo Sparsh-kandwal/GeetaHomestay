@@ -4,40 +4,66 @@ export const emailTemplate = (guestName) => `
 <head>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             line-height: 1.6;
             color: #333333;
-            background-color: #f4f4f4;
+            background-color: #f7f7f7;
             margin: 0;
             padding: 0;
         }
         .container {
             max-width: 600px;
-            margin: 20px auto;
+            margin: 30px auto;
             background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
         .header {
-            background-color: #4CAF50;
+            background-color: #2a9d8f;
             color: white;
-            padding: 20px;
+            padding: 30px;
             text-align: center;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
         }
         .content {
-            padding: 20px;
+            padding: 30px;
+            font-size: 16px;
+            color: #444444;
+        }
+        .content p {
+            margin-bottom: 15px;
         }
         .footer {
-            background-color: #f4f4f4;
+            background-color: #f7f7f7;
+            color: #777777;
             text-align: center;
-            color: #888888;
-            padding: 10px 20px;
-            font-size: 12px;
+            padding: 15px 30px;
+            font-size: 13px;
         }
-        a {
-            color: #4CAF50;
+        .footer a {
+            color: #2a9d8f;
             text-decoration: none;
+            font-weight: bold;
+        }
+        .button {
+            background-color: #2a9d8f;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #21867a;
         }
     </style>
 </head>
@@ -48,15 +74,13 @@ export const emailTemplate = (guestName) => `
         </div>
         <div class="content">
             <p>Dear ${guestName},</p>
-            <p>We are thrilled to have you as part of our Geeta Home Stay family! Thank you for choosing us for your stay. We are committed to making your experience comfortable, memorable, and truly special.</p>
-            <p>Whether you're here for a relaxing vacation or an adventurous getaway, our team is here to assist you at every step. If you have any special requests or need assistance, please do not hesitate to reach out.</p>
-            <p>Here’s to a wonderful and rejuvenating stay!</p>
-            <p>Warm regards,</p>
-            <p><strong>The Geeta Home Stay Team</strong></p>
+            <p>We are excited to welcome you to Geeta Home Stay! Thank you for choosing us for your upcoming stay. Our team is dedicated to providing you with a warm and comfortable environment to ensure you have a relaxing experience.</p>
+            <p>If you need any assistance or have special requests, please do not hesitate to reach out to us. We are here to help with anything you may need, whether it’s planning your activities, arranging special amenities, or simply offering recommendations.</p>
+            <p>We look forward to making your stay unforgettable!</p>
         </div>
         <div class="footer">
             <p>Geeta Home Stay | Your Home Away from Home</p>
-            <p><a href="https://www.geetahomestay.com">www.geetahomestay.com</a> | Contact: +91-XXXXXXXXXX</p>
+            <p><a href="https://www.geetahomestay.com">www.geetahomestay.com</a> | Contact: +91 9756198989</p>
         </div>
     </div>
 </body>

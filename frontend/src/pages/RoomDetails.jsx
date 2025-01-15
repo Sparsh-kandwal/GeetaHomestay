@@ -28,7 +28,11 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
-import { RoomContext } from '../auth/Userprovider';
+import { RoomContext, UserContext } from '../auth/Userprovider';
+
+
+import { useGoogleLogin } from "@react-oauth/google";
+import { googleAuth } from "../auth/api";
 
 const RoomDetails = () => {
   const { id } = useParams();
@@ -36,13 +40,42 @@ const RoomDetails = () => {
   const navigate = useNavigate();
 
   const [isFavorite, setIsFavorite] = useState(false);
-    const [rooms, setRooms] = useState([]);
-  
+  const [rooms, setRooms] = useState([]);
+  const { user, isLoading, setUser, setIsLoading } = useContext(UserContext);
 
   let { checkInDate, setCheckInDate, checkOutDate, setCheckOutDate } = useDateContext();
   const { fetchRooms } = useContext(RoomContext);
   
   const [minCheckOutDate, setMinCheckOutDate] = useState('');
+
+
+  const responseGoogle = async (authResult) => {
+    try {
+        if (authResult.code) {
+            const result = await googleAuth(authResult.code);
+            console.log("Backend response:", result);
+            if (result.data?.user) {
+                setUser(result.data.user);
+            } else {
+                console.error("User data missing in backend response");
+                alert("Error while processing login.");
+            }
+        } else {
+            console.error("No authorization code in auth result:", authResult);
+            alert("Google Login failed. Please try again.");
+        }
+    } catch (error) {
+        console.error("Error during Google Login:", error);
+        alert("Error while Google Login...");
+    }
+  };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: responseGoogle,
+    onError: responseGoogle,
+    flow: "auth-code",
+    scope: "openid profile email",
+  });
 
   useEffect(() => {
       // Fetch rooms from sessionStorage
@@ -140,20 +173,6 @@ const RoomDetails = () => {
       return;
     }
 
-    // Implement booking logic here (e.g., backend API call)
-    // For now, navigate to a confirmation page
-    // navigate('/booking-confirmation', { 
-    //   state: { 
-    //     room, 
-    //     bookingDetails: { 
-    //       checkInDate, 
-    //       checkOutDate, 
-    //       guests, 
-    //       roomCount, 
-    //       totalPrice: calculateTotalPrice() 
-    //     } 
-    //   } 
-    // });
 
     toast.success('Booking confirmed!');
   };
@@ -185,6 +204,9 @@ const RoomDetails = () => {
       if (response.ok) {
         toast.success('Room added to cart!');
       }
+      if (response.status === 400) {
+        toast.error(data.message);
+      }
     } catch (error) {
       console.error("Error adding to cart:", error);
       toast.error("internal server error");
@@ -215,7 +237,7 @@ const RoomDetails = () => {
   
 
   return (
-    <div className="container mx-auto px-4 py-12 lg:py-24">
+    <div className="container mx-auto px-4 py-12 lg:py-24 mt-9 lg:mt-0">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -427,22 +449,20 @@ const RoomDetails = () => {
             {/* Book Now Button */}
             <button
               onClick={handleBookNow}
-              className={`w-full sm:w-1/2 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200 ${
-                isInvalidDateRange() || !checkInDate || !checkOutDate
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
-              }`}
-              title={isInvalidDateRange() || !checkInDate || !checkOutDate 
-                ? 'Please select a Checkout Date' 
-                : ''}
-              disabled={isInvalidDateRange() || !checkInDate || !checkOutDate}
+              className={`w-full sm:w-1/2 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200 opacity-50 cursor-not-allowed
+              `}
+              // title={isInvalidDateRange() || !checkInDate || !checkOutDate 
+              //   ? 'Please select a Checkout Date' 
+              //   : ''}
+                disabled={true}
+              // disabled={isInvalidDateRange() || !checkInDate || !checkOutDate}
             >
               Book Now
             </button>
 
             {/* Add to Cart Button */}
             <button
-              onClick={handleAddToCart}
+              onClick={user ? handleAddToCart: googleLogin}
               className={`w-full sm:w-1/2 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-200 ${
                 isInvalidDateRange() || !checkInDate || !checkOutDate
                   ? 'opacity-50 cursor-not-allowed'

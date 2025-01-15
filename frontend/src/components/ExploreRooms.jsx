@@ -1,5 +1,3 @@
-// src/components/ExploreRooms.jsx
-
 import React, { useState, useMemo, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RoomCard from './RoomCard';
@@ -13,11 +11,17 @@ const ExploreRooms = () => {
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
   const [maxPriceInput, setMaxPriceInput] = useState(4000);
   const [guestCountInput, setGuestCountInput] = useState('');
+  const [availableRooms, setAvailableRooms] = useState({first: true});
+  const [roomAvailLoading, setRoomAvailLoading] = useState(true);
+  const [filteredRooms, setFilteredRooms] = useState([]);
+  const [rooms, setRooms] = useState([]);
+
   const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
 
-  const { fetchRooms, rooms, setRooms, roomsLoading } = useContext(RoomContext);
+  const { fetchRooms, roomsLoading } = useContext(RoomContext);
 
+  // Fetch initial rooms
   useEffect(() => {
     const storedRooms = sessionStorage.getItem('rooms');
     if (storedRooms) {
@@ -27,69 +31,105 @@ const ExploreRooms = () => {
     }
   }, [fetchRooms]);
 
-  const filteredRooms = useMemo(() => {
-    return rooms.filter((room) => {
-      let matchesAmenities = true;
+  useEffect(() => {
+    if (Object.keys(availableRooms).length > 0) {
+      setRooms((prevRooms) => {
+        const updatedRooms = prevRooms.map((room) => {
+          const availability = availableRooms[room.roomType];
+          if (availability) {
+            return {
+              ...room,
+              price: availability.price,
+              totalRooms: availability.totalRooms,
+              availableRooms: availability.availableRooms,
+            };
+          }
+          return room;
+        });
+        // Check if the updatedRooms are the same as the previous rooms to avoid unnecessary re-renders
+        if (JSON.stringify(prevRooms) !== JSON.stringify(updatedRooms)) {
+          return updatedRooms;
+        }
+        return prevRooms;
+      });
+    } 
+  }, [availableRooms]);
+  
 
-      if (selectedAmenitiesInput.length > 0) {
-        const bed2 = room.roomName.trim().toLowerCase().includes('double');
-        const bed3 = room.roomName.trim().toLowerCase().includes('triple');
-        const bed4 = room.roomName.trim().toLowerCase().includes('four');
-        const hasAC = room.amenities.some(
-          (a) => a.name.trim().toLowerCase() === 'air conditioning'
-        );
-        const hasBalcony = room.amenities.some(
-          (a) => a.name.trim().toLowerCase() === 'balcony' || a.name.trim().toLowerCase() === 'private balcony'
-        );
-        const hasCoffeKettle = room.amenities.some(
-          (a) => a.name.trim().toLowerCase() === 'hot-water/coffee kettle'
-        );
+  // Filter rooms based on inputs
+  useEffect(() => {
+    const filterRooms = () => {
+      return rooms.filter((room) => {
 
-        if (selectedAmenitiesInput.includes('Balcony')) matchesAmenities &= hasBalcony;
-        if (selectedAmenitiesInput.includes('Coffe-Kettle')) matchesAmenities &= hasCoffeKettle;
-
-        const filter2bed = selectedAmenitiesInput.includes('2 Bed');
-        const filter3bed = selectedAmenitiesInput.includes('3 Bed');
-        const filter4bed = selectedAmenitiesInput.includes('4 Bed');
-
-        if (filter2bed || filter3bed || filter4bed) {
-          matchesAmenities &=
-            (filter2bed && bed2) ||
-            (filter3bed && bed3) ||
-            (filter4bed && bed4);
+        if(!availableRooms.first){
+            if(!room.availableRooms){
+              return false;
+            }
         }
 
-        const filterAC = selectedAmenitiesInput.includes('AC');
-        const filterNonAC = selectedAmenitiesInput.includes('Non-AC');
+        let matchesAmenities = true;
+        if (selectedAmenitiesInput.length > 0) {
+          const bed2 = room.roomName.trim().toLowerCase().includes('double');
+          const bed3 = room.roomName.trim().toLowerCase().includes('triple');
+          const bed4 = room.roomName.trim().toLowerCase().includes('four');
+          const hasAC = room.amenities.some(
+            (a) => a.name.trim().toLowerCase() === 'air conditioning'
+          );
+          const hasBalcony = room.amenities.some(
+            (a) => a.name.trim().toLowerCase() === 'balcony' || a.name.trim().toLowerCase() === 'private balcony'
+          );
+          const hasCoffeKettle = room.amenities.some(
+            (a) => a.name.trim().toLowerCase() === 'hot-water/coffee kettle'
+          );
 
-        if (filterAC && filterNonAC) {
-          matchesAmenities &= true;
-        } else if (filterAC) {
-          matchesAmenities &= hasAC;
-        } else if (filterNonAC) {
-          matchesAmenities &= !hasAC;
+          if (selectedAmenitiesInput.includes('Balcony')) matchesAmenities &= hasBalcony;
+          if (selectedAmenitiesInput.includes('Coffe-Kettle')) matchesAmenities &= hasCoffeKettle;
+
+          const filter2bed = selectedAmenitiesInput.includes('2 Bed');
+          const filter3bed = selectedAmenitiesInput.includes('3 Bed');
+          const filter4bed = selectedAmenitiesInput.includes('4 Bed');
+
+          if (filter2bed || filter3bed || filter4bed) {
+            matchesAmenities &= 
+              (filter2bed && bed2) ||
+              (filter3bed && bed3) ||
+              (filter4bed && bed4);
+          }
+
+          const filterAC = selectedAmenitiesInput.includes('AC');
+          const filterNonAC = selectedAmenitiesInput.includes('Non-AC');
+
+          if (filterAC && filterNonAC) {
+            matchesAmenities &= true;
+          } else if (filterAC) {
+            matchesAmenities &= hasAC;
+          } else if (filterNonAC) {
+            matchesAmenities &= !hasAC;
+          }
         }
-      }
+        const matchesPrice = room.price <= Number(maxPriceInput);
+        const matchesGuests = guestCountInput
+          ? room.maxAdults >= Number(guestCountInput)
+          : true;
 
-      const matchesPrice = room.price <= Number(maxPriceInput);
 
-      const matchesGuests = guestCountInput
-        ? room.maxAdults >= Number(guestCountInput)
-        : true;
+        return matchesAmenities && matchesPrice && matchesGuests;
+      });
+    };
 
-      return matchesAmenities && matchesPrice && matchesGuests;
-    });
-  }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput, rooms]);
+    setFilteredRooms(filterRooms());
+  }, [rooms, selectedAmenitiesInput, maxPriceInput, guestCountInput]);
 
-  // States for filter inputs
   return (
     <div className="mt-12 min-h-screen w-full bg-gray-50 py-8 px-8">
-      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">
+      <h2 className="text-5xl font-semibold text-center text-gray-800 mb-10">
         Explore Our Rooms
       </h2>
 
+      {/* <SearchBar setAvailableRooms= {setAvailableRooms}/> */}
+
+
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Search and Filters Component */}
         <SearchFilter
           bedOptions={bedOptions}
           searchTermInput={searchTermInput}
@@ -103,11 +143,9 @@ const ExploreRooms = () => {
           setGuestCountInput={setGuestCountInput}
         />
 
-        {/* Room Cards */}
         <div className="w-full xl:w-4/5 lg:w-3/4 flex flex-col gap-8">
           <AnimatePresence>
             {roomsLoading ? (
-              // Show skeleton loader when rooms are loading
               Array(3)
                 .fill(0)
                 .map((_, index) => (
@@ -131,7 +169,6 @@ const ExploreRooms = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <RoomCard room={room} />
-
                 </motion.div>
               ))
             ) : (
@@ -151,9 +188,7 @@ const ExploreRooms = () => {
         </div>
       </div>
 
-      <div className="sticky bottom-5">
-        <SearchBar />
-      </div>
+      <SearchBar setAvailableRooms={setAvailableRooms} />
     </div>
   );
 };

@@ -17,9 +17,9 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   return (
-    <GoogleOAuthProvider clientId="1087462481925-43vqlkhqv232k6p5773d8j66sbnfbcve.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId= {import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <CartProvider>
-        <DateProvider> {/* Wrap DateProvider here */}
+        <DateProvider> 
           <Router>
             <Navbar />
             <AnimatedRoutes />
@@ -52,6 +52,7 @@ const AnimatedRoutes = () => {
             <Route path="/rooms/:id" element={<RoomDetails />} />
             <Route path="/booking-confirmation" element={<BookingConfirmation />} />
             <Route path="/cart" element={<Cart />} />
+            
           </Routes>
         </div>
       </CSSTransition>

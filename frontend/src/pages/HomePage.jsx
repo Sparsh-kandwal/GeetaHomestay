@@ -12,7 +12,7 @@ const HomePage = () => {
       const value = window.scrollY;
 
       // Adjust parallax speed for different screen sizes
-      const parallaxSpeed = window.innerHeight > 768 ? 1.1 : 0.8;
+      const parallaxSpeed = 1.2;
 
       // Apply parallax effects
       document.querySelector('.title').style.marginTop = `${value * parallaxSpeed}px`;
@@ -54,7 +54,7 @@ const HomePage = () => {
         <div className="title absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white font-extrabold drop-shadow-md">
           <div className="flex flex-col items-center gap-6">
             {/* Title */}
-            <span className="text-5xl md:text-7xl lg:text-9xl text-center">
+            <span className="text-7xl md:text-7xl lg:text-9xl text-center">
               Geeta HomeStay
             </span>
 

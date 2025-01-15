@@ -21,6 +21,7 @@ const RoomCard = ({ room }) => {
     maxAdults,
     gallery,
     totalRooms, // Assuming this property exists
+    availableRooms
   } = room;
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -151,7 +152,6 @@ const RoomCard = ({ room }) => {
             <FaUserFriends className="text-blue-500" />
             <span className="font-medium">
               {maxAdults} Guests
-
             </span>
           </div>
 
@@ -159,7 +159,7 @@ const RoomCard = ({ room }) => {
           <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-sm mb-3">
             <FaBed className="text-purple-500" />
             <span className="font-medium">
-              {totalRooms} Rooms Available
+              {availableRooms || totalRooms} Rooms Available
             </span>
           </div>
         </div>
@@ -196,7 +196,6 @@ RoomCard.propTypes = {
     ).isRequired,
     maxAdults: PropTypes.number.isRequired,
     gallery: PropTypes.arrayOf(PropTypes.string).isRequired,
-    roomsAvailable: PropTypes.number.isRequired,
   }).isRequired,
 };
 

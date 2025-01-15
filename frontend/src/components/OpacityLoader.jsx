@@ -2,8 +2,8 @@ import React from 'react';
 
 const OpacityLoader = () => {
   return (
-    <div className="loader-overlay">
-      <div className="lds-ring">
+    <div className="absolute min-h-screen loader-overlay">
+      <div className="text-black lds-ring">
         <div></div>
         <div></div>
         <div></div>

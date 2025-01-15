@@ -10,11 +10,15 @@ const TestimonialCard = ({ username, testimonial, rating, image }) => {
       {/* Display the image */}
       <div className="flex items-center">
         {/* Add the image and ensure it has a fixed size and is rounded */}
-        <img 
-          src={image} 
-          alt={`${username}'s profile`} 
-          className="w-16 h-16 rounded-full object-cover" 
-          style={{ objectFit: 'cover', display: 'block', width: '64px', height: '64px' }} 
+        <img
+          src={image || `/static/user.png`}
+          alt="User Avatar"
+          className="w-8 h-8 rounded-full cursor-pointer"
+          onClick={() => setShowLogoutMenu((prev) => !prev)}
+          onError={(e) => {
+            e.target.onerror = null; 
+            e.target.src = `/static/user.png`; 
+          }}
         />
         <h3
           className="ml-4 text-2xl font-semibold text-[#3a328c] truncate"
