@@ -5,6 +5,8 @@ import { verifyToken } from '../middleware/auth.js';
 import getRoomAvailability from '../controllers/availabilityController.js';
 import { getAllRooms } from '../controllers/roomData.js';
 import { getAllTestimonials } from '../controllers/TestimonialController.js';
+import Booking from '../models/booking.js';
+import { getUserBookings } from '../controllers/bookingController.js';
 
 const router = express.Router();
 
@@ -20,5 +22,7 @@ router.post('/changeQuantity', verifyToken, changeMember);
 router.post('/deleteFromCart', verifyToken, deletefromCart);
 router.post('/checkAvailability', verifyToken, getRoomAvailability);
 router.get('/allRooms', getAllRooms)
+router.post('/bookings', verifyToken,getUserBookings);
+
 router.get('/testimonials',getAllTestimonials )
 export default router;

@@ -12,7 +12,6 @@ const Profile = () => {
     name: "",
     email: "",
   });
-  const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -20,42 +19,14 @@ const Profile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    if (user) {
+      setProfileData({
+        name: user.userName || "",
+        email: user.email || "",
+      });
+    } else {
       setError("You must be logged in to view your profile.");
-      setIsLoading(false);
-      return;
     }
-
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/auth/profile`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch profile data.");
-        }
-
-        const data = await response.json();
-        setProfileData({
-          name: data.user.name || "",
-          email: data.user.email || "",
-        });
-      } catch (err) {
-        setError(err.message || "An error occurred while fetching profile data.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProfile();
   }, [user]);
 
   const handleChange = (e) => {
@@ -85,7 +56,8 @@ const Profile = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to update profile.");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update profile.");
       }
 
       const data = await response.json();
@@ -98,7 +70,7 @@ const Profile = () => {
     }
   };
 
-  if (isLoading || userLoading) {
+  if (userLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">
         <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
@@ -106,7 +78,7 @@ const Profile = () => {
     );
   }
 
-  if (error && !success) {
+  if (!user) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">
         <p className="text-red-500 text-lg">{error}</p>
@@ -122,15 +94,15 @@ const Profile = () => {
         </h2>
 
         <div className="flex justify-center mb-6">
-          {user.photo ? (
-            <img
-              src={user.photo}
-              alt="User Profile"
-              className="w-24 h-24 rounded-full object-cover shadow-md"
-            />
-          ) : (
-            <FaUserCircle className="w-24 h-24 text-gray-400" />
-          )}
+          <img
+            src={user.photo || `/static/user.png`}
+            alt="User Avatar"
+            className="w-16 h-16 rounded-full cursor-default"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `/static/user.png`;
+            }}
+          />
         </div>
 
         {/* Success Message */}
@@ -215,8 +187,7 @@ const Profile = () => {
               value={profileData.name}
               onChange={handleChange}
               required
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition"
-              placeholder="Your Name"
+              className="mt-1 block w-full px-4 py-2 border text-black border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition"
             />
           </div>
 
