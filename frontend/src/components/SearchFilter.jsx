@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const SearchFilter = ({
   bedOptions,
@@ -10,7 +10,27 @@ const SearchFilter = ({
   setMaxPriceInput,
   setGuestCountInput,
 }) => {
-  const [isFilterVisible, setIsFilterVisible] = useState(false); // State to toggle filter visibility
+  const [isFilterVisible, setIsFilterVisible] = useState(false); 
+
+
+  useEffect(() => {
+    // Function to handle screen size changes
+    const handleResize = () => {
+      if (window.innerWidth >= 768) { 
+        setIsFilterVisible(true);
+      } else {
+        setIsFilterVisible(false);
+      }
+    };
+
+    // Initial check
+    handleResize();
+    
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []); 
 
   const [selectedAmenities, setSelectedAmenities] = useState([]);
 
@@ -133,7 +153,7 @@ const SearchFilter = ({
         <div className="mt-4">
           <button
             onClick={handleReset}
-            className="w-full bg-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-400 transition duration-200"
+            className="w-full bg-red-500 text-gray-100 p-3 rounded-lg hover:bg-red-700 transition duration-200"
           >
             Reset
           </button>

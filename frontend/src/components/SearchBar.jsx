@@ -67,9 +67,9 @@ const SearchBar = ({setAvailableRooms}) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center mt-5 gap-3 justify-center p-4 border border-gray-300 rounded-lg bg-white shadow-md w-fit mx-auto sticky bottom-5">
+    <div className="flex flex-row items-center mt-5 gap-3 justify-center p-4 border border-gray-300 rounded-lg bg-white shadow-md w-[90%] md:w-fit mx-auto sticky bottom-5">
       {/* Check-in Date */}
-      <div className="flex flex-col w-full lg:w-[200px]">
+      <div className="flex flex-col w-[40%] md:w-full">
         <label className="text-gray-700 text-sm mb-1">Check-in</label>
         <input
           type="date"
@@ -81,7 +81,7 @@ const SearchBar = ({setAvailableRooms}) => {
       </div>
 
       {/* Check-out Date */}
-      <div className="flex flex-col w-full lg:w-[200px]">
+      <div className="flex flex-col w-[40%]">
         <label className="text-gray-700 text-sm mb-1">Check-out</label>
         <input
           type="date"
@@ -92,7 +92,7 @@ const SearchBar = ({setAvailableRooms}) => {
         />
       </div>
 
-      <div className="flex flex-col w-[50px]">
+      <div className="flex flex-col w-[20%]">
         <label className="text-gray-700 text-sm mb-1">Search</label>
         <button
           onClick={handleSearch}

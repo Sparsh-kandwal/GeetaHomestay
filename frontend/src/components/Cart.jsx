@@ -69,7 +69,7 @@ const Cart = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-12 lg:py-24">
+        <div className="container mx-auto px-4 py-12 lg:py-24 mt-5 md:mt-0">
             <h1 className="text-5xl font-bold mt-5 mb-8 text-blue-900 text-center">Your Cart</h1>
 
             {availableItems.length === 0 && removedItems.length === 0 ? (
