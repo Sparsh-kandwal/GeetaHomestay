@@ -1,9 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import TestimonialCard from './TestimonialCard';
-import { testimonials } from '../constants/Testimonials';
+import LoadingCard from './LoadingCard';
 
 const Testimonials = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch testimonials from API or sessionStorage
+  useEffect(() => {
+    // Check if testimonials exist in sessionStorage
+    const storedTestimonials = sessionStorage.getItem('testimonials');
+
+    if (storedTestimonials) {
+      // If found in sessionStorage, parse it and set the state
+      setTestimonials(JSON.parse(storedTestimonials));
+      setLoading(false); // Data loaded, stop the loader
+    } else {
+      // If not found, fetch from the backend
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/testimonials`)
+        .then((response) => response.json())
+        .then((data) => {
+          setTestimonials(data);
+          sessionStorage.setItem('testimonials', JSON.stringify(data)); // Store in sessionStorage
+          setLoading(false); // Data loaded, stop the loader
+        })
+        .catch((error) => {
+          console.error('Error fetching testimonials:', error);
+          setLoading(false); // Stop the loader even if fetch fails
+        });
+    }
+  }, []);
 
   // Go to the next testimonial
   const goToNext = () => {
@@ -24,7 +51,13 @@ const Testimonials = () => {
   useEffect(() => {
     const interval = setInterval(goToNext, 5000);
     return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, []);
+  }, [testimonials.length]);
+
+  if (loading) {
+    return (
+      <LoadingCard />
+    );
+  }
 
   return (
     <div className="bg-[#f5f5f5] py-10">

@@ -8,7 +8,7 @@ const Rooms = () => {
 
   return (
     <div className="mt">
-      <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-6 ">
         <ExploreRooms roomData={roomData} />
       </div>
      

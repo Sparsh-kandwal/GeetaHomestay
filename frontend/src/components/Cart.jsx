@@ -1,25 +1,100 @@
-// src/components/Cart.jsx
-
-import React from 'react';
-import { useCart } from '../contexts/CartContext';
+import React, { useEffect, useState, useContext } from 'react';
 import { FaTrashAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { RoomContext } from '../auth/Userprovider';
 
 const Cart = () => {
-  const { cartItems, removeFromCart, clearCart } = useCart();
+  const [cartItems, setCartItems] = useState([]);
+  const { fetchRooms, rooms, setRooms } = useContext(RoomContext);
   const navigate = useNavigate();
 
-  const totalAmount = cartItems.reduce((acc, item) => acc + item.bookingDetails.totalPrice, 0);
-
-  const handleProceedToCheckout = () => {
-    if (cartItems.length === 0) {
-      alert('Your cart is empty.');
-      return;
+  useEffect(() => {
+    // Fetch rooms from sessionStorage or fallback to context
+    const storedRooms = sessionStorage.getItem('rooms');
+    if (storedRooms) {
+      setRooms(JSON.parse(storedRooms));
+    } else {
+      fetchRooms();
     }
-    // Navigate to booking confirmation or checkout page
-    navigate('/checkout', { state: { cartItems, totalAmount } });
+  }, [fetchRooms]);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/getCart`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        const data = await response.json();
+        if (data.cart) {
+          // Enrich cart with room details from session storage
+          const enrichedCart = data.cart.map((item) => {
+            const roomDetails = rooms.find((room) => room.roomType === item.roomType);
+            return {
+              ...item,
+              room: roomDetails || {},
+            };
+          });
+          setCartItems(enrichedCart);
+        }
+      } catch (error) {
+        console.error('Error Fetching Cart Items', error);
+      }
+    };
+
+    fetchCart();
+  }, [rooms, fetchRooms]);
+
+  const removeFromCart = async (roomId) => {
+    try {
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/removeFromCart`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ roomId }),
+      });
+
+      if (response.ok) {
+        setCartItems((prev) => prev.filter((item) => item.room.id !== roomId));
+      } else {
+        console.error('Failed to remove item from cart.');
+      }
+    } catch (error) {
+      console.error('Error removing item from cart', error);
+    }
   };
 
+  const clearCart = async () => {
+    try {
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/clearCart`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        setCartItems([]);
+      } else {
+        console.error('Failed to clear cart.');
+      }
+    } catch (error) {
+      console.error('Error clearing cart', error);
+    }
+  };
+
+  const handleProceedToCheckout = () => {
+    navigate('/checkout');
+  };
+
+  const totalAmount = cartItems.reduce((acc, item) => acc + item.price, 0);
   return (
     <div className="container mx-auto px-4 py-12 lg:py-24">
       <h1 className="text-3xl lg:text-4xl font-bold mb-6 text-gray-800">Your Cart</h1>
@@ -31,14 +106,20 @@ const Cart = () => {
           {cartItems.map((item, index) => (
             <div key={index} className="flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-sm">
               <div className="flex items-center">
-                <img src={item.room.gallery[0]} alt={item.room.name} className="w-24 h-16 object-cover rounded-md mr-4" />
+                <img
+                  src={import.meta.env.VITE_CLOUDINARY_CLOUD + item.room.coverImage}
+                  alt={item.room.name || 'Room'}
+                  className="w-24 h-16 object-cover rounded-md mr-4"
+                />
                 <div>
-                  <h2 className="text-xl font-semibold">{item.room.name}</h2>
-                  <p className="text-gray-600">₹{item.bookingDetails.totalPrice.toLocaleString()}</p>
+                  <h2 className="text-xl font-semibold">{item.room.roomName || 'Room'}</h2>
+                  <p className="text-gray-600">
+                    ₹{(item.price).toLocaleString()}
+                  </p>
                 </div>
               </div>
               <button
-                onClick={() => removeFromCart(item.room.id)}
+                onClick={() => removeFromCart(item.room.roomType)}
                 className="text-red-500 hover:text-red-700 focus:outline-none"
                 aria-label="Remove from cart"
               >

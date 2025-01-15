@@ -6,12 +6,12 @@ const RoomList = ({ rooms, loading }) => {
   // Row component to render individual room cards
   const Row = ({ index, style }) => (
     <div style={{ ...style, marginBottom: '16px' }}>
-      <RoomCard key={rooms[index].id} room={rooms[index]} />
+      <RoomCard key={rooms[index].roomType} room={rooms[index]} />
     </div>
   );
 
   return (
-    <div>
+    <div >
       {loading ? (
         // Show loading skeletons when data is still loading
         <div className="flex flex-col gap-4">
@@ -41,7 +41,7 @@ const RoomList = ({ rooms, loading }) => {
         </List>
       ) : (
         // Message when no rooms match the search criteria
-        <p className="text-center text-gray-500">No rooms match your search criteria.</p>
+        <p className="text-center text-gray-500 w-screen">No rooms match your search criteria.</p>
       )}
     </div>
   );

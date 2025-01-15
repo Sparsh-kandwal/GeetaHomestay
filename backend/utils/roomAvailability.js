@@ -10,8 +10,10 @@ export const calculateRoomAvailability = async (checkIn, checkOut) => {
     }
     const availability = {};
     for (const room of rooms) {
-        availability[room.roomType] = {
-            availableRooms: room.totalRooms,
+        availability[room._doc.roomType] = {
+            availableRooms: room._doc.totalRooms,
+            price: room._doc.price,
+            discount: room._doc.discount,
         };
     }
     const bookedDates = await BookedDate.find({
@@ -36,6 +38,6 @@ export const calculateRoomAvailability = async (checkIn, checkOut) => {
             availability[roomType].availableRooms = 0;
         }
     }
-
+    console.log(availability);
     return availability;
 };

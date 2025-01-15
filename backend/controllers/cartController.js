@@ -5,6 +5,7 @@ import Room from "../models/room.js";
 export const addToCart = async (req, res) => {
     try {
         const { members, checkIn, checkOut, roomType, quantity } = req.body;
+        console.log(members, checkIn, checkOut, roomType, quantity);
         const userId = req.user.id;
         const availability = await calculateRoomAvailability(checkIn, checkOut);
         const room = await Room.findOne({ roomType });
@@ -44,13 +45,13 @@ export const getCart = async (req, res) => {
         for (const item of cartItems) {
             const availability = await calculateRoomAvailability(item.checkIn, item.checkOut);
             const roomType = item.roomType;
-
+            console.log(item);
             if (availability[roomType].availableRooms < item.quantity) {
                 item.quantity = availability[roomType].availableRooms;
                 await item.save();
-                removed.push({ roomType, updatedQuantity: item.quantity });
+                removed.push({ roomType, updatedQuantity: item.quantity, checkIn: item.checkIn, checkOut: item.checkOut, price: availability[roomType].price, discount: availability[roomType].discount });
             } else {
-                available.push({ roomType, quantity: item.quantity });
+                available.push({ roomType, quantity: item.quantity, checkIn: item.checkIn, checkOut: item.checkOut, price: availability[roomType].price, discount: availability[roomType].discount });
             }
             price += item.quantity * (item.price - (item.price * item.discount));
         }

@@ -6,7 +6,7 @@ const TestimonialCard = ({ username, testimonial, rating, image }) => {
   console.log(image)
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-xl mx-auto">
+    <div className="bg-white p-8 rounded-lg shadow-lg w-3/5 mx-auto">
       {/* Display the image */}
       <div className="flex items-center">
         {/* Add the image and ensure it has a fixed size and is rounded */}
