@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaTrashAlt } from 'react-icons/fa';
 
-const removeFromCart = async (roomType, checkIn, checkOut) => {
+const removeFromCart = async (roomType, checkIn, checkOut, setAvailableItems) => {
     try {
         const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/deleteFromCart', {
             method: 'POST',
@@ -25,7 +25,7 @@ const removeFromCart = async (roomType, checkIn, checkOut) => {
     }
 };
 
-const CartItem = ({ item, isRemoved = false }) => (
+const CartItem = ({ item, isRemoved = false, setAvailableItems }) => (
         <div className={`relative flex items-center justify-between bg-white border border-gray-200 p-6 rounded-lg shadow-md mx-auto max-w-4xl mt-4 ${isRemoved ? 'bg-blue-50' : ''}`}>
             {isRemoved && (
                 <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-red-100 rounded-lg text-red-700 text-xl font-bold">
@@ -34,7 +34,7 @@ const CartItem = ({ item, isRemoved = false }) => (
             )}
             {!isRemoved && (
                 <button
-                    onClick={() => removeFromCart(item.roomType, item.checkIn, item.checkOut)}
+                    onClick={() => removeFromCart(item.roomType, item.checkIn, item.checkOut, setAvailableItems)}
                     className="absolute top-4 right-4 text-blue-600 hover:text-blue-800 focus:outline-none transition"
                     aria-label="Remove from cart"
                 >
