@@ -17,11 +17,6 @@ router.get('/status', (req, res) => {
     res.send('Hello! The backend is working.');
 });
 
-// Authentication Routes
-router.post("/google", googleAuth);
-router.get("/profile", verifyToken, getMyProfile);
-router.put("/profile", verifyToken, updateProfile);
-router.post("/logout", verifyToken, logout);
 
 // Booking Routes
 router.post('/bookroom', verifyToken, createOrder);
