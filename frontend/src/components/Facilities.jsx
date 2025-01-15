@@ -4,8 +4,8 @@ import { Wifi, Car, Droplet, UtensilsCrossed, Clock } from 'lucide-react';
 const Facilities = () => {
   const facilities = [
     { name: "Free Parking", icon: Car },
-    { name: "Free WiFi", icon: Wifi },
-    { name: "24 Hours Hot Water", icon: Droplet },
+    { name: "High-Speed WiFi", icon: Wifi },
+    { name: "Hot Water", icon: Droplet },
     { name: "Food Facility Available", icon: UtensilsCrossed },
     { name: "24/7 Service", icon: Clock },
   ];

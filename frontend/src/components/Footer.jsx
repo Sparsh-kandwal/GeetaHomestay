@@ -13,9 +13,8 @@ const Footer = () => {
             <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li><a href="/" className="hover:text-gray-300">Home</a></li>
-              <li><a href="/explore" className="hover:text-gray-300">Explore Rooms</a></li>
-              <li><a href="/about" className="hover:text-gray-300">Gallery</a></li>
-              <li><a href="/contact" className="hover:text-gray-300">Profile</a></li>
+              <li><a href="./rooms" className="hover:text-gray-300">Explore Rooms</a></li>
+
             </ul>
           </div>
 
@@ -23,9 +22,10 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-2">
-              <li className="text-sm">Email: support@example.com</li>
-              <li className="text-sm">Phone: +123 456 7890</li>
-              <li className="text-sm">Address: 123 Main Street, City, Country</li>
+            <li className="text-sm"><strong>Email:</strong><a href="mailto:geetahomestaykaranprayag@gmail.com" > geetahomestaykaranprayag@gmail.com</a></li>
+            <li className="text-sm"><strong>Phone: </strong><a href="tel:+919756198989" className=" hover:underline">+91 9756198989</a></li>
+
+            <li className="text-sm"><strong>Address:</strong> Geeta HomeStay, near Petrol Pump, Main Market, Karanprayag, Chamoli, Uttarakhand (246444)</li>
             </ul>
           </div>
           
@@ -41,14 +41,7 @@ const Footer = () => {
               >
                 <FaFacebookF size={24} /> {/* React Icon for Facebook */}
               </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-gray-300"
-              >
-                <FaTwitter size={24} /> {/* React Icon for Twitter */}
-              </a>
+             
               <a
                 href="https://instagram.com"
                 target="_blank"
@@ -57,14 +50,7 @@ const Footer = () => {
               >
                 <FaInstagram size={24} /> {/* React Icon for Instagram */}
               </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-gray-300"
-              >
-                <FaLinkedinIn size={24} /> {/* React Icon for LinkedIn */}
-              </a>
+              
             </div>
           </div>
 
@@ -72,7 +58,7 @@ const Footer = () => {
 
         {/* Footer Bottom */}
         <div className="text-center mt-10 border-t pt-4 text-sm">
-          <p>© 2024 Your Company Name. All rights reserved.</p>
+          <p>© 2025 Geeta HomeStay. All rights reserved.</p>
         </div>
       </div>
     </div>

@@ -23,7 +23,7 @@
 
 /* Ensuring page styling */
 .page {
-  min-height: calc(100vh - 80px); /* Adjust for navbar/footer */
+  min-height: calc(100vh - 100px); /* Adjust for navbar/footer */
   display: flex;
   flex-direction: column;
 }
@@ -56,4 +56,14 @@
   font-family: "Merriweather Sans", serif;
   font-weight: 700;
   font-style: normal;
+}
+/* Add this to your global CSS or Tailwind CSS configuration */
+.no-arrows::-webkit-inner-spin-button,
+.no-arrows::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-arrows {
+  -moz-appearance: textfield; /* For Firefox */
 }
