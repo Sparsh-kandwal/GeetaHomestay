@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import User from "../models/user.js";
 import { emailTemplate } from '../constants/EmailTemplate.js';
 import { transporter } from '../utils/MailClient.js';
-// import fetch from 'node-fetch'; // Ensure node-fetch is installed
+
 
 /**
  * Google Authentication Handler
@@ -61,6 +61,7 @@ export const googleAuth = async (req, res) => {
 
         if (!user) {
             user = await User.create({
+                id: userInfo.id,
                 userName: userInfo.name,
                 email: userInfo.email,
                 photo: userInfo.picture,
@@ -125,23 +126,22 @@ export const googleAuth = async (req, res) => {
 /**
  * Get Current User Profile
  */
+
 export const getMyProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-__v');
-
+        const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-
-        return res.status(200).json({ message: "User profile retrieved", user });
+        return res.status(200).json({message: "user found", user: user});
     } catch (error) {
-        console.error('Error during getMyProfile:', error.message);
+        console.error('Error during getMyprofile:', error.message);
         res.status(500).json({
             message: 'Failed to retrieve user profile',
             error: error.message
         });
     }
-};
+}
 
 /**
  * Update User Profile
@@ -161,7 +161,7 @@ export const updateProfile = async (req, res) => {
             userId,
             { $set: updatedData },
             { new: true, runValidators: true }
-        ).select('-__v');
+        );
 
         if (!updatedUser) {
             return res.status(404).json({ message: "User not found" });
