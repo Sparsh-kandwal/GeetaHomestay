@@ -87,7 +87,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-purple-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-white shadow-xl rounded-lg p-8">
         <h2 className="text-3xl font-semibold text-indigo-600 mb-6 text-center">
           Your Profile
@@ -178,7 +178,7 @@ const Profile = () => {
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
-              Name<span className="text-red-500">*</span>
+              Name
             </label>
             <input
               type="text"
@@ -187,6 +187,7 @@ const Profile = () => {
               value={profileData.name}
               onChange={handleChange}
               required
+              disabled
               className="mt-1 block w-full px-4 py-2 border text-black border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition"
             />
           </div>
@@ -197,7 +198,7 @@ const Profile = () => {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Email<span className="text-red-500">*</span>
+              Email
             </label>
             <input
               type="email"
@@ -213,7 +214,7 @@ const Profile = () => {
           </div>
 
           {/* Update Profile Button */}
-          <div>
+          {/* <div>
             <button
               type="submit"
               disabled={isUpdating}
@@ -251,7 +252,7 @@ const Profile = () => {
                 "Update Profile"
               )}
             </button>
-          </div>
+          </div> */}
 
           {/* Booking History Button */}
           <div>
