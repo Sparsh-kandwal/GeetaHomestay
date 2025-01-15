@@ -27,7 +27,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/profile`,
+          `${import.meta.env.VITE_BACKEND_URL}/auth/profile`,
           {
             method: "GET",
             headers: {
@@ -83,7 +83,7 @@ const Profile = () => {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/profile`,
+        `${import.meta.env.VITE_BACKEND_URL}/auth/profile`,
         {
           method: "PUT",
           headers: {

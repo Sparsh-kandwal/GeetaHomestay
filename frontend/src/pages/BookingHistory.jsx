@@ -21,7 +21,7 @@ const BookingHistory = () => {
     const fetchBookings = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/bookings`,
+          `${import.meta.env.VITE_BACKEND_URL}/bookings`,
           {
             method: "GET",
             headers: {
