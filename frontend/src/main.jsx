@@ -5,11 +5,10 @@ import App from './App.jsx';
 import { RoomProvider, UserProvider } from './auth/Userprovider.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  
     <UserProvider>
       <RoomProvider>
         <App />
       </RoomProvider>
     </UserProvider>
-  </StrictMode>,
 );

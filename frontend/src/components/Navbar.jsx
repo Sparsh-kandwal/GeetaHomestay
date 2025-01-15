@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
-import { googleAuth } from "./api";
+import { googleAuth } from "../auth/api";
 import { UserContext } from "../auth/Userprovider";
 
 const Navbar = () => {
@@ -16,7 +16,6 @@ const Navbar = () => {
 
   const responseGoogle = async (authResult) => {
     try {
-        console.log("Auth result received:", authResult);
         if (authResult.code) {
             const result = await googleAuth(authResult.code);
             console.log("Backend response:", result);

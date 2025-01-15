@@ -28,16 +28,8 @@ const RoomProvider = ({ children }) => {
   useEffect(() => {
     const storedRooms = sessionStorage.getItem('rooms');
     if (storedRooms) {
-      try {
-        const parsedRooms = JSON.parse(storedRooms);
-        if (Array.isArray(parsedRooms)) {
-          setRooms(parsedRooms);
-        } else {
-          console.error('Invalid rooms data in sessionStorage');
-        }
-      } catch (error) {
-        console.error('Error parsing rooms from sessionStorage:', error);
-      }
+      const parsedRooms = JSON.parse(storedRooms);
+      setRooms(parsedRooms);
       setRoomsLoading(false);
     } else {
       fetchRooms();
