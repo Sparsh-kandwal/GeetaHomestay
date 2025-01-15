@@ -151,6 +151,7 @@ const RoomCard = ({ room }) => {
             <FaUserFriends className="text-blue-500" />
             <span className="font-medium">
               {maxAdults} Guests
+
             </span>
           </div>
 
