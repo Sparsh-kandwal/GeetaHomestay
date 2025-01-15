@@ -11,7 +11,6 @@ import {
   FaExclamationTriangle,
   FaCartPlus
 } from 'react-icons/fa';
-import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useCart } from '../contexts/CartContext';
 import { toast } from 'react-toastify';
