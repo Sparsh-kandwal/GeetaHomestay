@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { useDateContext } from '../contexts/DateContext';
 
-const SearchBar = ({ setFilteredRooms }) => {
+const SearchBar = ({setAvailableRooms}) => {
   const {
     checkInDate,
     setCheckInDate,
@@ -55,8 +55,7 @@ const SearchBar = ({ setFilteredRooms }) => {
       const data = await response.json();
   
       if (data.success) {
-        // Assuming you want to filter rooms based on the received availability data
-        setFilteredRooms(data.availability); // Updating filtered rooms based on the received data
+        setAvailableRooms(data.availability)
       } else {
         setError('Failed to fetch room availability.');
       }
@@ -67,7 +66,7 @@ const SearchBar = ({ setFilteredRooms }) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center gap-3 justify-center p-4 border border-gray-300 rounded-lg bg-white shadow-md w-fit mx-auto sticky bottom-5">
+    <div className="flex flex-col md:flex-row items-center mt-5 gap-3 justify-center p-4 border border-gray-300 rounded-lg bg-white shadow-md w-fit mx-auto sticky bottom-5">
       {/* Check-in Date */}
       <div className="flex flex-col w-full lg:w-[200px]">
         <label className="text-gray-700 text-sm mb-1">Check-in</label>

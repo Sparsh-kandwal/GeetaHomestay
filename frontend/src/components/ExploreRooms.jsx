@@ -13,23 +13,42 @@ const ExploreRooms = () => {
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
   const [maxPriceInput, setMaxPriceInput] = useState(4000);
   const [guestCountInput, setGuestCountInput] = useState('');
+  const [availableRooms, setAvailableRooms] = useState(['First'])
   const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
+  let [rooms, SetRooms] = useState([])
 
-  const { fetchRooms, rooms, setRooms, roomsLoading } = useContext(RoomContext);
+  const { fetchRooms, roomsLoading } = useContext(RoomContext);
 
   useEffect(() => {
     const storedRooms = sessionStorage.getItem('rooms');
     if (storedRooms) {
-      setRooms(JSON.parse(storedRooms));
+      const parsedRooms = JSON.parse(storedRooms);
+      SetRooms(parsedRooms);
     } else {
       fetchRooms();
     }
   }, [fetchRooms]);
 
   const filteredRooms = useMemo(() => {
+    console.log(rooms)
+
+    
     return rooms.filter((room) => {
+
+      if(!availableRooms[0] == 'First'){
+        if (!availableRooms[room.roomType]) {
+          return false; 
+        }
+  
+        room.price = availableRooms[room.roomType].price
+        room.totalRooms = availableRooms[room.roomType].availableRooms
+  
+      }
+
+     
       let matchesAmenities = true;
+
 
       if (selectedAmenitiesInput.length > 0) {
         const bed2 = room.roomName.trim().toLowerCase().includes('double');
@@ -79,7 +98,7 @@ const ExploreRooms = () => {
 
       return matchesAmenities && matchesPrice && matchesGuests;
     });
-  }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput, rooms]);
+  }, [availableRooms, selectedAmenitiesInput, maxPriceInput, guestCountInput, rooms]);
 
   // States for filter inputs
   return (
@@ -151,7 +170,7 @@ const ExploreRooms = () => {
       </div>
 
       
-      <SearchBar />
+      <SearchBar setAvailableRooms= {setAvailableRooms} />
 
      
     </div>
