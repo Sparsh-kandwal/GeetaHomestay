@@ -69,6 +69,7 @@ const HomePage = () => {
                 <MapPin className="w-4 h-4 mr-2" />
                 Locate Us
               </button>
+              
               <Link
                 to="/rooms"
                 className="bg-white text-green-600 px-6 py-2 rounded-md border border-green-600 hover:bg-green-50 transition duration-300 flex items-center"

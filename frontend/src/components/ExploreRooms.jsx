@@ -45,7 +45,6 @@ const ExploreRooms = () => {
         room.totalRooms = availableRooms[room.roomType].availableRooms
   
       }
-
      
       let matchesAmenities = true;
 
@@ -106,6 +105,9 @@ const ExploreRooms = () => {
       <h2 className="text-5xl font-semibold text-center text-gray-800 mb-10">
         Explore Our Rooms
       </h2>
+
+      {/* <SearchBar setAvailableRooms= {setAvailableRooms}/> */}
+
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Search and Filters Component */}
@@ -170,7 +172,7 @@ const ExploreRooms = () => {
       </div>
 
       
-      <SearchBar setAvailableRooms= {setAvailableRooms} />
+      <SearchBar setAvailableRooms= {setAvailableRooms}/>
 
      
     </div>
