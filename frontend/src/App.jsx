@@ -1,3 +1,5 @@
+// frontend/src/App.jsx
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { SwitchTransition, CSSTransition } from 'react-transition-group';
@@ -14,22 +16,27 @@ import Cart from './components/Cart';
 import BookingConfirmation from './pages/BookingConfirmation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import Profile from './pages/Profile';
+import BookingHistory from './pages/BookingHistory';
+import { UserProvider,RoomProvider } from './auth/Userprovider';
+import ProtectedRoute from './components/ProtectedRoute';
+import NotFound from './pages/NotFound';
 const App = () => {
   return (
-    <GoogleOAuthProvider clientId="1087462481925-43vqlkhqv232k6p5773d8j66sbnfbcve.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
       <CartProvider>
-        <DateProvider> {/* Wrap DateProvider here */}
-          <Router>
-            <Navbar />
-            <AnimatedRoutes />
-            <Footer />
-            <ToastContainer />
-          </Router>
+        <DateProvider>
+          <UserProvider>
+            <Router>
+              <Navbar />
+              <AnimatedRoutes />
+              <Footer />
+              <ToastContainer />
+            </Router>
+          </UserProvider>
         </DateProvider>
       </CartProvider>
     </GoogleOAuthProvider>
-    
   );
 };
 
@@ -45,18 +52,38 @@ const AnimatedRoutes = () => {
       >
         <div className="page">
           <Routes location={location}>
+            {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/home" element={<HomePage />} />
-
             <Route path="/rooms" element={<Rooms />} />
             <Route path="/rooms/:id" element={<RoomDetails />} />
             <Route path="/booking-confirmation" element={<BookingConfirmation />} />
             <Route path="/cart" element={<Cart />} />
+            
+            {/* Protected Routes */}
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/booking-history" 
+              element={
+                <ProtectedRoute>
+                  <BookingHistory />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Add a catch-all route for 404 Not Found */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </CSSTransition>
     </SwitchTransition>
   );
 };
-
 export default App;

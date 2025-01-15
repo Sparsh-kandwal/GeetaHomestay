@@ -1,22 +1,40 @@
+// backend/routes/routes.js
+
 import express from 'express';
+import { googleAuth, getMyProfile, updateProfile, logout } from '../controllers/authController.js';
+import { verifyToken } from '../middleware/auth.js';
 import createOrder from '../controllers/book.js';
 import { addToCart, getCart, updateCart } from '../controllers/cartController.js';
-import { verifyToken } from '../middleware/auth.js';
 import getRoomAvailability from '../controllers/availabilityController.js';
 import { getAllRooms } from '../controllers/roomData.js';
 import { getAllTestimonials } from '../controllers/TestimonialController.js';
+import { getUserBookings } from '../controllers/bookingController.js';
 
 const router = express.Router();
 
+// Status Endpoint
 router.get('/status', (req, res) => {
-  res.send('Hello! The backend is working.');
+    res.send('Hello! The backend is working.');
 });
 
+// Authentication Routes
+router.post("/google", googleAuth);
+router.get("/profile", verifyToken, getMyProfile);
+router.put("/profile", verifyToken, updateProfile);
+router.post("/logout", verifyToken, logout);
+
+// Booking Routes
 router.post('/bookroom', verifyToken, createOrder);
+router.get('/bookings', verifyToken, getUserBookings);
+
+// Cart Routes
 router.post('/addToCart', verifyToken, addToCart);
-router.get('/getCart',  verifyToken, getCart);
+router.get('/getCart', verifyToken, getCart);
 router.post('/updateCart', verifyToken, updateCart);
+
+// Other Routes
 router.post('/checkAvailability', getRoomAvailability);
-router.get('/allRooms', getAllRooms)
-router.get('/testimonials',getAllTestimonials )
+router.get('/allRooms', getAllRooms);
+router.get('/testimonials', getAllTestimonials);
+
 export default router;
