@@ -31,7 +31,7 @@ const ExploreRooms = () => {
   }, [fetchRooms]);
 
   const filteredRooms = useMemo(() => {
-    console.log(rooms)
+    console.log(availableRooms)
 
     
     return rooms.filter((room) => {
@@ -102,8 +102,8 @@ const ExploreRooms = () => {
 
   // States for filter inputs
   return (
-    <div className="mt-12 min-h-screen w-full bg-gray-50 py-8 px-8 relative">
-      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">
+    <div className="mt-12 min-h-screen w-full bg-gray-50 py-8 px-8">
+      <h2 className="text-5xl font-semibold text-center text-gray-800 mb-10">
         Explore Our Rooms
       </h2>
 

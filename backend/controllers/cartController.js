@@ -5,9 +5,8 @@ import Room from "../models/room.js";
 export const addToCart = async (req, res) => {
     try {
         const { members, checkIn, checkOut, roomType, quantity } = req.body;
-        console.log(members, checkIn, checkOut, roomType, quantity);
         const userId = req.user.id;
-        const availability = await calculateRoomAvailability(checkIn, checkOut);
+        const availability = await calculateRoomAvailability(checkIn, checkOut, userId);
         const room = await Room.findOne({ roomType });
         if (room.maxAdults < members) {
             return res.status(400).json({ message: "Too many adults" });
@@ -16,7 +15,14 @@ export const addToCart = async (req, res) => {
             return res.status(400).json({ message: "No rooms available" });
         }
         if (availability[roomType].availableRooms < quantity) {
-            return res.status(400).json({ message: "only" + availability[roomType].availableRooms + "rooms available" });
+            return res.status(400).json({ message: "only " + availability[roomType].availableRooms + " rooms available" });
+        }
+        const prevItem = await Cart_item.findOne({ userId, roomType, checkIn, checkOut });
+        if (prevItem) {
+            prevItem.quantity += quantity;
+            prevItem.members += members;
+            await prevItem.save();
+            return res.json({ message: "Item already in cart" });
         }
         const cartItem = new Cart_item({
             userId,
@@ -42,26 +48,68 @@ export const getCart = async (req, res) => {
         const removed = [];
         const available = [];
         let price = 0;
+
         for (const item of cartItems) {
-            const availability = await calculateRoomAvailability(item.checkIn, item.checkOut);
+            const availability = await calculateRoomAvailability(item.checkIn, item.checkOut, userId, item._id);
             const roomType = item.roomType;
-            console.log(item);
+            const checkIn = new Date(item.checkIn);
+            const checkOut = new Date(item.checkOut);
+            const days = Math.round((checkOut - checkIn) / (1000 * 3600 * 24 ));
             if (availability[roomType].availableRooms < item.quantity) {
+                const curr = item.quantity;
                 item.quantity = availability[roomType].availableRooms;
-                await item.save();
-                removed.push({ roomType, updatedQuantity: item.quantity, checkIn: item.checkIn, checkOut: item.checkOut, price: availability[roomType].price, discount: availability[roomType].discount });
+                item.members = Math.min(item.members, item.quantity * availability[roomType].maxAdults);
+
+                if (item.quantity === 0) {
+                    await Cart_item.deleteOne({ _id: item._id });
+                } else {
+                    await item.save();
+                }
+                const itemPrice = parseFloat(days * (availability[roomType].price - (availability[roomType].price * availability[roomType].discount)));
+                removed.push({
+                    roomType,
+                    removedQuantity: curr - availability[roomType].availableRooms,
+                    checkIn: item.checkIn,
+                    checkOut: item.checkOut,
+                    price: parseFloat(days * (availability[roomType].price - (availability[roomType].price * availability[roomType].discount))),
+                    discount: availability[roomType].discount,
+                    members: item.members
+                });
+
+                if (availability[roomType].availableRooms > 0) {
+                    available.push({
+                        roomType,
+                        quantity: availability[roomType].availableRooms,
+                        checkIn: item.checkIn,
+                        checkOut: item.checkOut,
+                        price: itemPrice,
+                        discount: availability[roomType].discount,
+                        members: item.members
+                    });
+                }
+                price += itemPrice;
             } else {
-                available.push({ roomType, quantity: item.quantity, checkIn: item.checkIn, checkOut: item.checkOut, price: availability[roomType].price, discount: availability[roomType].discount });
+                const itemPrice = parseFloat(days * (availability[roomType].price - (availability[roomType].price * availability[roomType].discount)));
+                available.push({
+                    roomType,
+                    quantity: item.quantity,
+                    checkIn: item.checkIn,
+                    checkOut: item.checkOut,
+                    price: itemPrice,
+                    discount: availability[roomType].discount,
+                    members: item.members
+                });
+                price += itemPrice;
             }
-            price += item.quantity * (item.price - (item.price * item.discount));
         }
-        const cart = [...removed , ...available];
+
+        const cart = [...removed, ...available];
         return res.status(200).json({
             cart,
             removed,
             available,
             message: "Cart items checked and updated successfully",
-            price: price
+            price
         });
     } catch (error) {
         console.error(error);
@@ -70,33 +118,26 @@ export const getCart = async (req, res) => {
 };
 
 
-export const changeQuantity = async (req, res) => {
+
+export const changeMember = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { roomType, quantity, checkIn, checkOut } = req.body;
-    if (!roomType || !quantity || !checkIn || !checkOut) {
+    const { roomType, members, checkIn, checkOut } = req.body;
+    if (!roomType || !checkIn || !checkOut) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
-    const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(checkOut);
-    const availability = await calculateRoomAvailability(checkInDate, checkOutDate);
-    if (!availability[roomType]) {
-      return res.status(404).json({ message: 'Invalid room type provided.' });
-    }
-    const availableRooms = availability[roomType].availableRooms;
-    if (quantity > availableRooms) {
-      return res.status(400).json({
-        message: `Only ${availableRooms} rooms are available for the selected dates.`,
-      });
-    }
-    const cartItem = await Cart.findOne({ userId, roomType, checkIn, checkOut });
+    const cartItem = await Cart_item.findOne({ userId, roomType, checkIn, checkOut });
+    const room = await Room.findOne({ roomType });
     if (!cartItem) {
       return res.status(404).json({ message: 'Cart item not found for the given criteria.' });
     }
-    cartItem.quantity = quantity;
+    if (members > room.maxAdults) {
+        return res.status(400).json({ message: 'Maximum number of adults exceeded.' });
+    }
+    cartItem.members = members;
     await cartItem.save();
     return res.status(200).json({ 
-      message: 'Room quantity updated successfully.',
+      message: 'Room members updated successfully.',
       cartItem 
     });
   } catch (error) {
@@ -105,6 +146,22 @@ export const changeQuantity = async (req, res) => {
   }
 };
 
+
+export const deletefromCart = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { roomType, checkIn, checkOut } = req.body;
+        const cartItem = await Cart_item.findOne({ userId, roomType, checkIn, checkOut });
+        if (!cartItem) {
+            return res.status(404).json({ message: 'Cart item not found for the given criteria .' });
+        }
+        await Cart_item.findOneAndDelete({ userId, roomType, checkIn, checkOut });
+        return res.status(200).json({ message: 'Item removed from cart successfully.' });
+    } catch (error) {
+        console.error('Error removing item from cart:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+};
 
 export const updateCart = async (req, res) => {
     try {

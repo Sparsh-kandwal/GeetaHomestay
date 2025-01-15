@@ -196,7 +196,6 @@ RoomCard.propTypes = {
     ).isRequired,
     maxAdults: PropTypes.number.isRequired,
     gallery: PropTypes.arrayOf(PropTypes.string).isRequired,
-    roomsAvailable: PropTypes.number.isRequired,
   }).isRequired,
 };
 

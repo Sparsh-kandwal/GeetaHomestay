@@ -31,7 +31,7 @@ const SearchBar = ({setAvailableRooms}) => {
 
   const handleSearch = async () => {
     if (!checkInDate || !checkOutDate) {
-      setError('Please select both check-in and check-out dates.');
+      alert('Please select both check-in and check-out dates.');
       return;
     }
   
@@ -50,6 +50,7 @@ const SearchBar = ({setAvailableRooms}) => {
           checkIn: checkInDate,
           checkOut: checkOutDate,
         }),
+        credentials: 'include'
       });
   
       const data = await response.json();
@@ -57,11 +58,11 @@ const SearchBar = ({setAvailableRooms}) => {
       if (data.success) {
         setAvailableRooms(data.availability)
       } else {
-        setError('Failed to fetch room availability.');
+        alert('Failed to fetch room availability.');
       }
     } catch (error) {
       console.error('Error fetching availability:', error);
-      setError('An error occurred while fetching room availability.');
+      alert('An error occurred while fetching room availability.');
     }
   };
 
