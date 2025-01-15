@@ -38,6 +38,5 @@ export const calculateRoomAvailability = async (checkIn, checkOut) => {
             availability[roomType].availableRooms = 0;
         }
     }
-    console.log(availability);
     return availability;
 };

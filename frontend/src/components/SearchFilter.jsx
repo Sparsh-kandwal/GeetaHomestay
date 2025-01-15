@@ -12,15 +12,16 @@ const SearchFilter = ({ bedOptions, maxPriceInput, guestCountInput, amenitiesOpt
 
   // Handle Reset button click
   const handleReset = () => {
-    // Reset input states
+    console.log('Reset button clicked');
     setSearchTermInput('');
     setSelectedAmenitiesInput([]);
     setMaxPriceInput(4000);
     setGuestCountInput('');
   };
+  
 
   return (
-    <div className="lg:sticky top-20 h-fit w-full lg:w-1/4 p-6 bg-white shadow-md rounded-lg">
+    <div className=" lg:sticky top-20 h-fit w-full lg:w-1/4 p-6 bg-white shadow-md rounded-lg">
           <h3 className="text-lg font-semibold mb-6">Search & Filters</h3>
           <div className="mb-6">
             <h4 className="text-md font-semibold mb-2">Filter by Beds</h4>

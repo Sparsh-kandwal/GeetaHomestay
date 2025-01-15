@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { FaSearch } from 'react-icons/fa';
 import { useDateContext } from '../contexts/DateContext';
-import { FaCalendarAlt, FaSearch } from 'react-icons/fa';
 
-const SearchBar = () => {
+const SearchBar = ({ setFilteredRooms }) => {
   const {
     checkInDate,
     setCheckInDate,
@@ -29,66 +29,82 @@ const SearchBar = () => {
     }
   }, [checkInDate]);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!checkInDate || !checkOutDate) {
       setError('Please select both check-in and check-out dates.');
       return;
     }
-
+  
     setError('');
-    alert(`Searching for:
-    Check-in: ${checkInDate}
-    Check-out: ${checkOutDate}`);
+  
+    // Construct the request URL using the backend URL and query parameters
+    const url = `${import.meta.env.VITE_BACKEND_URL}/checkAvailability`;
+  
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          checkIn: checkInDate,
+          checkOut: checkOutDate,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (data.success) {
+        // Assuming you want to filter rooms based on the received availability data
+        setFilteredRooms(data.availability); // Updating filtered rooms based on the received data
+      } else {
+        setError('Failed to fetch room availability.');
+      }
+    } catch (error) {
+      console.error('Error fetching availability:', error);
+      setError('An error occurred while fetching room availability.');
+    }
   };
 
   return (
-    <div className="md:w-1/2 mx-auto p-4 md:p-6 bg-gray-100 rounded-md shadow-md flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
+    <div className="flex flex-col md:flex-row items-center gap-3 justify-center p-4 border border-gray-300 rounded-lg bg-white shadow-md w-fit mx-auto sticky bottom-5">
       {/* Check-in Date */}
-      <div className="relative flex-1 w-full">
-        <label htmlFor="checkIn" className="block text-gray-800 font-bold text-sm md:text-base mb-1">
-          Check-in
-        </label>
-        <FaCalendarAlt className="absolute top-10 left-3 text-gray-500 text-lg md:text-xl" />
+      <div className="flex flex-col w-full lg:w-[200px]">
+        <label className="text-gray-700 text-sm mb-1">Check-in</label>
         <input
-          id="checkIn"
           type="date"
           value={checkInDate}
-          min={new Date().toISOString().split('T')[0]}
+          min={new Date().toISOString().split('T')[0]} // Ensure today or future date
           onChange={(e) => setCheckInDate(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-transparent rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 transition duration-200 bg-white text-gray-800"
+          className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
         />
       </div>
 
       {/* Check-out Date */}
-      <div className="relative flex-1 w-full">
-        <label htmlFor="checkOut" className="block text-gray-800 font-bold text-sm md:text-base mb-1">
-          Check-out
-        </label>
-        <FaCalendarAlt className="absolute top-10 left-3 text-gray-500 text-lg md:text-xl" />
+      <div className="flex flex-col w-full lg:w-[200px]">
+        <label className="text-gray-700 text-sm mb-1">Check-out</label>
         <input
-          id="checkOut"
           type="date"
           value={checkOutDate}
-          min={minCheckOutDate}
+          min={minCheckOutDate} // Ensure day after check-in
           onChange={(e) => setCheckOutDate(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-transparent rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 transition duration-200 bg-white text-gray-800"
+          className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
         />
       </div>
 
-      {/* Search Button */}
-      <button
-        onClick={handleSearch}
-        className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-yellow-500 text-white rounded-full shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300 transition duration-200"
-      >
-        <FaSearch className="text-sm md:text-base" />
-      </button>
+      <div className="flex flex-col w-[50px]">
+        <label className="text-gray-700 text-sm mb-1">Search</label>
+        <button
+          onClick={handleSearch}
+          className="w-12 h-12 bg-blue-500 text-white rounded-full hover:bg-blue-600 flex items-center justify-center transition"
+          aria-label="Search"
+        >
+          <FaSearch size={20} />
+        </button>
+      </div>
 
       {/* Error Message */}
-      {error && (
-        <p className="text-red-500 text-sm mt-2 md:mt-0">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
     </div>
   );
 };

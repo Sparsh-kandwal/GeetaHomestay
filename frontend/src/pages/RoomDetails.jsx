@@ -215,7 +215,7 @@ const RoomDetails = () => {
   
 
   return (
-    <div className="container mx-auto px-4 py-12 lg:py-24">
+    <div className="container mx-auto px-4 py-12 lg:py-24 mt-9 lg:mt-0">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
