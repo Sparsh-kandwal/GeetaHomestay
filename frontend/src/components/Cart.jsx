@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { RoomContext } from '../auth/Userprovider';
 import CartItem from './Cartitem'
 import OpacityLoader from './OpacityLoader';
-
+import { AnimatePresence } from 'framer-motion';
 const Cart = () => {
     const [availableItems, setAvailableItems] = useState([]);
     const [removedItems, setRemovedItems] = useState([]);
@@ -70,6 +70,7 @@ const Cart = () => {
 
     return (
         <div className="container mx-auto px-4 py-12 lg:py-24 mt-5 md:mt-0">
+            <AnimatePresence>
             <h1 className="text-5xl font-bold mt-5 mb-8 text-blue-900 text-center">Your Cart</h1>
 
             {availableItems.length === 0 && removedItems.length === 0 ? (
@@ -112,6 +113,7 @@ const Cart = () => {
                     )}
                 </div>
             )}
+            </AnimatePresence>
         </div>
     );
 };
