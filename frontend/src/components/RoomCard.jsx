@@ -12,16 +12,15 @@ import { useNavigate } from 'react-router-dom';
 
 const RoomCard = ({ room }) => {
   const {
-    id,
-    name,
+    roomType,
+    roomName,
     price,
+    discount,
     description,
     amenities,
     maxAdults,
-    maxGuests,
-    maxChildren,
     gallery,
-    roomsAvailable, // Assuming this prop exists
+    totalRooms, // Assuming this property exists
   } = room;
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -52,7 +51,7 @@ const RoomCard = ({ room }) => {
 
   // Handle card click to navigate to RoomDetails
   const handleCardClick = () => {
-    navigate(`/rooms/${id}`, { state: { room } });
+    navigate(`/rooms/${roomType}`, { state: { room } });
   };
 
   return (
@@ -64,13 +63,13 @@ const RoomCard = ({ room }) => {
       onKeyPress={(e) => {
         if (e.key === 'Enter') handleCardClick();
       }}
-      aria-label={`View details for ${name}`}
+      aria-label={`View details for ${roomName}`}
     >
       {/* Image Gallery */}
       <div className="relative md:w-1/3 w-full h-56 md:h-auto">
         <img
-          src={gallery[currentImageIndex]}
-          alt={`${name} Image ${currentImageIndex + 1}`} // Fixed: Used template literals
+          src={import.meta.env.VITE_CLOUDINARY_CLOUD + gallery[currentImageIndex]}
+          alt={`${roomName} Image ${currentImageIndex + 1}`}
           className="w-full h-56 md:h-full object-cover"
           loading="lazy"
         />
@@ -112,7 +111,7 @@ const RoomCard = ({ room }) => {
         {/* Room Name and Price */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
           <h3 className="text-xl sm:text-2xl font-semibold text-gray-800">
-            {name}
+            {roomName}
           </h3>
           <p className="text-lg sm:text-xl font-bold text-indigo-600 mt-2 sm:mt-0">
             ₹{price}{' '}
@@ -151,17 +150,16 @@ const RoomCard = ({ room }) => {
           <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-sm mr-4 mb-3">
             <FaUserFriends className="text-blue-500" />
             <span className="font-medium">
-              {maxGuests} Max Guests
+              {maxAdults} Guests
+
             </span>
           </div>
-
-          
 
           {/* Rooms Available */}
           <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-sm mb-3">
             <FaBed className="text-purple-500" />
             <span className="font-medium">
-              {roomsAvailable} Rooms Available
+              {totalRooms} Rooms Available
             </span>
           </div>
         </div>
@@ -172,7 +170,7 @@ const RoomCard = ({ room }) => {
             className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/rooms/${id}`, { state: { room } });
+              navigate(`/rooms/${roomType}`, { state: { room } });
             }}
           >
             Book Now
@@ -186,21 +184,19 @@ const RoomCard = ({ room }) => {
 // PropTypes for type checking
 RoomCard.propTypes = {
   room: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
+    roomType: PropTypes.string.isRequired,
+    roomName: PropTypes.string.isRequired,
     price: PropTypes.number.isRequired,
     description: PropTypes.string,
     amenities: PropTypes.arrayOf(
       PropTypes.shape({
-        name: PropTypes.string,
-        icon: PropTypes.node, // Changed to node for React elements
+        name: PropTypes.string.isRequired,
+        icon: PropTypes.node.isRequired, // React element for icons
       })
-    ),
-    maxAdults: PropTypes.number,
-    maxGuests: PropTypes.number,
-    maxChildren: PropTypes.number,
-    gallery: PropTypes.arrayOf(PropTypes.string),
-    roomsAvailable: PropTypes.number, // Added assuming it's needed
+    ).isRequired,
+    maxAdults: PropTypes.number.isRequired,
+    gallery: PropTypes.arrayOf(PropTypes.string).isRequired,
+    roomsAvailable: PropTypes.number.isRequired,
   }).isRequired,
 };
 

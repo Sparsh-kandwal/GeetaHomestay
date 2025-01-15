@@ -1,190 +1,137 @@
 // src/components/ExploreRooms.jsx
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RoomCard from './RoomCard';
-import { rooms } from '../constants/Rooms';// Adjusted import path based on your data file
+import SearchFilter from './SearchFilter';
+import SearchBar from './SearchBar';
+import { RoomContext } from '../auth/Userprovider';
+import SkeletonRoom from './SkeletonRoom';
 
 const ExploreRooms = () => {
-  // States for filter inputs
   const [searchTermInput, setSearchTermInput] = useState('');
   const [selectedAmenitiesInput, setSelectedAmenitiesInput] = useState([]);
-  const [maxPriceInput, setMaxPriceInput] = useState(4000); // Only max price
+  const [maxPriceInput, setMaxPriceInput] = useState(4000);
   const [guestCountInput, setGuestCountInput] = useState('');
+  const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
+  const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
 
-  // Fixed amenities options aligned with data
-  const amenitiesOptions = ['Air Conditioning', 'Non-AC'];
+  const { fetchRooms, rooms, setRooms, roomsLoading } = useContext(RoomContext);
 
-  // Handle amenity selection (input state)
-  const handleAmenityChangeInput = (amenity) => {
-    setSelectedAmenitiesInput((prev) =>
-      prev.includes(amenity)
-        ? prev.filter((a) => a !== amenity)
-        : [...prev, amenity]
-    );
-  };
+  useEffect(() => {
+    const storedRooms = sessionStorage.getItem('rooms');
+    if (storedRooms) {
+      setRooms(JSON.parse(storedRooms));
+    } else {
+      fetchRooms();
+    }
+  }, [fetchRooms]);
 
-  // Handle Reset button click
-  const handleReset = () => {
-    // Reset input states
-    setSearchTermInput('');
-    setSelectedAmenitiesInput([]);
-    setMaxPriceInput(4000);
-    setGuestCountInput('');
-  };
-
-  // Filtering logic using useMemo for performance optimization
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {
-      // 1. Match room name if searchTerm is provided
-      const matchesName = searchTermInput
-        ? room.name.toLowerCase().includes(searchTermInput.toLowerCase())
-        : true;
-
-      // 2. Match selected amenities if any are selected
       let matchesAmenities = true;
+
       if (selectedAmenitiesInput.length > 0) {
+        const bed2 = room.roomName.trim().toLowerCase().includes('double');
+        const bed3 = room.roomName.trim().toLowerCase().includes('triple');
+        const bed4 = room.roomName.trim().toLowerCase().includes('four');
         const hasAC = room.amenities.some(
           (a) => a.name.trim().toLowerCase() === 'air conditioning'
         );
-        const filterAC = selectedAmenitiesInput.includes('Air Conditioning');
+        const hasBalcony = room.amenities.some(
+          (a) => a.name.trim().toLowerCase() === 'balcony' || a.name.trim().toLowerCase() === 'private balcony'
+        );
+        const hasCoffeKettle = room.amenities.some(
+          (a) => a.name.trim().toLowerCase() === 'hot-water/coffee kettle'
+        );
+
+        if (selectedAmenitiesInput.includes('Balcony')) matchesAmenities &= hasBalcony;
+        if (selectedAmenitiesInput.includes('Coffe-Kettle')) matchesAmenities &= hasCoffeKettle;
+
+        const filter2bed = selectedAmenitiesInput.includes('2 Bed');
+        const filter3bed = selectedAmenitiesInput.includes('3 Bed');
+        const filter4bed = selectedAmenitiesInput.includes('4 Bed');
+
+        if (filter2bed || filter3bed || filter4bed) {
+          matchesAmenities &=
+            (filter2bed && bed2) ||
+            (filter3bed && bed3) ||
+            (filter4bed && bed4);
+        }
+
+        const filterAC = selectedAmenitiesInput.includes('AC');
         const filterNonAC = selectedAmenitiesInput.includes('Non-AC');
 
         if (filterAC && filterNonAC) {
-          matchesAmenities = true; // Both filters selected, include all rooms
+          matchesAmenities &= true;
         } else if (filterAC) {
-          matchesAmenities = hasAC;
+          matchesAmenities &= hasAC;
         } else if (filterNonAC) {
-          matchesAmenities = !hasAC;
+          matchesAmenities &= !hasAC;
         }
       }
 
-      // 3. Match price range (only max price)
       const matchesPrice = room.price <= Number(maxPriceInput);
 
-      // 4. Match guest count if specified
       const matchesGuests = guestCountInput
-        ? room.maxGuests >= Number(guestCountInput)
+        ? room.maxAdults >= Number(guestCountInput)
         : true;
 
-      return matchesName && matchesAmenities && matchesPrice && matchesGuests;
+      return matchesAmenities && matchesPrice && matchesGuests;
     });
-  }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput]);
+  }, [searchTermInput, selectedAmenitiesInput, maxPriceInput, guestCountInput, rooms]);
 
+  // States for filter inputs
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="mt-12 min-h-screen w-full bg-gray-50 py-8 px-8">
       <h2 className="text-3xl font-semibold text-center text-gray-800 mb-10">
         Explore Our Rooms
       </h2>
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Search and Filters Component */}
-        <div className="w-full lg:w-1/4 p-6 bg-white shadow-md rounded-lg">
-          <h3 className="text-lg font-semibold mb-6">Search & Filters</h3>
-
-          {/* Search by Name */}
-          <div className="mb-6">
-            <input
-              type="text"
-              placeholder="Search by room name..."
-              value={searchTermInput}
-              onChange={(e) => setSearchTermInput(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          {/* Filter by Amenities */}
-          <div className="mb-6">
-            <h4 className="text-md font-semibold mb-2">Filter by Amenities</h4>
-            <div className="space-y-2">
-              {amenitiesOptions.map((amenity, index) => (
-                <label key={index} className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedAmenitiesInput.includes(amenity)}
-                    onChange={() => handleAmenityChangeInput(amenity)}
-                    className="form-checkbox h-5 w-5 text-indigo-600"
-                  />
-                  <span className="ml-3 text-gray-700">{amenity}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Filter by Price Range (Max Price Only) */}
-          <div className="mb-6">
-            <h4 className="text-md font-semibold mb-3">Filter by Price (₹)</h4>
-            <div className="flex flex-col space-y-4">
-              <div>
-                <label
-                  className="block text-gray-700 text-sm mb-1"
-                  htmlFor="maxPrice"
-                >
-                  Max Price: ₹{maxPriceInput}
-                </label>
-                <input
-                  type="range"
-                  id="maxPrice"
-                  min="0"
-                  max="4000" // Adjusted max based on data
-                  step="100"
-                  value={maxPriceInput}
-                  onChange={(e) => setMaxPriceInput(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Filter by Guest Count */}
-          <div className="mb-6">
-            <h4 className="text-md font-semibold mb-3">Filter by Guest Count</h4>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-gray-700">Total Guests</label>
-                <select
-                  value={guestCountInput}
-                  onChange={(e) => setGuestCountInput(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="">Any</option>
-                  <option value="1">1 Guest</option>
-                  <option value="2">2 Guests</option>
-                  <option value="3">3 Guests</option>
-                  <option value="4">4 Guests</option>
-                  <option value="5">5 Guests</option>
-                  <option value="6">6 Guests</option>
-                  <option value="7">7 Guests</option>
-                  <option value="8">8 Guests</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Reset Button */}
-          <div className="mt-4">
-            <button
-              onClick={handleReset}
-              className="w-full bg-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-400 transition duration-200"
-            >
-              Reset
-            </button>
-          </div>
-        </div>
+        <SearchFilter
+          bedOptions={bedOptions}
+          searchTermInput={searchTermInput}
+          selectedAmenitiesInput={selectedAmenitiesInput}
+          maxPriceInput={maxPriceInput}
+          guestCountInput={guestCountInput}
+          amenitiesOptions={amenitiesOptions}
+          setSearchTermInput={setSearchTermInput}
+          setSelectedAmenitiesInput={setSelectedAmenitiesInput}
+          setMaxPriceInput={setMaxPriceInput}
+          setGuestCountInput={setGuestCountInput}
+        />
 
         {/* Room Cards */}
         <div className="w-full xl:w-4/5 lg:w-3/4 flex flex-col gap-8">
           <AnimatePresence>
-            {filteredRooms.length > 0 ? (
+            {roomsLoading ? (
+              // Show skeleton loader when rooms are loading
+              Array(3)
+                .fill(0)
+                .map((_, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <SkeletonRoom />
+                  </motion.div>
+                ))
+            ) : filteredRooms.length > 0 ? (
               filteredRooms.map((room) => (
                 <motion.div
-                  key={room.id}
+                  key={room.roomType}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
                   <RoomCard room={room} />
+
                 </motion.div>
               ))
             ) : (
@@ -195,13 +142,17 @@ const ExploreRooms = () => {
                 exit={{ opacity: 0 }}
                 className="col-span-full"
               >
-                <p className="text-center text-gray-500">
+                <p className="text-center text-gray-500 min-w-screen">
                   No rooms match your search criteria.
                 </p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
+      </div>
+
+      <div className="sticky bottom-5">
+        <SearchBar />
       </div>
     </div>
   );

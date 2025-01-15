@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDateContext } from '../contexts/DateContext';
+import { FaCalendarAlt, FaSearch } from 'react-icons/fa';
 
 const SearchBar = () => {
   const {
@@ -10,8 +11,8 @@ const SearchBar = () => {
   } = useDateContext();
 
   const [minCheckOutDate, setMinCheckOutDate] = useState('');
+  const [error, setError] = useState('');
 
-  // Set the minimum date for check-in and check-out dynamically
   useEffect(() => {
     if (!checkInDate) {
       const today = new Date().toISOString().split('T')[0];
@@ -20,7 +21,6 @@ const SearchBar = () => {
     }
   }, [checkInDate, setCheckInDate]);
 
-  // Update the minimum check-out date when the check-in date changes
   useEffect(() => {
     if (checkInDate) {
       const nextDay = new Date(checkInDate);
@@ -31,48 +31,64 @@ const SearchBar = () => {
 
   const handleSearch = () => {
     if (!checkInDate || !checkOutDate) {
-      alert('Please select valid dates.');
+      setError('Please select both check-in and check-out dates.');
       return;
     }
 
+    setError('');
     alert(`Searching for:
     Check-in: ${checkInDate}
     Check-out: ${checkOutDate}`);
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center p-4 border border-gray-300 rounded-lg bg-white shadow-md space-y-4 md:space-y-0 md:space-x-4 font-sans">
+    <div className="md:w-1/2 mx-auto p-4 md:p-6 bg-gray-100 rounded-md shadow-md flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
       {/* Check-in Date */}
-      <div className="flex flex-col w-full md:w-auto">
-        <label className="text-gray-700 text-sm mb-1">Check-in</label>
+      <div className="relative flex-1 w-full">
+        <label htmlFor="checkIn" className="block text-gray-800 font-bold text-sm md:text-base mb-1">
+          Check-in
+        </label>
+        <FaCalendarAlt className="absolute top-10 left-3 text-gray-500 text-lg md:text-xl" />
         <input
+          id="checkIn"
           type="date"
           value={checkInDate}
           min={new Date().toISOString().split('T')[0]}
           onChange={(e) => setCheckInDate(e.target.value)}
-          className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+          className="w-full pl-10 pr-4 py-2 border border-transparent rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 transition duration-200 bg-white text-gray-800"
         />
       </div>
 
       {/* Check-out Date */}
-      <div className="flex flex-col w-full md:w-auto">
-        <label className="text-gray-700 text-sm mb-1">Check-out</label>
+      <div className="relative flex-1 w-full">
+        <label htmlFor="checkOut" className="block text-gray-800 font-bold text-sm md:text-base mb-1">
+          Check-out
+        </label>
+        <FaCalendarAlt className="absolute top-10 left-3 text-gray-500 text-lg md:text-xl" />
         <input
+          id="checkOut"
           type="date"
           value={checkOutDate}
           min={minCheckOutDate}
           onChange={(e) => setCheckOutDate(e.target.value)}
-          className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+          className="w-full pl-10 pr-4 py-2 border border-transparent rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 transition duration-200 bg-white text-gray-800"
         />
       </div>
 
       {/* Search Button */}
       <button
         onClick={handleSearch}
-        className="w-full md:w-auto px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+        className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-yellow-500 text-white rounded-full shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300 transition duration-200"
       >
-        Search
+        <FaSearch className="text-sm md:text-base" />
       </button>
+
+      {/* Error Message */}
+      {error && (
+        <p className="text-red-500 text-sm mt-2 md:mt-0">
+          {error}
+        </p>
+      )}
     </div>
   );
 };

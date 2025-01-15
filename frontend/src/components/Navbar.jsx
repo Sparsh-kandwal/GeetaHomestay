@@ -11,7 +11,7 @@ const Navbar = () => {
   const logoutMenuRef = useRef(null);
   const location = useLocation();
 
-  const navItems = ["Home", "Rooms", "Gallery","Cart"];
+  const navItems = ["Home", "Rooms","Cart"];
   const { user, isLoading, setUser, setIsLoading } = useContext(UserContext);
 
   const responseGoogle = async (authResult) => {
@@ -83,7 +83,7 @@ const Navbar = () => {
 
   return (
     <header
-      className={`flex justify-between items-center h-20 px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
+      className={`flex justify-between items-center h-[65px]  px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
         isHomePage ? "" : "bg-indigo-700 shadow-lg"
       }`}
     >

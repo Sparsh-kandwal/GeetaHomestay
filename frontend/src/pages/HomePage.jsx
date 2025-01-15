@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
-import { AboutSection } from '../components/AboutSection';
+import React, { useEffect, useState } from 'react';
 import Testimonials from '../components/Testimonials';
 import Facilities from '../components/Facilities';
 import { MapPin, Calendar } from "lucide-react";
 import { Link } from 'react-router-dom';
+import ScrollPrompt from '../components/ScrollPrompt';
+import LocationComponent from '../components/LocationComponent';
 
 const HomePage = () => {
   useEffect(() => {
@@ -19,6 +20,24 @@ const HomePage = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const [showScrollPrompt, setShowScrollPrompt] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setShowScrollPrompt(false);  // Hide the prompt after scroll
+      } else {
+        setShowScrollPrompt(true);  // Show the prompt when scrolled back to top
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
@@ -62,9 +81,10 @@ const HomePage = () => {
         </div>
       </section>
 
-      <div className="font-merriweather">
-        <AboutSection id="about" />
-      </div>
+      {showScrollPrompt && <ScrollPrompt />}
+
+      <LocationComponent />
+      
 
       <Facilities />
 
