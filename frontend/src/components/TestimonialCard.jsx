@@ -11,7 +11,7 @@ const TestimonialCard = ({ username, testimonial, rating, image }) => {
       <div className="flex items-center">
         {/* Add the image and ensure it has a fixed size and is rounded */}
         <img 
-          src={image} 
+          src={image || `/static/user.png`} 
           alt={`${username}'s profile`} 
           className="w-16 h-16 rounded-full object-cover" 
           style={{ objectFit: 'cover', display: 'block', width: '64px', height: '64px' }} 

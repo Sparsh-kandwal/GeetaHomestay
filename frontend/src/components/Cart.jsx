@@ -69,7 +69,7 @@ const Cart = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-12 lg:py-24">
+        <div className="container mx-auto px-4 py-12 lg:py-24 mt-5 md:mt-0">
             <h1 className="text-5xl font-bold mt-5 mb-8 text-blue-900 text-center">Your Cart</h1>
 
             {availableItems.length === 0 && removedItems.length === 0 ? (
@@ -80,14 +80,14 @@ const Cart = () => {
                         <div className="space-y-4">
                             <h2 className="text-2xl font-semibold text-red-700">Unavailable Items</h2>
                             {removedItems.map((item, index) => (
-                                <CartItem key={`removed-${index}`} item={item} isRemoved={true} />
+                                <CartItem key={`removed-${index}`} item={item} isRemoved={true} setAvailableItems={setAvailableItems} />
                             ))}
                         </div>
                     )}
                     {availableItems.length > 0 && (
                         <div className="space-y-4">
                             {availableItems.map((item, index) => (
-                                <CartItem key={`available-${index}`} item={item} />
+                                <CartItem key={`available-${index}`} item={item} setAvailableItems={setAvailableItems}/>
                             ))}
                         </div>
                     )}

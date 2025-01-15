@@ -14,6 +14,7 @@ const ExploreRooms = () => {
   const [maxPriceInput, setMaxPriceInput] = useState(4000);
   const [guestCountInput, setGuestCountInput] = useState('');
   const [availableRooms, setAvailableRooms] = useState(['First'])
+  const [roomAvailLoading, setRoomAvailLoading] = useState(true);
   const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
   let [rooms, SetRooms] = useState([])
@@ -33,7 +34,6 @@ const ExploreRooms = () => {
   const filteredRooms = useMemo(() => {
     console.log(availableRooms)
 
-    
     return rooms.filter((room) => {
 
       if(!availableRooms[0] == 'First'){
@@ -97,7 +97,7 @@ const ExploreRooms = () => {
 
       return matchesAmenities && matchesPrice && matchesGuests;
     });
-  }, [availableRooms, selectedAmenitiesInput, maxPriceInput, guestCountInput, rooms]);
+  }, [availableRooms, selectedAmenitiesInput, maxPriceInput, guestCountInput, availableRooms]);
 
   // States for filter inputs
   return (
