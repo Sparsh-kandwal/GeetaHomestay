@@ -8,19 +8,27 @@ import LocationComponent from '../components/LocationComponent';
 
 const HomePage = () => {
   useEffect(() => {
-    const handleScroll = () => {
-      const value = window.scrollY;
+  const handleScroll = () => {
+    if (window.innerWidth <= 768) {
+      return; // Skip parallax effect on mobile view
+    }
 
-      // Adjust parallax speed for different screen sizes
-      const parallaxSpeed = 1.2;
+    const value = window.scrollY;
 
-      // Apply parallax effects
-      document.querySelector('.title').style.marginTop = `${value * parallaxSpeed}px`;
-    };
+    // Adjust parallax speed for different screen sizes
+    const parallaxSpeed = 1.2;
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    // Apply parallax effects
+    const titleElement = document.querySelector('.title');
+    if (titleElement) {
+      titleElement.style.marginTop = `${value * parallaxSpeed}px`;
+    }
+  };
+
+  window.addEventListener('scroll', handleScroll);
+
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
 
   const [showScrollPrompt, setShowScrollPrompt] = useState(true);
 

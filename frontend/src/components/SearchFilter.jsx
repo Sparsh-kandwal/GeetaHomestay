@@ -14,23 +14,23 @@ const SearchFilter = ({
 
 
   useEffect(() => {
-    // Function to handle screen size changes
     const handleResize = () => {
-      if (window.innerWidth >= 768) { 
+      if (window.innerWidth >= 768 && !isFilterVisible) {
         setIsFilterVisible(true);
-      } else {
+      } else if (window.innerWidth < 768 && isFilterVisible) {
         setIsFilterVisible(false);
       }
     };
-
+  
     // Initial check
     handleResize();
-    
+  
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []); 
+  }, [isFilterVisible]);
+  
 
   const [selectedAmenities, setSelectedAmenities] = useState([]);
 
