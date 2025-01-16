@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import { googleAuth } from "../auth/api";
 import { UserContext } from "../auth/Userprovider";
@@ -15,7 +16,6 @@ const Navbar = () => {
 
   const responseGoogle = async (authResult) => {
     try {
-      console.log("Auth result received:", authResult);
       if (authResult.code) {
         const result = await googleAuth(authResult.code);
         console.log("Backend response:", result);
@@ -31,7 +31,7 @@ const Navbar = () => {
       }
     } catch (error) {
       console.error("Error during Google Login:", error);
-      alert("Error during Google Login...");
+      alert("Error while Google Login...");
     }
   };
 
@@ -44,7 +44,10 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (logoutMenuRef.current && !logoutMenuRef.current.contains(event.target)) {
+      if (
+        logoutMenuRef.current &&
+        !logoutMenuRef.current.contains(event.target)
+      ) {
         setShowLogoutMenu(false);
       }
     };
@@ -59,22 +62,23 @@ const Navbar = () => {
     setShowLogoutMenu(false);
     setIsLoading(true);
     try {
-      const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/auth/logout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
+      const response = await fetch(
+        import.meta.env.VITE_BACKEND_URL + "/auth/logout",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         setUser(null);
         alert("Logged out successfully!");
       } else {
         console.error("Logout failed");
-        alert("Logout failed. Please try again.");
       }
     } catch (error) {
       console.error("Error during logout:", error);
-      alert("Error during logout. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -84,13 +88,18 @@ const Navbar = () => {
 
   return (
     <header
-      className={`flex justify-between items-center h-[65px] px-8 fixed top-0 w-full z-50 transition-all duration-300 ${isHomePage ? "" : "bg-indigo-700 shadow-lg"
-        }`}
+      className={`flex justify-between items-center h-[65px]  px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
+        isHomePage ? "" : "bg-indigo-700 shadow-lg"
+      }`}
     >
       {/* Logo */}
       <h1 className="text-3xl text-white">
         <Link to="/home">
-          <img src="/static/logo.png" alt="Logo" className="mt-2 h-20 scale-150" />
+          <img
+            src="/static/logo.png"
+            alt="Logo"
+            className="mt-2 h-20 scale-150"
+          />
         </Link>
       </h1>
 
@@ -98,20 +107,19 @@ const Navbar = () => {
       <button
         className="block md:hidden text-white text-3xl"
         onClick={() => setIsMenuOpen((prev) => !prev)}
-        aria-label="Toggle menu"
       >
         ☰
       </button>
 
       {/* Navigation Menu */}
       <nav
-        className={`fixed top-0 right-0 h-full bg-indigo-700 p-8 transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "translate-x-full"
-          } md:static md:flex md:bg-transparent md:h-auto md:translate-x-0`}
+        className={`fixed top-0 right-0 h-full bg-indigo-700 p-8 transition-transform duration-300 ${
+          isMenuOpen ? "translate-x-0" : "translate-x-full"
+        } md:static md:flex md:bg-transparent md:h-auto md:translate-x-0`}
       >
         <button
           className="block md:hidden text-white text-2xl mb-6"
           onClick={() => setIsMenuOpen(false)}
-          aria-label="Close menu"
         >
           ✕
         </button>
@@ -148,23 +156,6 @@ const Navbar = () => {
                 {showLogoutMenu && (
                   <div className="absolute right-0 mt-5 w-40 bg-white rounded-lg shadow-lg z-50">
                     <ul className="py-2">
-                    <li>
-                        <Link
-                          to="/profile"
-                          className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        >
-                          Profile
-                        </Link>
-                      </li>
-                      <li>
-                      <Link
-                        to="/booking-history"
-                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        onClick={() => setShowLogoutMenu(false)}
-                      >
-                        Booking History
-                      </Link>
-                      </li>
                       <li>
                         <button
                           onClick={handleLogout}
@@ -173,11 +164,17 @@ const Navbar = () => {
                           Logout
                         </button>
                       </li>
-                    
+                      <li>
+                        <Link
+                          to="/profile"
+                          className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        >
+                          Profile
+                        </Link>
+                      </li>
                     </ul>
                   </div>
                 )}
-
               </div>
             ) : (
               // Show login button if not logged in
@@ -190,8 +187,6 @@ const Navbar = () => {
             )}
           </li>
         </ul>
-
-
       </nav>
     </header>
   );

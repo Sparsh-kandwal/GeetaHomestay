@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from "react";
 
 const UserContext = createContext();
 const RoomContext = createContext();
@@ -9,24 +9,26 @@ const RoomProvider = ({ children }) => {
 
   const fetchRooms = useCallback(async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/allRooms`, { method: 'GET' });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/allRooms`,
+        { method: "GET" }
+      );
       const data = await response.json();
-      console.log(data)
+      console.log(data);
       if (data) {
-        sessionStorage.setItem('rooms', JSON.stringify(data)); // Save rooms to sessionStorage
+        sessionStorage.setItem("rooms", JSON.stringify(data)); // Save rooms to sessionStorage
         setRooms(data); // Set rooms state
       } else {
-        console.error('Invalid data received from API:', data);
+        console.error("Invalid data received from API:", data);
       }
-    } catch (error) {
-      console.error('Error fetching rooms:', error);
-    } finally {
       setRoomsLoading(false);
+    } catch (error) {
+      console.error("Error fetching rooms:", error);
     }
   }, []);
 
   useEffect(() => {
-    const storedRooms = sessionStorage.getItem('rooms');
+    const storedRooms = sessionStorage.getItem("rooms");
     if (storedRooms) {
       const parsedRooms = JSON.parse(storedRooms);
       setRooms(parsedRooms);
@@ -43,44 +45,44 @@ const RoomProvider = ({ children }) => {
   );
 };
 const UserProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-  
-    const fetchUser = useCallback(async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/profile`, {
-          method: 'POST',
-          credentials: 'include',
-        });
-        if (response.status === 401) {
-          alert('Your session has expired. Please log in again.');
-          setUser(null);
-        } else if (response.status === 200) {
-          const data = await response.json();
-          setUser(data.user);
-        } else {
-          setUser(null);
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/profile`,
+        {
+          method: "POST",
+          credentials: "include",
         }
-      } catch (error) {
-        console.error('Error fetching user:', error);
+      );
+      if (response.status === 401) {
+        alert("Your session has expired. Please log in again.");
         setUser(null);
-      } finally {
-        setIsLoading(false);
+      } else if (response.status === 200) {
+        const data = await response.json();
+        setUser(data.user);
+      } else {
+        setUser(null);
       }
-    }, []);
-  
-    useEffect(() => {
-      fetchUser();
-    }, [fetchUser]);
-  
-    return (
-      <UserContext.Provider value={{ user, setUser, isLoading, setIsLoading }}>
-        {children}
-      </UserContext.Provider>
-    );
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  return (
+    <UserContext.Provider value={{ user, setUser, isLoading, setIsLoading }}>
+      {children}
+    </UserContext.Provider>
+  );
 };
 
-
-
-  
-export { UserContext, UserProvider, RoomContext, RoomProvider};
+export { UserContext, UserProvider, RoomContext, RoomProvider };

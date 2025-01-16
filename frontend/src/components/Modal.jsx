@@ -1,35 +1,33 @@
-// frontend/src/components/Modal.jsx
+import React, { useEffect } from "react";
 
-import React, { Fragment } from "react";
-import { Transition } from "@headlessui/react";
+export default function Modal({ title, content, handleCloseModal, isOpen }) {
+  // Don't render the modal if isOpen is false
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
 
-const Modal = ({ isOpen, onClose, children }) => {
-    return (
-        <Transition show={isOpen} as={Fragment}>
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <Transition.Child
-                    as={Fragment}
-                    enter="ease-out duration-300" // Smoother ease-out transition
-                    enterFrom="opacity-0 translate-y-4 scale-95" // Start slightly lower and smaller
-                    enterTo="opacity-100 translate-y-0 scale-100" // Move to original position and size
-                    leave="ease-in duration-200" // Smoother ease-in transition
-                    leaveFrom="opacity-10 translate-y-0 scale-100" // Original position and size
-                    leaveTo="opacity-0 translate-y-4 scale-95" // Move slightly lower and smaller
-                >
-                    <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
-                        <button
-                            onClick={onClose}
-                            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-                            aria-label="Close modal"
-                        >
-                            &#10005;
-                        </button>
-                        {children}
-                    </div>
-                </Transition.Child>
-            </div>
-        </Transition>
-    );
-};
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, [isOpen]);
 
-export default Modal;
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white p-8 rounded-lg max-w-2xl max-h-[80vh] overflow-y-auto">
+        <h3 className="text-2xl font-bold mb-4 text-indigo-600">{title}</h3>
+        <div className="mb-4 text-black">{content}</div>
+        <button
+          onClick={handleCloseModal}
+          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}

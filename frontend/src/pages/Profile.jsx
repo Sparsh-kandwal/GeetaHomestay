@@ -213,47 +213,6 @@ const Profile = () => {
             />
           </div>
 
-          {/* Update Profile Button */}
-          {/* <div>
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className={`w-full flex justify-center items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
-                isUpdating
-                  ? "bg-indigo-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700"
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors`}
-            >
-              {isUpdating ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 mr-3 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8z"
-                    ></path>
-                  </svg>
-                  Updating...
-                </>
-              ) : (
-                "Update Profile"
-              )}
-            </button>
-          </div> */}
-
           {/* Booking History Button */}
           <div>
             <button
