@@ -68,7 +68,7 @@ export const googleAuth = async (req, res) => {
       httpOnly: true,
       expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days expiry
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
     });
 
     // abhi isko only for new user karunga,  testing ke liye chodd rkha
