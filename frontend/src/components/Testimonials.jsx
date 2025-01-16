@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import TestimonialCard from './TestimonialCard';
-import LoadingCard from './LoadingCard';
+import React, { useState, useEffect } from "react";
+import TestimonialCard from "./TestimonialCard";
+import LoadingCard from "./LoadingCard";
 
 const Testimonials = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -10,7 +10,7 @@ const Testimonials = () => {
   // Fetch testimonials from API or sessionStorage
   useEffect(() => {
     // Check if testimonials exist in sessionStorage
-    const storedTestimonials = sessionStorage.getItem('testimonials');
+    const storedTestimonials = sessionStorage.getItem("testimonials");
 
     if (storedTestimonials) {
       // If found in sessionStorage, parse it and set the state
@@ -22,12 +22,11 @@ const Testimonials = () => {
         .then((response) => response.json())
         .then((data) => {
           setTestimonials(data);
-          sessionStorage.setItem('testimonials', JSON.stringify(data)); // Store in sessionStorage
+          sessionStorage.setItem("testimonials", JSON.stringify(data)); // Store in sessionStorage
           setLoading(false); // Data loaded, stop the loader
         })
         .catch((error) => {
-          console.error('Error fetching testimonials:', error);
-          setLoading(false); // Stop the loader even if fetch fails
+          console.error("Error fetching testimonials:", error);
         });
     }
   }, []);
@@ -39,7 +38,9 @@ const Testimonials = () => {
 
   // Go to the previous testimonial
   const goToPrevious = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length
+    );
   };
 
   // Go to a specific testimonial by index (from dots)
@@ -54,16 +55,16 @@ const Testimonials = () => {
   }, [testimonials.length]);
 
   if (loading) {
-    return (
-      <LoadingCard />
-    );
+    return <LoadingCard />;
   }
 
   return (
     <div className="bg-[#f5f5f5] py-10">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center text-[#3a328c] mb-10">What Our Customers Say</h2>
-        
+        <h2 className="text-3xl font-bold text-center text-[#3a328c] mb-10">
+          What Our Customers Say
+        </h2>
+
         {/* Carousel container */}
         <div className="flex justify-center items-center space-x-6">
           {/* Previous button */}
@@ -76,10 +77,13 @@ const Testimonials = () => {
 
           {/* Testimonial card */}
           <TestimonialCard
-            username={testimonials[currentIndex].username}
-            testimonial={testimonials[currentIndex].testimonial}
-            rating={testimonials[currentIndex].rating}
-            image={testimonials[currentIndex].image || 'https://via.placeholder.com/64'}  // Fallback image
+            username={testimonials[currentIndex]?.username}
+            testimonial={testimonials[currentIndex]?.testimonial}
+            rating={testimonials[currentIndex]?.rating}
+            image={
+              testimonials[currentIndex]?.image ||
+              "https://via.placeholder.com/64"
+            } // Fallback image
           />
 
           {/* Next button */}
@@ -96,7 +100,9 @@ const Testimonials = () => {
           {testimonials.map((_, index) => (
             <span
               key={index}
-              className={`w-3 h-3 mx-2 rounded-full cursor-pointer ${currentIndex === index ? 'bg-[#3a328c]' : 'bg-gray-400'}`}
+              className={`w-3 h-3 mx-2 rounded-full cursor-pointer ${
+                currentIndex === index ? "bg-[#3a328c]" : "bg-gray-400"
+              }`}
               onClick={() => goToTestimonial(index)}
             ></span>
           ))}

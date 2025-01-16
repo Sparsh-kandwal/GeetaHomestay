@@ -65,8 +65,12 @@ const HomeCarousel = () => {
           <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-bold">
             {currentItem.title}
           </h1>
-          <p className="text-white opacity-80 mt-4">{currentItem.description}</p>
-          <p className="text-white opacity-70 mt-2">{currentItem.extraDescription}</p>
+          <p className="text-white opacity-80 mt-4">
+            Distance from HomeStay: {currentItem.description}
+          </p>
+          <p className="text-white opacity-70 mt-2">
+            {currentItem.extraDescription}
+          </p>
         </div>
         <button
           onClick={() => openGoogleMaps(currentItem.location)}

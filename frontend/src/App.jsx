@@ -1,25 +1,31 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import { SwitchTransition, CSSTransition } from 'react-transition-group';
-import HomePage from './pages/HomePage';
-import Rooms from './pages/Rooms';
-import Navbar from './components/Navbar'; 
-import Footer from './components/Footer'; 
-import './App.css';
-import RoomDetails from './pages/RoomDetails';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
+import { SwitchTransition, CSSTransition } from "react-transition-group";
+import HomePage from "./pages/HomePage";
+import Rooms from "./pages/Rooms";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import "./App.css";
+import RoomDetails from "./pages/RoomDetails";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { CartProvider } from './contexts/CartContext';
-import { DateProvider } from './contexts/DateContext';
-import Cart from './components/Cart';
-import BookingConfirmation from './pages/BookingConfirmation';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { CartProvider } from "./contexts/CartContext";
+import { DateProvider } from "./contexts/DateContext";
+import Cart from "./components/Cart";
+import BookingConfirmation from "./pages/BookingConfirmation";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Profile from "./pages/Profile";
 
 const App = () => {
   return (
-    <GoogleOAuthProvider clientId= {import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <CartProvider>
-        <DateProvider> 
+        <DateProvider>
           <Router>
             <Navbar />
             <AnimatedRoutes />
@@ -29,7 +35,6 @@ const App = () => {
         </DateProvider>
       </CartProvider>
     </GoogleOAuthProvider>
-    
   );
 };
 
@@ -38,11 +43,7 @@ const AnimatedRoutes = () => {
 
   return (
     <SwitchTransition mode="out-in">
-      <CSSTransition
-        key={location.pathname}
-        classNames="fade"
-        timeout={500}
-      >
+      <CSSTransition key={location.pathname} classNames="fade" timeout={500}>
         <div className="page">
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />
@@ -50,9 +51,12 @@ const AnimatedRoutes = () => {
 
             <Route path="/rooms" element={<Rooms />} />
             <Route path="/rooms/:id" element={<RoomDetails />} />
-            <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+            <Route
+              path="/booking-confirmation"
+              element={<BookingConfirmation />}
+            />
             <Route path="/cart" element={<Cart />} />
-            
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </div>
       </CSSTransition>
