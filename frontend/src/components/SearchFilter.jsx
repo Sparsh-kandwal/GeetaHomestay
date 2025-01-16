@@ -15,21 +15,26 @@ const SearchFilter = ({
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768 && !isFilterVisible) {
-        setIsFilterVisible(true);
-      } else if (window.innerWidth < 768 && isFilterVisible) {
-        setIsFilterVisible(false);
+      // Only set the filter visibility on initial load based on screen size
+      if (window.innerWidth >= 768) {
+        setIsFilterVisible(true);  // Show filters on larger screens
+      } else {
+        setIsFilterVisible(false);  // Hide filters on smaller screens
       }
     };
   
     // Initial check
     handleResize();
   
-    window.addEventListener("resize", handleResize);
+    // Attach resize event listener
+    window.addEventListener('resize', handleResize);
+  
+    // Cleanup event listener on component unmount
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener('resize', handleResize);
     };
-  }, [isFilterVisible]);
+  }, []);  // Empty dependency array means this runs only once on mount
+  
   
 
   const [selectedAmenities, setSelectedAmenities] = useState([]);
