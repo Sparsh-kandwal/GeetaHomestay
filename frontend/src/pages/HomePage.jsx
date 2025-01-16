@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import Testimonials from '../components/Testimonials';
-import Facilities from '../components/Facilities';
+import React, { useEffect, useState } from "react";
+import Testimonials from "../components/Testimonials";
+import Facilities from "../components/Facilities";
 import { MapPin, Calendar } from "lucide-react";
-import { Link } from 'react-router-dom';
-import ScrollPrompt from '../components/ScrollPrompt';
-import LocationComponent from '../components/LocationComponent';
+import { Link } from "react-router-dom";
+import ScrollPrompt from "../components/ScrollPrompt";
+import LocationComponent from "../components/LocationComponent";
 
 const HomePage = () => {
   useEffect(() => {
@@ -35,9 +35,9 @@ const HomePage = () => {
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 100) {
-        setShowScrollPrompt(false);  // Hide the prompt after scroll
+        setShowScrollPrompt(false); // Hide the prompt after scroll
       } else {
-        setShowScrollPrompt(true);  // Show the prompt when scrolled back to top
+        setShowScrollPrompt(true); // Show the prompt when scrolled back to top
       }
     };
 
@@ -53,10 +53,10 @@ const HomePage = () => {
       <section
         className="h-screen bg-gradient-to-t from-blue-200 to-blue-400 relative overflow-hidden"
         style={{
-          backgroundImage: 'url(static/mount1.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
+          backgroundImage: "url(static/mount1.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
         }}
       >
         <div className="title absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white font-extrabold drop-shadow-md">
@@ -70,7 +70,10 @@ const HomePage = () => {
             <div className="flex gap-4">
               <button
                 onClick={() =>
-                  window.open("https://maps.app.goo.gl/tr8YhF4AuSyNbhWh9", "_blank")
+                  window.open(
+                    "https://maps.app.goo.gl/tr8YhF4AuSyNbhWh9",
+                    "_blank"
+                  )
                 }
                 className="bg-white text-blue-600 px-6 py-2 rounded-md border border-blue-600 hover:bg-blue-50 transition duration-300 flex items-center"
               >
@@ -92,7 +95,6 @@ const HomePage = () => {
       {showScrollPrompt && <ScrollPrompt />}
 
       <LocationComponent />
-      
 
       <Facilities />
 
