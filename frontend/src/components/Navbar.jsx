@@ -96,9 +96,9 @@ const Navbar = () => {
       <h1 className="text-3xl text-white">
         <Link to="/home">
           <img
-            src="/static/logo.png"
+            src="/logo.png"
             alt="Logo"
-            className="mt-2 h-20 scale-150"
+            className="h-12"
           />
         </Link>
       </h1>

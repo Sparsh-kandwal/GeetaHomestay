@@ -1,51 +1,48 @@
-
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { 
   FaChevronLeft, 
-  FaChevronRight, 
-  FaBed, 
   FaHeart, 
-  FaPlus, 
-  FaMinus,
   FaExclamationTriangle,
   FaCartPlus
 } from 'react-icons/fa';
 import 'react-datepicker/dist/react-datepicker.css';
-import { useCart } from '../contexts/CartContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-// Import Swiper React components and required modules
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import { useDateContext } from '../contexts/DateContext';
-
-
-// Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import { RoomContext, UserContext } from '../auth/Userprovider';
-
-
 import { useGoogleLogin } from "@react-oauth/google";
 import { googleAuth } from "../auth/api";
+import OpacityLoader from '../components/OpacityLoader';
 
 const RoomDetails = () => {
   const { id } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
-
   const [isFavorite, setIsFavorite] = useState(false);
-  const [rooms, setRooms] = useState([]);
   const { user, isLoading, setUser, setIsLoading } = useContext(UserContext);
-
   let { checkInDate, setCheckInDate, checkOutDate, setCheckOutDate } = useDateContext();
-  const { fetchRooms } = useContext(RoomContext);
-  
+  const { fetchRooms, roomsLoading, rooms } = useContext(RoomContext);
+  const [ room, setRoom ] = useState();
+  const [load, setLoad] = useState(true);
   const [minCheckOutDate, setMinCheckOutDate] = useState('');
+  const [guests, setGuests] = useState(1); 
+  const [roomCount, setRoomCount] = useState(1);
+  const [roomDetails, setRoomDetails] = useState({
+    roomType: null,
+    roomName: null,
+    price: null,
+    description: null,
+    amenities: null,
+    maxAdults: null,
+    gallery: null,
+    totalRooms: null,
+  });
 
 
   const responseGoogle = async (authResult) => {
@@ -76,18 +73,38 @@ const RoomDetails = () => {
     scope: "openid profile email",
   });
 
-  useEffect(() => {
-      // Fetch rooms from sessionStorage
-      const rooms = sessionStorage.getItem('rooms');
-      if (rooms) {
-        setRooms(JSON.parse(rooms));
-      }
-      else {
-        fetchRooms();
-      }
-    }, []);
 
-  // Set the minimum date for check-in and check-out dynamically
+
+  useEffect(() => {
+    if (!rooms) {
+      fetchRooms();
+    }
+  }, [fetchRooms]);
+
+  useEffect(() => {
+    setRoom(rooms.find((r) => r.roomType === id));
+  }, [rooms, fetchRooms, roomsLoading]);
+
+  useEffect(() => {
+    if (room) {
+      setLoad(false);
+      setRoomDetails({
+        roomType: room.roomType || null,
+        roomName: room.roomName || null,
+        price: room.price || null,
+        description: room.description || null,
+        amenities: room.amenities || null,
+        maxAdults: room.maxAdults || null,
+        gallery: room.gallery || null,
+        totalRooms: room.totalRooms || null,
+      });
+    }
+  }, [room]);
+
+
+
+
+
   useEffect(() => {
     if (!checkInDate) {
       const today = new Date().toISOString().split('T')[0];
@@ -96,7 +113,6 @@ const RoomDetails = () => {
     }
   }, [checkInDate, setCheckInDate]);
 
-  // Update the minimum check-out date when the check-in date changes
   useEffect(() => {
     if (checkInDate) {
       const nextDay = new Date(checkInDate);
@@ -105,45 +121,24 @@ const RoomDetails = () => {
     }
   }, [checkInDate]);
   
-  // State for booking
-  const [guests, setGuests] = useState(1); // Unified guests state
-  const [roomCount, setRoomCount] = useState(1);
+  const isInvalidDateRange = () => {
+    return checkInDate && checkOutDate && checkInDate >= checkOutDate;
+  };
 
-  // Access cart context
-  const { addToCart } = useCart();
 
-  // Option 1: Use location.state if navigated from RoomCard
-  const roomFromState = location.state?.room;
+  useEffect(() => {
+    if (guests > roomDetails.maxAdults * roomCount) {
+      setGuests(roomDetails.maxAdults * roomCount);
+    }
+  }, [guests, roomDetails.maxAdults, roomCount, roomsLoading]);
+  
 
-  // Option 2: Find the room by id if accessed directly
-  const room = roomFromState || rooms.find((r) => r.roomType === id);
 
-  if (!room) {
-    return (
-      <div className="container mx-auto px-4 py-24 text-center text-red-500">
-        <FaExclamationTriangle className="mx-auto mb-4 text-4xl" />
-        <p>Room not found.</p>
-      </div>
-    );
-  }
-
-  const {
-    roomType,
-    roomName,
-    price,
-    description,
-    amenities,
-    maxAdults,
-    gallery,
-    totalRooms
-  } = room;
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
-    // Optionally, handle favorite logic (e.g., update backend)
   };
 
-  // Handlers for booking
   const handleGuestsChange = (value) => {
     setGuests(value);
   };
@@ -152,18 +147,15 @@ const RoomDetails = () => {
     setRoomCount(value);
   };
 
-  const isInvalidDateRange = () => {
-    return checkInDate && checkOutDate && checkInDate >= checkOutDate;
-  };
+  
 
   const calculateTotalPrice = () => {
-    if (!checkInDate || !checkOutDate) return price;
+    if (!checkInDate || !checkOutDate) return roomDetails.price;
     checkInDate = new Date(checkInDate)
     checkOutDate = new Date(checkOutDate)
-
     const timeDiff = checkOutDate - checkInDate;
     const dayCount = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    return dayCount * price * roomCount;
+    return dayCount * roomDetails.price * roomCount;
   };
 
   const handleBookNow = () => {
@@ -171,12 +163,9 @@ const RoomDetails = () => {
       toast.error('Please select valid check-in and check-out dates before booking.');
       return;
     }
-
-
     toast.success('Booking confirmed!');
   };
 
-  // Handler for adding to cart
   const handleAddToCart = async () => {
     if (isInvalidDateRange() || !checkInDate || !checkOutDate) {
       toast.error('Please select valid check-in and check-out dates before adding to cart.');
@@ -193,13 +182,11 @@ const RoomDetails = () => {
           checkIn: checkInDate, 
           checkOut: checkOutDate, 
           members: guests,
-          roomType: roomType, 
+          roomType: roomDetails.roomType, 
           quantity: roomCount,
         }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         toast.success('Room added to cart!');
       }
@@ -212,14 +199,6 @@ const RoomDetails = () => {
     }
   };
 
-  // Ensure that guests do not exceed maxGuests per room
-  useEffect(() => {
-    if (guests > maxAdults * roomCount) {
-      setGuests(maxAdults * roomCount);
-    }
-  }, [guests, maxAdults, roomCount]);
-
-  // Define Swiper settings
   const swiperSettings = {
     modules: [Autoplay, Navigation, Pagination, EffectFade],
     autoplay: {
@@ -233,7 +212,23 @@ const RoomDetails = () => {
     speed: 1000, // Transition speed in ms
   };
 
-  
+  if (roomsLoading || load) {
+    return <div className="min-h-screen"> loading </div>
+  }
+
+  if (!room && !load) {
+    return (
+      <div className="container mx-auto px-4 py-24 text-center text-red-500">
+        <FaExclamationTriangle className="mx-auto mb-4 text-4xl" />
+        <p>Room not found.</p>
+      </div>
+    );
+  }  
+
+
+
+
+
 
   return (
     <div className="container mx-auto px-4 py-12 lg:py-24 mt-9 lg:mt-0">
@@ -252,11 +247,12 @@ const RoomDetails = () => {
           {/* Wrapping Swiper to maintain 4:3 aspect ratio */}
           <div className="w-full aspect-w-4 aspect-h-3 relative">
             <Swiper {...swiperSettings}>
-              {gallery.map((image, index) => (
+              
+              {roomDetails.gallery && roomDetails.gallery.map((image, index) => (
                 <SwiperSlide key={index}>
                   <img
                     src={import.meta.env.VITE_CLOUDINARY_CLOUD+image}
-                    alt={`${roomName} Image ${index + 1}`}
+                    alt={`${roomDetails.roomName} Image ${index + 1}`}
                     className="w-full h-full object-cover rounded-lg shadow-lg"
                     loading="lazy"
                   />
@@ -279,14 +275,14 @@ const RoomDetails = () => {
 
         {/* Room Details and Booking */}
         <div className="flex flex-col">
-          <h1 className="text-3xl lg:text-4xl font-bold mb-4 text-gray-800">{roomName}</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold mb-4 text-gray-800">{roomDetails.roomName}</h1>
           <p className="text-xl lg:text-2xl font-semibold text-indigo-600 mb-6">
-            ₹{price.toLocaleString()} per night
+            ₹{roomDetails.price && roomDetails.price.toLocaleString()} per night
           </p>
           <p className="text-sm text-gray-600 mt-1">
-                  ({maxAdults} guests per room)
+                  ({roomDetails.maxAdults} guests per room)
                 </p>
-          <p className="text-gray-700 mb-6">{description}</p>
+          <p className="text-gray-700 mb-6">{roomDetails.description}</p>
 
           {/* Room Availability */}
           {/* Select Dates */}
@@ -358,7 +354,7 @@ const RoomDetails = () => {
                 <button
                   type="button"
                   onClick={() => handleRoomCountChange(roomCount + 1)}
-                  disabled={roomCount >= totalRooms} // Disable if room count exceeds total available
+                  disabled={roomCount >= roomDetails.totalRooms} // Disable if room count exceeds total available
                   className="mt-2 bg-gray-100 bg-indigo-600 hover:bg-indigo-700 border border-indigo-600 rounded-e-lg p-3 h-11"
                 >
                   <svg
@@ -378,7 +374,7 @@ const RoomDetails = () => {
               <div className='flex items-center'>
               <label className="font-medium text-gray-700">Guests </label>
               <label className="block text-sm font-medium text-gray-700" htmlFor="guest-input">
-                      (Max: {maxAdults * roomCount})
+                      (Max: {roomDetails.maxAdults * roomCount})
                     </label>
                     :
               </div>
@@ -406,7 +402,7 @@ const RoomDetails = () => {
                       type="number"
                       id="guest-input"
                       min="1"
-                      max={maxAdults * roomCount}
+                      max={roomDetails.maxAdults * roomCount}
                       value={guests}
                       readOnly
                       className="mt-2 text-indigo-600 h-11 text-center block w-full py-2.5"
@@ -414,7 +410,7 @@ const RoomDetails = () => {
                     <button
                       type="button"
                       onClick={() => setGuests(guests + 1)}
-                      disabled={guests >= maxAdults * roomCount} // Disable if room count exceeds total available
+                      disabled={guests >= roomDetails.maxAdults * roomCount} // Disable if room count exceeds total available
                       className="mt-2 bg-gray-100 bg-indigo-600 hover:bg-indigo-700 border border-indigo-600 rounded-e-lg p-3 h-11"
                     >
                       <svg
@@ -438,7 +434,7 @@ const RoomDetails = () => {
           <div className="mb-6">
             <h2 className="text-xl lg:text-2xl font-semibold mb-2 text-gray-800">Total Price</h2>
             <p className="text-xl font-bold text-indigo-600">
-              ₹{calculateTotalPrice().toLocaleString()} 
+              ₹{roomDetails.price && calculateTotalPrice().toLocaleString()} 
               <span className="text-gray-600"> for {roomCount} room{roomCount > 1 ? 's' : ''}</span>
             </p>
           </div>
@@ -486,7 +482,7 @@ const RoomDetails = () => {
       <div className="mt-12">
         <h2 className="text-2xl lg:text-3xl font-semibold mb-6 text-gray-800">Amenities</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {amenities.map((amenity, index) => (
+          {roomDetails.amenities && roomDetails.amenities.map((amenity, index) => (
             <span
               key={index}
               className="flex items-center text-gray-700 text-sm bg-gray-100 px-4 py-2 rounded-full shadow-sm"
