@@ -9,8 +9,8 @@ const createOrder = async (req, res) => {
     if (!userId) {
       return res.status(403).json({ message: "Unauthorized" });
     }
-    const cartItems = await Cart_item.find({ userId });
 
+    const cartItems = await Cart_item.find({ userId });
     if (!cartItems || cartItems.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
@@ -19,8 +19,7 @@ const createOrder = async (req, res) => {
     const errors = [];
 
     for (const cartItem of cartItems) {
-      const { roomType, checkIn, checkOut, quantity, adults, children } =
-        cartItem;
+      const { roomType, checkIn, checkOut, quantity, members } = cartItem;
       const room = await Room.findOne({ roomType });
 
       if (!room) {
@@ -30,9 +29,32 @@ const createOrder = async (req, res) => {
 
       const totalDays =
         (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
-      const totalAmount = totalDays * quantity * room.price * 100; // Amount in paise
+      if (totalDays <= 0) {
+        errors.push({ roomType, message: "Invalid booking dates" });
+        continue;
+      }
+
+      const totalAmount = totalDays * quantity * room.price ; 
       const checkInDate = new Date(checkIn);
       const checkOutDate = new Date(checkOut);
+
+      let isRoomAvailable = true;
+      for (
+        let date = new Date(checkInDate);
+        date < checkOutDate;
+        date.setDate(date.getDate() + 1)
+      ) {
+        const formattedDate = new Date(date).toISOString().split("T")[0];
+        const existingDate = await BookedDate.findOne({ date: formattedDate, roomType });
+
+        if (existingDate && existingDate.quantity + quantity > room.totalRooms) {
+          isRoomAvailable = false;
+          errors.push({ roomType, message: `No availability on ${formattedDate}` });
+          break;
+        }
+      }
+
+      if (!isRoomAvailable) continue;
 
       for (
         let date = new Date(checkInDate);
@@ -40,40 +62,29 @@ const createOrder = async (req, res) => {
         date.setDate(date.getDate() + 1)
       ) {
         const formattedDate = new Date(date).toISOString().split("T")[0];
-        const existingDate = await BookedDate.findOne({
-          date: formattedDate,
-          roomType,
-        });
+        const existingDate = await BookedDate.findOne({ date: formattedDate, roomType });
 
         if (existingDate) {
           existingDate.quantity += quantity;
           await existingDate.save();
         } else {
-          await BookedDate.create({
-            date: formattedDate,
-            roomType,
-            quantity,
-          });
+          await BookedDate.create({ date: formattedDate, roomType, quantity });
         }
       }
 
       const booking = await Booking.create({
         userId,
-        adults,
-        children,
         roomType,
+        members,
         checkIn,
         checkOut,
         roomsBooked: quantity,
         totalAmount,
-        status: "pending",
+        paymentStatus: "pending",
       });
 
       bookings.push(booking);
     }
-
-    // Clear the cart after successful bookings
-    await Cart_item.deleteMany({ userId });
 
     const responseMessage = {
       success: true,
@@ -88,9 +99,7 @@ const createOrder = async (req, res) => {
     res.status(200).json(responseMessage);
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to create orders" });
+    res.status(500).json({ success: false, message: "Failed to create orders" });
   }
 };
 

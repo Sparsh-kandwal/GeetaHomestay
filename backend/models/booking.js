@@ -10,7 +10,7 @@ const booking = new mongoose.Schema ({
     roomsBooked: {type: Number, required: true},   // Number of rooms booked
     totalAmount: {type: Number, required: true},   // Total amount paid
     discount: {type: Number, required: true, default: 0},   // Discount applied
-    payementStatus: {type: String, required: true, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending'},   // Payment status (paid or unpaid)
+    paymentStatus: {type: String, required: true, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending'},   // Payment status (paid or unpaid)
 });
 
 const Booking = mongoose.model('Booking', booking);
