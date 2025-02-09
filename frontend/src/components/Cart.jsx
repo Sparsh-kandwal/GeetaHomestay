@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoomContext } from '../auth/Userprovider';
+import { UserContext } from '../auth/Userprovider';
 import CartItem from './Cartitem'
 import OpacityLoader from './OpacityLoader';
 import { AnimatePresence } from 'framer-motion';
+import { checkouthandler } from '../utils/Payment';
+import axios from 'axios';
 const Cart = () => {
     const [availableItems, setAvailableItems] = useState([]);
     const [removedItems, setRemovedItems] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
     const [loading, setLoading] = useState(true);
     const { fetchRooms, rooms, setRooms, roomsLoading } = useContext(RoomContext);
-    const navigate = useNavigate();
-
+    const { user } = useContext(UserContext);
 
     useEffect(() => {
         const storedRooms = sessionStorage.getItem('rooms');
@@ -60,8 +62,27 @@ const Cart = () => {
     }, [roomsLoading]);
 
 
-    const handleProceedToCheckout = () => {
-        navigate('/checkout');
+    const handleProceedToCheckout = async () => {
+        try {
+            const bookingResponse = await axios.post(
+                `${import.meta.env.VITE_BACKEND_URL}/bookroom`,
+                { 
+                    userId: user._id,  
+                    totalAmount
+                },
+                { withCredentials: true } 
+            );
+            console.log("🟢 Booking Response:", bookingResponse.data);
+    
+            if (bookingResponse.data.success) {
+                checkouthandler(totalAmount, user);
+            } else {
+                alert("Booking failed! Please try again.");
+            }
+        } catch (error) {
+            console.error("🔴 Booking Error:", error);
+            alert("Booking request failed. Please try again.");
+        }
     };
 
     if (loading || roomsLoading) {
@@ -80,15 +101,15 @@ const Cart = () => {
                     {removedItems.length > 0 && (
                         <div className="space-y-4">
                             <h2 className="text-2xl font-semibold text-red-700">Unavailable Items</h2>
-                            {removedItems.map((item, index) => (
-                                <CartItem key={`removed-${index}`} item={item} isRemoved={true} setAvailableItems={setAvailableItems} />
+                            {removedItems.map((item) => (
+                                <CartItem key={`removed-${item.id || item.roomType}`} item={item} isRemoved={true} setAvailableItems={setAvailableItems} />
                             ))}
                         </div>
                     )}
                     {availableItems.length > 0 && (
                         <div className="space-y-4">
-                            {availableItems.map((item, index) => (
-                                <CartItem key={`available-${index}`} item={item} setAvailableItems={setAvailableItems}/>
+                            {availableItems.map((item) => (
+                                <CartItem key={`available-${item.id || item.roomType}`} item={item} setAvailableItems={setAvailableItems}/>
                             ))}
                         </div>
                     )}
@@ -103,8 +124,7 @@ const Cart = () => {
                                 </div>
                                 <button
                                     onClick={handleProceedToCheckout}
-                                    className="bg-blue-600 text-white py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors h-fit opacity-50 cursor-not-allowed"
-                                    disabled={true}
+                                    className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"  
                                 >
                                     Proceed to Checkout
                                 </button>

@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import routes from './routes/routes.js';
 import authroutes from './routes/authrouter.js'
+import payment_routes from './routes/payment_routes.js'
+
 import cookieParser from 'cookie-parser';
 dotenv.config();
 const app = express();
@@ -48,6 +50,7 @@ connectDB();
 // Routes
 app.use('/', routes);
 app.use('/auth', authroutes);
+app.use('/payment', payment_routes);
 
 app.listen(process.env.PORT || 5000, () => {
     console.log(`Server is listening on port: ${process.env.PORT || 5000}`);
