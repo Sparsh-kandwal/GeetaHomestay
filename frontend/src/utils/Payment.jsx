@@ -31,7 +31,11 @@ export const checkouthandler = async (amount, user) => {
                 amount: order.amount, 
             });
 
-            console.log("🟢 Payment Verification Response:", verificationRes.data);
+
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkPaymentStatus`, {
+                paymentId: response.razorpay_payment_id,
+                userId: user._id,
+            });
 
         } catch (error) {
             console.error("🔴 Payment Verification Failed:", error);
@@ -69,3 +73,4 @@ export const checkouthandler = async (amount, user) => {
     console.error("Payment Error:", error);
   }
 };
+

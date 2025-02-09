@@ -11,6 +11,7 @@ const booking = new mongoose.Schema ({
     totalAmount: {type: Number, required: true},   // Total amount paid
     discount: {type: Number, required: true, default: 0},   // Discount applied
     paymentStatus: {type: String, required: true, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending'},   // Payment status (paid or unpaid)
+    createdAt: { type: Date, default: Date.now }
 });
 
 const Booking = mongoose.model('Booking', booking);

@@ -98,3 +98,41 @@ export const getKey = (req,res)=>{
     key: process.env.RAZORPAY_KEY_ID
   })
 }
+
+
+
+export const checkPaymentStatus = async (req, res) => {
+  try {
+      const { paymentId, userId } = req.body;
+
+      if (!paymentId || !userId) {
+          return res.status(400).json({ success: false, message: "Missing paymentId or userId" });
+      }
+
+      // Fetch payment details from Razorpay
+      const payment = await instance.payments.fetch(paymentId);
+
+      console.log("Payment Status Response:", payment.status);
+
+      if (payment.status === "captured") {
+          // Payment successful, update booking status
+          await Booking.updateMany(
+              { userId, paymentStatus: "pending" },
+              { $set: { paymentStatus: "confirmed" } }
+          );
+          return res.status(200).json({ success: true, message: "Payment confirmed" });
+
+      } else if (payment.status === "failed") {
+          console.log("Payment failed, rolling back bookings...");
+          await rollbackBookings(userId);
+          return res.status(400).json({ success: false, message: "Payment failed, booking rolled back" });
+
+      } else {
+          return res.status(200).json({ success: false, message: "Payment still pending" });
+      }
+
+  } catch (error) {
+      console.error("Error checking payment status:", error);
+      return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
