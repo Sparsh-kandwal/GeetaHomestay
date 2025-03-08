@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const checkouthandler = async (amount, user) => {
+export const checkouthandler = async (amount, user, callback) => {
   try {
     console.log(user)
     const { data: { order } } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkout`, {
@@ -32,10 +32,8 @@ export const checkouthandler = async (amount, user) => {
             });
 
 
-            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkPaymentStatus`, {
-                paymentId: response.razorpay_payment_id,
-                userId: user._id,
-            });
+            callback(response.razorpay_payment_id);
+
 
         } catch (error) {
             console.error("🔴 Payment Verification Failed:", error);

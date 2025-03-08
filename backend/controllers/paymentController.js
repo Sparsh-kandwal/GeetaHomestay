@@ -74,11 +74,9 @@ export const paymentVerification = async (req, res) => {
       { $set: { paymentStatus: "confirmed" } }
     );
 
-
-
     await Cart_item.deleteMany({ userId });
 
-    res.status(200).json({ success: true, message: "Payment verified successfully" });
+    res.redirect(`${process.env.CLIENT_URL}/paymentsuccess?reference=${razorpay_payment_id}`);
 
   } catch (error) {
     bookingFailed = true

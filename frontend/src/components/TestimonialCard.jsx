@@ -6,7 +6,7 @@ const TestimonialCard = ({ username, testimonial, rating, image }) => {
   console.log(image)
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-lg w-3/5 mx-auto">
+    <div className="bg-white p-8 rounded-lg shadow-lg w-3/5 h-[40vh] sm:h-[30vh] mx-auto">
       {/* Display the image */}
       <div className="flex items-center">
         {/* Add the image and ensure it has a fixed size and is rounded */}
@@ -28,7 +28,9 @@ const TestimonialCard = ({ username, testimonial, rating, image }) => {
 </h3>
 
       </div>
-      <p className="text-gray-600 mt-4 text-lg">{testimonial}</p>
+      <p className="text-gray-600 mt-4 text-lg overflow-hidden line-clamp-4">
+        {testimonial}
+      </p>
 
       {/* Display stars */}
       <div className="text-yellow-500 mt-2" aria-label={`${starCount} stars`}>

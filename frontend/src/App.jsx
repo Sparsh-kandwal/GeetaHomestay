@@ -20,7 +20,9 @@ import BookingConfirmation from "./pages/BookingConfirmation";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Profile from "./pages/Profile";
+import BookingHistory from "./pages/BookingHistory";
 import ScrollToTop from "./components/ScrollToTop";
+
 
 
 const App = () => {
@@ -54,11 +56,12 @@ const AnimatedRoutes = () => {
             <Route path="/rooms" element={<Rooms />} />
             <Route path="/rooms/:id" element={<RoomDetails />} />
             <Route
-              path="/booking-confirmation"
-              element={<BookingConfirmation />}
+              path="/booking-confirmation" element={<BookingConfirmation />}
             />
             <Route path="/cart" element={<Cart />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/booking-history" element={<BookingHistory />} />
+
           </Routes>
         </div>
       </CSSTransition>
