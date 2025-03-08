@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { FaCheckCircle, FaHome, FaShoppingCart, FaFilePdf } from 'react-icons/fa';
 import jsPDF from 'jspdf';
+import BookedDate from '../../../backend/models/bookedDates';
 
 const BookingConfirmation = () => {
     const location = useLocation();
@@ -11,9 +12,8 @@ const BookingConfirmation = () => {
 
     const { state } = location;
     const bookingData = state?.bookingDetails;
-    const room = state?.room;
 
-    if (!bookingData || !room) {
+    if (!bookingData) {
         return (
             <div className="min-h-screen flex mt-10 items-center justify-center p-4 bg-gray-100">
                 <div className="bg-white shadow-lg rounded-lg p-8 max-w-lg text-center">
@@ -36,15 +36,19 @@ const BookingConfirmation = () => {
     }
 
     const {
-        checkInDate,
-        checkOutDate,
-        guests,
-        roomCount,
-        totalPrice,
+        checkIn,
+        checkOut,
+        members,
+        roomsBooked,
+        totalAmount,
+        roomType
     } = bookingData;
 
-    const formattedCheckIn = format(new Date(checkInDate), 'PPP');
-    const formattedCheckOut = format(new Date(checkOutDate), 'PPP');
+
+    console.log(bookingData)
+
+    const formattedCheckIn = format(new Date(checkIn), 'PPP');
+    const formattedCheckOut = format(new Date(checkOut), 'PPP');
 
     const handleNavigateHome = () => {
         navigate('/');
@@ -61,12 +65,12 @@ const BookingConfirmation = () => {
         doc.setFontSize(20);
         doc.text('Booking Receipt', 20, 20);
         doc.setFontSize(12);
-        doc.text(`Room: ${room.name}`, 20, 40);
+        doc.text(`Room Type: ${roomType}`, 20, 40);
         doc.text(`Check-In Date: ${formattedCheckIn}`, 20, 50);
         doc.text(`Check-Out Date: ${formattedCheckOut}`, 20, 60);
-        doc.text(`Guests: ${guests}`, 20, 70);
-        doc.text(`Rooms Booked: ${roomCount}`, 20, 80);
-        doc.text(`Total Price: ₹${totalPrice.toLocaleString()}`, 20, 90);
+        doc.text(`Guests: ${members}`, 20, 70);
+        doc.text(`Rooms Booked: ${roomsBooked}`, 20, 80);
+        doc.text(`Total Price: ₹${totalAmount.toLocaleString()}`, 20, 90);
         doc.save('booking-receipt.pdf');
     };
 
@@ -86,8 +90,8 @@ const BookingConfirmation = () => {
                         <h2 className="text-xl font-semibold text-gray-800 mb-4">Booking Information</h2>
                         <div className="space-y-3">
                             <div>
-                                <h3 className="text-gray-500">Room</h3>
-                                <p className="text-gray-700">{room.name}</p>
+                                <h3 className="text-gray-500">Room Type</h3>
+                                <p className="text-gray-700">{roomType}</p>
                             </div>
                             <div>
                                 <h3 className="text-gray-500">Check-In Date</h3>
@@ -99,11 +103,11 @@ const BookingConfirmation = () => {
                             </div>
                             <div>
                                 <h3 className="text-gray-500">Guests</h3>
-                                <p className="text-gray-700">{guests} {guests > 1 ? 'guests' : 'guest'}</p>
+                                <p className="text-gray-700">{members} {members > 1 ? 'guests' : 'guest'}</p>
                             </div>
                             <div>
                                 <h3 className="text-gray-500">Rooms Booked</h3>
-                                <p className="text-gray-700">{roomCount} {roomCount > 1 ? 'rooms' : 'room'}</p>
+                                <p className="text-gray-700">{roomsBooked} {roomsBooked > 1 ? 'rooms' : 'room'}</p>
                             </div>
                         </div>
                     </div>
@@ -111,9 +115,9 @@ const BookingConfirmation = () => {
                     <div>
                         <h2 className="text-xl font-semibold text-gray-800 mb-4">Total Price</h2>
                         <div className="bg-gradient-to-br from-teal-400 to-indigo-500 p-6 rounded-lg text-center shadow-lg transform transition-transform hover:scale-105">
-                            <p className="text-4xl font-bold text-white drop-shadow-lg">₹{totalPrice.toLocaleString()}</p>
+                            <p className="text-4xl font-bold text-white drop-shadow-lg">₹{totalAmount.toLocaleString()}</p>
                             <p className="text-gray-100 mt-2">
-                                Total for {roomCount} {roomCount > 1 ? 'rooms' : 'room'}
+                                Total for {roomsBooked} {roomsBooked > 1 ? 'rooms' : 'room'}
                             </p>
                         </div>
                         <button
