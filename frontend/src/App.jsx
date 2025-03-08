@@ -21,6 +21,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Profile from "./pages/Profile";
 import BookingHistory from "./pages/BookingHistory";
+import ScrollToTop from "./components/ScrollToTop";
+
 
 
 const App = () => {
