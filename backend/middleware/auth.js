@@ -5,7 +5,6 @@ export const verifyToken = (req, res, next) => {
   const secretKey = process.env.JWT_SECRET;
 
   if (!token) {
-    console.log("no token");
     return next();
   }
 

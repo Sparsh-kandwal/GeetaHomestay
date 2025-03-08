@@ -133,7 +133,6 @@ const SearchFilter = ({
 
         {/* Filter by Guest Count */}
         <div className="mb-6">
-          <h4 className="text-md font-semibold mb-3">Filter by Guest Count</h4>
           <div className="space-y-4">
             <div>
               <label className="block text-gray-700">Total Guests</label>
