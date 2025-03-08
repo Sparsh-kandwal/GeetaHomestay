@@ -2,6 +2,7 @@ import Booking from "../models/booking.js";
 import Room from "../models/room.js";
 import BookedDate from "../models/bookedDates.js";
 import Cart_item from "../models/cart.js";
+import mongoose from "mongoose";
 
 const createOrder = async (req, res) => {
   try {
@@ -17,6 +18,8 @@ const createOrder = async (req, res) => {
 
     const bookings = [];
     const errors = [];
+
+    const bookingId = new mongoose.Types.ObjectId();
 
     for (const cartItem of cartItems) {
       const { roomType, checkIn, checkOut, quantity, members } = cartItem;
@@ -73,6 +76,7 @@ const createOrder = async (req, res) => {
       }
 
       const booking = await Booking.create({
+        bookingId, 
         userId,
         roomType,
         members,

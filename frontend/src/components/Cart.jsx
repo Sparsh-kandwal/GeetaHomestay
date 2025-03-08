@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { RoomContext } from '../auth/Userprovider';
 import { UserContext } from '../auth/Userprovider';
 import CartItem from './Cartitem'
@@ -13,7 +13,9 @@ const Cart = () => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [loading, setLoading] = useState(true);
     const { fetchRooms, rooms, setRooms, roomsLoading } = useContext(RoomContext);
+    const navigate = useNavigate()
     const { user } = useContext(UserContext);
+    const [paymentStatus ,setPaymentStatus] = useState(false)
 
     useEffect(() => {
         const storedRooms = sessionStorage.getItem('rooms');
@@ -75,10 +77,38 @@ const Cart = () => {
             console.log("🟢 Booking Response:", bookingResponse.data);
     
             if (bookingResponse.data.success) {
-                checkouthandler(totalAmount, user);
-            } else {
+                checkouthandler(totalAmount, user, async (paymentId) => {
+                    console.log(`Saumil payment : ${paymentId}`);
+                
+                    const statusRes = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkPaymentStatus`, {
+                      paymentId,
+                      userId: user._id,
+                    },
+                    { withCredentials: true } 
+                    );
+
+
+                    console.log(statusRes)
+
+                    try {
+                        navigate('/booking-confirmation', { 
+                            state: { 
+                                bookingDetails: bookingResponse.data.bookings[0], // Extract first booking
+                                room: { name: bookingResponse.data.bookings[0].roomType } // Assuming room name is roomType
+                            } 
+                        });
+                    } catch (error) {
+                        console.error("🔴 Navigation Error:", error);
+                    }
+                    
+                    
+                  });
+                
+            }     
+            else {
                 alert("Booking failed! Please try again.");
             }
+           
         } catch (error) {
             console.error("🔴 Booking Error:", error);
             alert("Booking request failed. Please try again.");
