@@ -41,7 +41,8 @@
     "react-toastify": "^11.0.3",
     "react-transition-group": "^4.4.5",
     "react-window": "^1.8.11",
-    "swiper": "^11.2.1"
+    "swiper": "^11.2.1",
+    "@rollup/rollup-linux-x64-gnu": "^4.9.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
