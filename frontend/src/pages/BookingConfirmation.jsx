@@ -1,156 +1,65 @@
-import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { toast } from 'react-toastify';
-import { FaCheckCircle, FaHome, FaShoppingCart, FaFilePdf } from 'react-icons/fa';
-import jsPDF from 'jspdf';
-import BookedDate from '../../../backend/models/bookedDates';
+import { useEffect } from "react";
+import { useContext } from "react";
+import { CheckCircle } from "lucide-react";
+import { UserContext } from "../auth/Userprovider";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const BookingConfirmation = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
+  const { user } = useContext(UserContext); 
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    const { state } = location;
-    const bookingData = state?.bookingDetails;
-
-    if (!bookingData) {
-        return (
-            <div className="min-h-screen flex mt-10 items-center justify-center p-4 bg-gray-100">
-                <div className="bg-white shadow-lg rounded-lg p-8 max-w-lg text-center">
-                    <h2 className="text-2xl font-semibold text-red-600 mb-4">
-                        Oops! Booking Details Missing
-                    </h2>
-                    <p className="text-gray-700 mb-6">
-                        It seems like we couldn't retrieve your booking details. Please try booking again.
-                    </p>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                    >
-                        <FaHome className="mr-2" />
-                        Go to Home
-                    </button>
-                </div>
-            </div>
-        );
+  useEffect(() => {
+    if (!location.state?.fromCart) {
+      navigate("/cart");
     }
+  }, [location, navigate]);
 
-    const {
-        checkIn,
-        checkOut,
-        members,
-        roomsBooked,
-        totalAmount,
-        roomType
-    } = bookingData;
+  // Safely extract bookingId
+  const bookingId = location.state?.bookingDetails?.bookings?.[0]?.bookingId;
+
+  useEffect(() => {
+    sendEmail();
+  }, [bookingId]);
+
+  const sendEmail = async () => {
+    if (!bookingId) return; 
+
+    try {
+      const response =  await fetch(`${import.meta.env.VITE_BACKEND_URL}/email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ bookingId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+
+      console.log("Email sent successfully");
+    } catch (error) {
+      console.error("Error sending email:", error.message);
+    }
+  };
 
 
-    console.log(bookingData)
 
-    const formattedCheckIn = format(new Date(checkIn), 'PPP');
-    const formattedCheckOut = format(new Date(checkOut), 'PPP');
-
-    const handleNavigateHome = () => {
-        navigate('/');
-        toast.success('Welcome back!');
-    };
-
-    const handleViewCart = () => {
-        navigate('/cart');
-        toast.info('Here is your cart!');
-    };
-
-    const handleDownloadPDF = () => {
-        const doc = new jsPDF();
-        doc.setFontSize(20);
-        doc.text('Booking Receipt', 20, 20);
-        doc.setFontSize(12);
-        doc.text(`Room Type: ${roomType}`, 20, 40);
-        doc.text(`Check-In Date: ${formattedCheckIn}`, 20, 50);
-        doc.text(`Check-Out Date: ${formattedCheckOut}`, 20, 60);
-        doc.text(`Guests: ${members}`, 20, 70);
-        doc.text(`Rooms Booked: ${roomsBooked}`, 20, 80);
-        doc.text(`Total Price: ₹${totalAmount.toLocaleString()}`, 20, 90);
-        doc.save('booking-receipt.pdf');
-    };
-
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-300 p-4" style={{ marginTop: '50px' }}>
-            <div className="bg-gradient-to-br from-blue-200 to-white shadow-2xl rounded-2xl p-8 max-w-4xl w-full">
-                <div className="flex flex-col items-center mb-8">
-                    <FaCheckCircle className="text-green-500 text-6xl" />
-                    <h1 className="text-3xl font-bold text-green-600 mt-4">Booking Confirmed!</h1>
-                    <p className="text-gray-600 mt-2 text-center">
-                        Thank you for your reservation. Here are your booking details:
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Booking Information</h2>
-                        <div className="space-y-3">
-                            <div>
-                                <h3 className="text-gray-500">Room Type</h3>
-                                <p className="text-gray-700">{roomType}</p>
-                            </div>
-                            <div>
-                                <h3 className="text-gray-500">Check-In Date</h3>
-                                <p className="text-gray-700">{formattedCheckIn}</p>
-                            </div>
-                            <div>
-                                <h3 className="text-gray-500">Check-Out Date</h3>
-                                <p className="text-gray-700">{formattedCheckOut}</p>
-                            </div>
-                            <div>
-                                <h3 className="text-gray-500">Guests</h3>
-                                <p className="text-gray-700">{members} {members > 1 ? 'guests' : 'guest'}</p>
-                            </div>
-                            <div>
-                                <h3 className="text-gray-500">Rooms Booked</h3>
-                                <p className="text-gray-700">{roomsBooked} {roomsBooked > 1 ? 'rooms' : 'room'}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Total Price</h2>
-                        <div className="bg-gradient-to-br from-teal-400 to-indigo-500 p-6 rounded-lg text-center shadow-lg transform transition-transform hover:scale-105">
-                            <p className="text-4xl font-bold text-white drop-shadow-lg">₹{totalAmount.toLocaleString()}</p>
-                            <p className="text-gray-100 mt-2">
-                                Total for {roomsBooked} {roomsBooked > 1 ? 'rooms' : 'room'}
-                            </p>
-                        </div>
-                        <button
-                            onClick={handleDownloadPDF}
-                            className="mt-4 flex items-center justify-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-                        >
-                            <FaFilePdf className="mr-2" />
-                            Download Receipt
-                        </button>
-                    </div>
-                </div>
-
-                <hr className="my-8 border-gray-300" />
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button
-                        onClick={handleNavigateHome}
-                        className="flex items-center justify-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-                    >
-                        <FaHome className="mr-2" />
-                        Go to Home
-                    </button>
-                    <button
-                        onClick={handleViewCart}
-                        className="flex items-center justify-center border border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 transition"
-                    >
-                        <FaShoppingCart className="mr-2" />
-                        View Cart
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+      <div className="bg-white shadow-lg rounded-2xl p-6 text-center max-w-md">
+        <CheckCircle className="text-green-500 w-16 h-16 mx-auto" />
+        <h2 className="text-2xl font-semibold mt-4">Booking Confirmed!</h2>
+        <p className="text-gray-600 mt-2">
+          Your booking has been successfully confirmed.
+        </p>
+        <p className="text-gray-600 mt-2">
+          An invoice has been sent to <strong>{user?.email}</strong>.
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default BookingConfirmation;

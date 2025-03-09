@@ -88,13 +88,11 @@ const Cart = () => {
                     );
 
 
-                    console.log(statusRes)
-
                     try {
                         navigate('/booking-confirmation', { 
                             state: { 
-                                bookingDetails: bookingResponse.data.bookings[0], // Extract first booking
-                                room: { name: bookingResponse.data.bookings[0].roomType } // Assuming room name is roomType
+                                bookingDetails: bookingResponse.data,
+                                fromCart: true
                             } 
                         });
                     } catch (error) {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import BookingCard from "../components/BookingCard";
 
 const BookingHistory = () => {
   const [groupedBookings, setGroupedBookings] = useState([]);
@@ -79,34 +80,19 @@ const BookingHistory = () => {
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="max-w-4xl mx-auto mt-20 p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-4xl mx-auto mt-32 p-6 bg-white shadow-lg rounded-lg">
       <h2 className="text-3xl font-bold text-center mb-6 text-blue-600">Booking History</h2>
 
       {groupedBookings.length === 0 ? (
         <p className="text-gray-500 text-center">No confirmed bookings found.</p>
       ) : (
         <>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300 rounded-lg shadow-md">
-              <thead>
-                <tr className="bg-blue-500 text-white text-sm md:text-lg">
-                  <th className="border p-3">Check-In</th>
-                  <th className="border p-3">Check-Out</th>
-                  <th className="border p-3">Room Types</th>
-                  <th className="border p-3">Total Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentBookings.map((booking) => (
-                  <tr key={booking.bookingId} className="border text-sm md:text-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition">
-                    <td className="border p-3">{new Date(booking.checkIn).toLocaleDateString()}</td>
-                    <td className="border p-3">{new Date(booking.checkOut).toLocaleDateString()}</td>
-                    <td className="border p-3">{booking.roomTypes.join(", ")}</td>
-                    <td className="border p-3 font-bold text-green-600">₹{booking.totalAmount}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            {currentBookings.map((booking) => (
+
+              <BookingCard booking={booking} />
+
+            ))}
           </div>
 
           {/* Pagination Controls */}

@@ -24,6 +24,7 @@ import BookingHistory from "./pages/BookingHistory";
 import ScrollToTop from "./components/ScrollToTop";
 
 
+
 const App = () => {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
@@ -54,9 +55,7 @@ const AnimatedRoutes = () => {
             <Route path="/home" element={<HomePage />} />
             <Route path="/rooms" element={<Rooms />} />
             <Route path="/rooms/:id" element={<RoomDetails />} />
-            <Route
-              path="/booking-confirmation" element={<BookingConfirmation />}
-            />
+            <Route path="/booking-confirmation" element={<BookingConfirmation />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/booking-history" element={<BookingHistory />} />
