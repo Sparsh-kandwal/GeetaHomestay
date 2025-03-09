@@ -13,6 +13,7 @@ const Navbar = () => {
 
   const navItems = ["Home", "Rooms", "Cart"];
   const { user, isLoading, setUser, setIsLoading } = useContext(UserContext);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const responseGoogle = async (authResult) => {
     try {
@@ -59,8 +60,10 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = async () => {
+    setShowConfirmModal(false); // Close modal
     setShowLogoutMenu(false);
     setIsLoading(true);
+
     try {
       const response = await fetch(
         import.meta.env.VITE_BACKEND_URL + "/auth/logout",
@@ -156,14 +159,7 @@ const Navbar = () => {
                 {showLogoutMenu && (
                   <div className="absolute right-0 mt-5 w-40 bg-white rounded-lg shadow-lg z-50">
                     <ul className="py-2">
-                      <li>
-                        <button
-                          onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        >
-                          Logout
-                        </button>
-                      </li>
+                      
                       <li>
                         <Link
                           to="/profile"
@@ -171,6 +167,23 @@ const Navbar = () => {
                         >
                           Profile
                         </Link>
+                      </li>
+
+                      <li>
+                        <Link
+                          to="/booking-history"
+                          className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        >
+                          Your Bookings
+                        </Link>
+                        <li>
+                        <button
+                          onClick={() => setShowConfirmModal(true)}
+                          className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-600"
+                        >
+                          Logout
+                        </button>
+                      </li>
                       </li>
                     </ul>
                   </div>
@@ -188,6 +201,30 @@ const Navbar = () => {
           </li>
         </ul>
       </nav>
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
+            <h2 className="text-lg font-semibold mb-4">Are you sure?</h2>
+            <p className="text-gray-600">Do you really want to logout?</p>
+
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg mr-2 hover:bg-red-700 transition"
+              >
+                {isLoading ? "Logging out..." : "Yes, Logout"}
+              </button>
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

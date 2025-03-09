@@ -442,18 +442,7 @@ const RoomDetails = () => {
           {/* Booking and Add to Cart Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Book Now Button */}
-            <button
-              onClick={handleBookNow}
-              className={`w-full sm:w-1/2 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200 opacity-50 cursor-not-allowed
-              `}
-              // title={isInvalidDateRange() || !checkInDate || !checkOutDate 
-              //   ? 'Please select a Checkout Date' 
-              //   : ''}
-                disabled={true}
-              // disabled={isInvalidDateRange() || !checkInDate || !checkOutDate}
-            >
-              Book Now
-            </button>
+            
 
             {/* Add to Cart Button */}
             <button
