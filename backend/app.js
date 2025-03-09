@@ -21,7 +21,7 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-    origin : (origin, callback) => {
+    origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);  // Allow request from the origin
         } else {
@@ -29,11 +29,21 @@ app.use(cors({
             callback(new Error('Not allowed by CORS'));
         }
     },
-    methods: 'GET,POST,PUT,DELETE,OPTIONS', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
 }));
 
-app.options('*', cors());
+app.options('*', (req, res) => {
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.header('Access-Control-Allow-Credentials', 'true');
+        return res.sendStatus(204);
+    }
+    return res.status(403).json({ message: 'CORS not allowed for this origin' });
+});
 app.use(cookieParser());
 
 const connectDB = async () => {
