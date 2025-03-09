@@ -23,8 +23,6 @@ const sendInvoice = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    console.log("User found:", user);
-
     const invoiceData = {
       bookingId,
       userEmail: user.email,
