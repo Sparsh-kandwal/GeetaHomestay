@@ -15,7 +15,7 @@ const Cart = () => {
     const { fetchRooms, rooms, setRooms, roomsLoading } = useContext(RoomContext);
     const navigate = useNavigate()
     const { user } = useContext(UserContext);
-    const [paymentStatus ,setPaymentStatus] = useState(false)
+    const [paymentStatus, setPaymentStatus] = useState(false)
 
     useEffect(() => {
         const storedRooms = sessionStorage.getItem('rooms');
@@ -57,110 +57,112 @@ const Cart = () => {
             } catch (error) {
                 console.error('Error Fetching Cart Items', error);
             } finally {
-              setLoading(false);
+                setLoading(false);
             }
         };
         if (!roomsLoading) fetchCart();
     }, [roomsLoading]);
 
 
+
     const handleProceedToCheckout = async () => {
         try {
             const bookingResponse = await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}/bookroom`,
-                { 
-                    userId: user._id,  
+                {
+                    userId: user._id,
                     totalAmount
                 },
-                { withCredentials: true } 
+                { withCredentials: true }
             );
             console.log("🟢 Booking Response:", bookingResponse.data);
-    
+
             if (bookingResponse.data.success) {
                 checkouthandler(totalAmount, user, async (paymentId) => {
                     console.log(`Saumil payment : ${paymentId}`);
-                
+
                     const statusRes = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkPaymentStatus`, {
-                      paymentId,
-                      userId: user._id,
+                        paymentId,
+                        userId: user._id,
                     },
-                    { withCredentials: true } 
+                        { withCredentials: true }
                     );
 
+                    console.log("🟢 Payment Status Response:", statusRes.data);
 
                     try {
-                        navigate('/booking-confirmation', { 
-                            state: { 
+                        navigate('/booking-confirmation', {
+                            state: {
                                 bookingDetails: bookingResponse.data,
                                 fromCart: true
-                            } 
+                            }
                         });
+                        console.log("🟢 Navigation to /booking-confirmation successful");
                     } catch (error) {
                         console.error("🔴 Navigation Error:", error);
                     }
-                    
-                    
-                  });
-                
-            }     
-            else {
+
+                });
+
+            } else {
                 alert("Booking failed! Please try again.");
             }
-           
+
         } catch (error) {
             console.error("🔴 Booking Error:", error);
             alert("Booking request failed. Please try again.");
         }
     };
 
+
     if (loading || roomsLoading) {
-      return <OpacityLoader />;
+        return <OpacityLoader />;
     }
 
     return (
         <div className="container mx-auto px-4 py-12 lg:py-24 mt-5 md:mt-0">
             <AnimatePresence>
-            <h1 className="text-5xl font-bold mt-5 mb-8 text-blue-900 text-center">Your Cart</h1>
+                <h1 className="text-5xl font-bold mt-5 mb-8 text-blue-900 text-center">Your Cart</h1>
 
-            {availableItems.length === 0 && removedItems.length === 0 ? (
-                <p className="text-gray-700 text-center text-lg">Your cart is empty. Start adding rooms to your cart!</p>
-            ) : (
-                <div className="space-y-8">
-                    {removedItems.length > 0 && (
-                        <div className="space-y-4">
-                            <h2 className="text-2xl font-semibold text-red-700">Unavailable Items</h2>
-                            {removedItems.map((item) => (
-                                <CartItem key={`removed-${item.id || item.roomType}`} item={item} isRemoved={true} setAvailableItems={setAvailableItems} />
-                            ))}
-                        </div>
-                    )}
-                    {availableItems.length > 0 && (
-                        <div className="space-y-4">
-                            {availableItems.map((item) => (
-                                <CartItem key={`available-${item.id || item.roomType}`} item={item} setAvailableItems={setAvailableItems}/>
-                            ))}
-                        </div>
-                    )}
-                    {availableItems.length > 0 && (
-                        <div className="border-t border-gray-200 pt-8 mt-8">
-                            <div className="flex justify-between items-center mx-auto max-w-4xl">
-                                <div>
-                                    <div className="text-2xl font-bold text-gray-900">
-                                        Total Amount: ₹{totalAmount.toLocaleString()}
-                                    </div>
-                                    <div className="text-sm font-italic text-gray-500">(inclusive of all taxes)</div>
-                                </div>
-                                <button
-                                    onClick={handleProceedToCheckout}
-                                    className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"  
-                                >
-                                    Proceed to Checkout
-                                </button>
+                {availableItems.length === 0 && removedItems.length === 0 ? (
+                    <p className="text-gray-700 text-center text-lg">Your cart is empty. Start adding rooms to your cart!</p>
+                ) : (
+                    <div className="space-y-8">
+                        {removedItems.length > 0 && (
+                            <div className="space-y-4">
+                                <h2 className="text-2xl font-semibold text-red-700">Unavailable Items</h2>
+                                {removedItems.map((item) => (
+                                    <CartItem key={`removed-${item.id || item.roomType}`} item={item} isRemoved={true} setAvailableItems={setAvailableItems} />
+                                ))}
                             </div>
-                        </div>
-                    )}
-                </div>
-            )}
+                        )}
+                        {availableItems.length > 0 && (
+                            <div className="space-y-4">
+                                {availableItems.map((item) => (
+                                    <CartItem key={`available-${item.id || item.roomType}`} item={item} setAvailableItems={setAvailableItems} />
+                                ))}
+                            </div>
+                        )}
+                        {availableItems.length > 0 && (
+                            <div className="border-t border-gray-200 pt-8 mt-8">
+                                <div className="flex justify-between items-center mx-auto max-w-4xl">
+                                    <div>
+                                        <div className="text-2xl font-bold text-gray-900">
+                                            Total Amount: ₹{totalAmount.toLocaleString()}
+                                        </div>
+                                        <div className="text-sm font-italic text-gray-500">(inclusive of all taxes)</div>
+                                    </div>
+                                    <button
+                                        onClick={handleProceedToCheckout}
+                                        className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    >
+                                        Proceed to Checkout
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </AnimatePresence>
         </div>
     );
