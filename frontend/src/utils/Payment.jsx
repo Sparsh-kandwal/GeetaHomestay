@@ -2,10 +2,11 @@ import axios from 'axios';
 
 export const checkouthandler = async (amount, user, callback) => {
   try {
-    console.log(user)
+    console.log(user);
     const { data: { order } } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkout`, {
       amount
     });
+
     const { data: { key } } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/payment/getKey`);
 
     if (!user || !user._id) {
@@ -23,22 +24,30 @@ export const checkouthandler = async (amount, user, callback) => {
       "order_id": order.id,
       "handler": async function (response) {
         try {
-            const verificationRes = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/paymentVerification`, {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                userId: user._id,
-                amount: order.amount, 
-            });
+          // Call backend to verify the payment
+          const verificationRes = await axios.post(
+            `${import.meta.env.VITE_BACKEND_URL}/payment/paymentVerification`,
+            {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              userId: user._id,
+              amount: order.amount,
+            },
+            { withCredentials: true }
+          );
 
+          console.log("🟢 Backend Verification Response:", verificationRes.data);
 
-            callback(response.razorpay_payment_id);
-
-
+          if (verificationRes.data.success) {
+            callback(verificationRes.data.paymentId);
+          } else {
+            console.error("🔴 Payment Verification Failed on Backend!");
+          }
         } catch (error) {
-            console.error("🔴 Payment Verification Failed:", error);
+          console.error("🔴 Payment Verification Failed:", error);
         }
-    },
+      },
       "prefill": {
         "name": user?.userName || "",
         "email": user?.email || "",
@@ -52,16 +61,15 @@ export const checkouthandler = async (amount, user, callback) => {
       "modal": {
         escape: false,
         ondismiss: async function () {
-            console.warn("🔴 User exited the payment process!");
-            try {
-                await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/rollbackBooking`, { userId: user._id });
-                console.log("🔄 Booking rolled back successfully!");
-            } catch (rollbackError) {
-                console.error("🔴 Booking rollback failed:", rollbackError);
-            }
+          console.warn("🔴 User exited the payment process!");
+          try {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/rollbackBooking`, { userId: user._id });
+            console.log("🔄 Booking rolled back successfully!");
+          } catch (rollbackError) {
+            console.error("🔴 Booking rollback failed:", rollbackError);
+          }
         }
-    }
-      
+      }
     };
 
     const razor = new Razorpay(options);
@@ -71,4 +79,5 @@ export const checkouthandler = async (amount, user, callback) => {
     console.error("Payment Error:", error);
   }
 };
+
 
