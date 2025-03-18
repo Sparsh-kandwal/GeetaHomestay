@@ -76,20 +76,24 @@ const Cart = () => {
                 { withCredentials: true }
             );
             console.log("🟢 Booking Response:", bookingResponse.data);
-
+    
             if (bookingResponse.data.success) {
                 checkouthandler(totalAmount, user, async (paymentId) => {
-                    console.log(`Saumil payment : ${paymentId}`);
-
-                    const statusRes = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkPaymentStatus`, {
-                        paymentId,
-                        userId: user._id,
-                    },
+                    console.log(`🟢 Payment Successful: ${paymentId}`);
+    
+                    // Verify payment status on backend
+                    const statusRes = await axios.post(
+                        `${import.meta.env.VITE_BACKEND_URL}/payment/checkPaymentStatus`,
+                        {
+                            paymentId,
+                            userId: user._id,
+                        },
                         { withCredentials: true }
                     );
-
+    
                     console.log("🟢 Payment Status Response:", statusRes.data);
-
+    
+                    // Proceed to booking confirmation
                     try {
                         navigate('/booking-confirmation', {
                             state: {
@@ -101,18 +105,18 @@ const Cart = () => {
                     } catch (error) {
                         console.error("🔴 Navigation Error:", error);
                     }
-
                 });
-
+    
             } else {
                 alert("Booking failed! Please try again.");
             }
-
+    
         } catch (error) {
             console.error("🔴 Booking Error:", error);
             alert("Booking request failed. Please try again.");
         }
     };
+    
 
 
     if (loading || roomsLoading) {

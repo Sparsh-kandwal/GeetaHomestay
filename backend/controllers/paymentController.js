@@ -39,15 +39,12 @@ export const checkout = async (req, res) => {
 
 
 export const paymentVerification = async (req, res) => {
-
   let bookingFailed = false;
 
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId, amount } = req.body;
 
-
     const body = razorpay_order_id + "|" + razorpay_payment_id;
-
 
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -55,7 +52,8 @@ export const paymentVerification = async (req, res) => {
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      bookingFailed = true
+      bookingFailed = true;
+      return res.status(400).json({ success: false, error: "Invalid payment signature" });
     }
 
     const payment = new Payment({
@@ -76,19 +74,26 @@ export const paymentVerification = async (req, res) => {
 
     await Cart_item.deleteMany({ userId });
 
-    res.redirect(`${process.env.CLIENT_URL}/paymentsuccess?reference=${razorpay_payment_id}`);
+    console.log("✅ Payment Verified Successfully!");
+
+    // Instead of redirecting, return a success response
+    return res.status(200).json({
+      success: true,
+      message: "Payment Verified Successfully",
+      paymentId: razorpay_payment_id
+    });
 
   } catch (error) {
-    bookingFailed = true
-    console.error("Payment Verification Error:", error);
+    bookingFailed = true;
+    console.error("🔴 Payment Verification Error:", error);
   }
 
   if (bookingFailed) {
     await rollbackBookings(userId);
+    return res.status(500).json({ success: false, error: "Payment verification failed" });
   }
-
-
 };
+
 
 
 export const getKey = (req,res)=>{
