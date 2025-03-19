@@ -41,7 +41,7 @@ const HomeCarousel = () => {
       <div className="absolute inset-0 bg-black/10 animate-fade-in">
         {isLoading && <div className="absolute inset-0 bg-gray-300 animate-pulse"></div>}
         <img
-          src={currentItem.image}
+          src={`${import.meta.env.VITE_CLOUDINARY_CLOUD}${currentItem.image}`}
           alt={`${currentItem.title} Image`}
           className={`w-full h-full object-cover transition-opacity duration-700 ${isLoading ? "opacity-0" : "opacity-100"}`}
           onLoad={() => setIsLoading(false)}
