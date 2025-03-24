@@ -27,6 +27,12 @@ const Cart = () => {
     }, [fetchRooms]);
 
     useEffect(() => {
+        // Recalculate total amount whenever availableItems changes
+        const newTotalAmount = availableItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        setTotalAmount(newTotalAmount);
+    }, [availableItems]);
+
+    useEffect(() => {
         const fetchCart = async () => {
             try {
                 const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/getCart', {
@@ -37,14 +43,12 @@ const Cart = () => {
                     credentials: 'include',
                 });
                 const data = await response.json();
-                let Price = 0;
                 if (data.available) {
                     const enrichedAvailable = data.available.map((item) => ({
                         ...item,
                         room: rooms.find((room) => room.roomType === item.roomType) || {},
                     }));
                     setAvailableItems(enrichedAvailable);
-                    Price += data.available.reduce((acc, item) => acc + (item.price * item.quantity), 0);
                 }
                 if (data.removed) {
                     const enrichedRemoved = data.removed.map((item) => ({
@@ -53,7 +57,6 @@ const Cart = () => {
                     }));
                     setRemovedItems(enrichedRemoved);
                 }
-                setTotalAmount(Price || 0);
             } catch (error) {
                 console.error('Error Fetching Cart Items', error);
             } finally {
