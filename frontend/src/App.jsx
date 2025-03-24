@@ -31,10 +31,17 @@ const App = () => {
       <CartProvider>
         <DateProvider>
           <Router>
-            <Navbar />
-            <AnimatedRoutes />
-            <Footer />
-            <ToastContainer />
+            <div className="flex flex-col min-h-screen">
+              <div className="fixed top-0 left-0 right-0 z-50 bg-white mb-[64px]">
+                <Navbar />
+              </div>
+              <div className="flex-grow  ">
+                <AnimatedRoutes />
+              </div>
+              <Footer />
+              <ToastContainer />
+            </div>
+          
           </Router>
         </DateProvider>
       </CartProvider>
