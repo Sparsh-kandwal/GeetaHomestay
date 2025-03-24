@@ -153,10 +153,10 @@ const RoomDetails = () => {
 
   const calculateTotalPrice = () => {
     if (!checkInDate || !checkOutDate) return roomDetails.price;
-    checkInDate = new Date(checkInDate)
-    checkOutDate = new Date(checkOutDate)
-    const timeDiff = checkOutDate - checkInDate;
-    const dayCount = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    const startDate = new Date(checkInDate);
+    const endDate = new Date(checkOutDate);
+    const timeDiff = endDate - startDate;
+    const dayCount = Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
     return dayCount * roomDetails.price * roomCount;
   };
 

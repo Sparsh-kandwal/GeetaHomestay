@@ -91,8 +91,8 @@ const Navbar = () => {
 
   return (
     <header
-      className={`flex justify-between items-center h-[65px]  px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
-        isHomePage ? "" : "bg-indigo-700 shadow-lg"
+      className={`flex justify-between items-center h-[65px] px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
+        isHomePage ? "bg-transparent" : "bg-indigo-700 shadow-lg"
       }`}
     >
       {/* Logo */}
