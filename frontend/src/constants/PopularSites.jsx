@@ -2,164 +2,202 @@
 export const carouselItems = [
   {
     id: 1,
-    image: "https://www.namasteindiatrip.com/blog/wp-content/uploads/2019/04/Karnaprayag-Sangam.jpg",
+    image:
+      "v1742328129/Karnaprayag-Sangam_reoekv.jpg",
     title: "Karanprayag Sangam",
     description: "Approximately <100 meters",
-    extraDescription: "Karanprayag is the confluence of the Alaknanda and Pindar rivers, and a sacred spot in Uttarakhand.",
+    extraDescription:
+      "Karanprayag is the confluence of the Alaknanda and Pindar rivers, and a sacred spot in Uttarakhand.",
     location: "Karanprayag Sangam, Uttarakhand, India",
   },
   {
     id: 2,
-    image: "https://garhwalitraveller.com/wp-content/uploads/2021/12/karna-temple-1.jpg",
+    image:
+      "v1742328130/Karna-Temple-Karnaprayag_dagz1o.jpg",
     title: "Karna Temple",
     description: "Approximately <100 meters",
-    extraDescription: "Karna Temple is dedicated to the great warrior Karna from the Mahabharata.",
+    extraDescription:
+      "Karna Temple is dedicated to the great warrior Karna from the Mahabharata.",
     location: "Karna Temple, Uttarakhand, India",
   },
   {
     id: 3,
-    image: "https://www.rajyasameeksha.com/Uploads/6a5c6d36-758a-4eef-a8a9-b70f79eac7ef.jpg",
+    image:
+      "v1742328136/Uma_devi_temple_ijfc8h.jpg",
     title: "Uma Devi Temple",
     description: "Approximately <100 meters",
-    extraDescription: "Uma Devi Temple is a sacred shrine dedicated to Goddess Uma (Parvati). Located amidst serene surroundings in Karnaprayag, this temple is an important religious site for devotees seeking blessings and spiritual peace.",
+    extraDescription:
+      "Uma Devi Temple is a sacred shrine dedicated to Goddess Uma (Parvati). Located amidst serene surroundings in Karnaprayag, this temple is an important religious site for devotees seeking blessings and spiritual peace.",
     location: "Uma Devi Temple ,Karnaprayag, Uttarakhand, India",
   },
   {
     id: 4,
-    image: "https://www.sacredyatra.com/images/temples/adi-badri-temple.webp",
+    image:
+      "v1742328140/adi-badri-temple_ocxnsc.webp",
     title: "Adibadri Temple",
     description: "Approximately 19 km",
-    extraDescription: "Adibadri Temple is one of the lesser-known temples in Uttarakhand, surrounded by beautiful hills.",
+    extraDescription:
+      "Adibadri Temple is one of the lesser-known temples in Uttarakhand, surrounded by beautiful hills.",
     location: "Adibadri Temple, Uttarakhand, India",
   },
   {
     id: 5,
-    image: "https://cdn-web.firstrek.in/wp-content/uploads/2023/11/2022-03-05.jpg",
+    image:
+      "v1742328128/benital_f3nbnc.jpg",
     title: "Benital",
     description: "Approximately 33 km",
-    extraDescription: "Benital is a scenic location with natural beauty and serene surroundings.",
+    extraDescription:
+      "Benital is a scenic location with natural beauty and serene surroundings.",
     location: "Benital, Uttarakhand, India",
   },
   {
     id: 6,
-    image: "https://uttarakhandtourism.gov.in/sites/default/files/2022-08/Under_Banner_Kartik%20Swami%20Temple_0.jpeg",
+    image:
+      "v1742328138/kartik_swami_temple_mpqqnj.webp",
     title: "Kartik Swami Temple",
     description: "Approximately 40 km",
-    extraDescription: "Kartik Swami Temple is situated in the Garhwal region of Uttarakhand.",
+    extraDescription:
+      "Kartik Swami Temple is situated in the Garhwal region of Uttarakhand.",
     location: "Kartik Swami Temple, Uttarakhand, India",
   },
   {
     id: 7,
-    image: "https://www.pilgrimagetour.in/blog/wp-content/uploads/2024/02/Best-Time-to-Visit-Rudranath-Temple.jpg",
+    image:
+      "v1742328135/Rudranath-Temple_oh1nv8.jpg",
     title: "Rudranath Temple (Sagar Village)",
     description: "Approximately 41 km",
-    extraDescription: "Rudranath Temple is one of the Panch Kedar temples and is located at an altitude of 2,100 meters.",
+    extraDescription:
+      "Rudranath Temple is one of the Panch Kedar temples and is located at an altitude of 2,100 meters.",
     location: "Rudranath Temple, Uttarakhand, India",
   },
   {
     id: 8,
-    image: "https://uttarakhandtriptrek.com/wp-content/uploads/2023/12/69290014_460527701465410_4177711411759153152_n.jpg",
+    image:
+      "v1742328129/dhari_devi_temple_du04nv.jpg",
     title: "Dhari Devi Temple",
     description: "Approximately 50 km",
-    extraDescription: "Dhari Devi Temple is dedicated to the goddess Dhari Devi, located near Srinagar in Uttarakhand.",
+    extraDescription:
+      "Dhari Devi Temple is dedicated to the goddess Dhari Devi, located near Srinagar in Uttarakhand.",
     location: "Dhari Devi Temple, Uttarakhand, India",
   },
   {
     id: 9,
-    image: "https://uttarakhandtriptrek.com/wp-content/uploads/2023/12/gwaldum-uttarakhand--1024x469.png",
+    image:
+      "v1742328138/gwaldum_n9o1zx.png",
     title: "Gwaldum",
     description: "Approximately 66 km",
-    extraDescription: "Gwaldum is a quaint hill town known for its stunning views of the Himalayan peaks, lush green meadows, and serene ambiance. It is an ideal destination for nature lovers and trekkers.",
+    extraDescription:
+      "Gwaldum is a quaint hill town known for its stunning views of the Himalayan peaks, lush green meadows, and serene ambiance. It is an ideal destination for nature lovers and trekkers.",
     location: "Gwaldum, Uttarakhand, India",
   },
   {
     id: 10,
-    image: "https://www.chardham-pilgrimage-tour.com/assets/images/madhyamaheshwar-temple-himalayas-1.webp",
+    image:
+      "v1742328133/madhyamaheshwar-temple_m3ptmv.webp",
     title: "Shri Madmaheshwar Temple",
     description: "Approximately 71 km",
-    extraDescription: "Shri Madmaheshwar Temple is one of the Panch Kedar temples in Uttarakhand.",
+    extraDescription:
+      "Shri Madmaheshwar Temple is one of the Panch Kedar temples in Uttarakhand.",
     location: "Shri Madmaheshwar Temple, Uttarakhand, India",
   },
   {
     id: 11,
-    image: "https://yhaindia.org/UploadsProgramImages/gallery_919/ChoptaDP-6.jpg",
+    image:
+      "v1742328129/Chopta_timgnath_o0jvjz.jpg",
     title: "Tungnath",
     description: "Approximately 77 km",
-    extraDescription: "Tungnath is a beautiful temple located at the highest altitude of any Shiva temple in India.",
+    extraDescription:
+      "Tungnath is a beautiful temple located at the highest altitude of any Shiva temple in India.",
     location: "Tungnath, Uttarakhand, India",
   },
   {
     id: 12,
-    image: "https://www.exoticmiles.com/wp-content/uploads/2020/06/Hemkund-Sahib.jpg",
+    image:
+      "v1742328129/Hemkund-Sahib_xxoyui.jpg",
     title: "Hemkund Sahib",
     description: "Approximately 80 km",
-    extraDescription: "Hemkund Sahib is a revered Sikh pilgrimage site in the Himalayas.",
+    extraDescription:
+      "Hemkund Sahib is a revered Sikh pilgrimage site in the Himalayas.",
     location: "Hemkund Sahib, Uttarakhand, India",
   },
   {
     id: 13,
-    image: "https://s3-ap-south-1.amazonaws.com/soulveda-media-prod/wp-content/uploads/2024/06/10103627/deoria-tal-A-emerald-lake-perched-at-a-height-of-2438-mts-above-sea-level.jpg",
+    image:
+      "v1742328129/deoria-tal_bkk9de.jpg",
     title: "Deoria Taal",
     description: "Approximately 84 km",
-    extraDescription: "Deoria Taal is a picturesque lake located in the Garhwal region.",
+    extraDescription:
+      "Deoria Taal is a picturesque lake located in the Garhwal region.",
     location: "Deoria Taal, Uttarakhand, India",
   },
   {
     id: 14,
-    image: "https://indiathrills.com/wp-content/uploads/2022/07/8565363673_50bfe4fbae_b.jpg",
+    image:
+      "v1742328128/auli_godmzh.webp",
     title: "Auli",
     description: "Approximately 85 km",
-    extraDescription: "Auli is known for its stunning skiing slopes and scenic views.",
+    extraDescription:
+      "Auli is known for its stunning skiing slopes and scenic views.",
     location: "Auli, Uttarakhand, India",
   },
   {
     id: 15,
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpc1ahIXNaAbidiXaltxodxigTIRhZ8L4kVQ&s",
+    image:
+      "v1742328134/roopkund_mjd7ys.jpg",
     title: "Roopkund (Lohajung Pass)",
     description: "Approximately 92 km",
-    extraDescription: "Roopkund is famous for its mysterious skeleton lake and scenic trekking routes.",
+    extraDescription:
+      "Roopkund is famous for its mysterious skeleton lake and scenic trekking routes.",
     location: "Roopkund, Uttarakhand, India",
   },
   {
     id: 16,
-    image: "https://www.mygoodtrip.in/wp-content/uploads/2020/08/1-lW05RlARF0vAhJMdVRGxVw.png",
+    image:
+      "/v1742328139/valley_of_flowers_k6g1xo.png",
     title: "Valley of Flowers",
     description: "Approximately 94 km",
-    extraDescription: "The Valley of Flowers is a UNESCO World Heritage site known for its diverse alpine flora.",
+    extraDescription:
+      "The Valley of Flowers is a UNESCO World Heritage site known for its diverse alpine flora.",
     location: "Valley of Flowers, Uttarakhand, India",
   },
   {
     id: 17,
-    image: "https://alotusinthemud.com/wp-content/uploads/2024/02/lead-pic-temple-and-snow-mountains.jpg",
+    image:
+      "/v1742328133/kedarnath_temple_l8csue.jpg",
     title: "Kedarnath Temple",
     description: "Approximately 104 km",
-    extraDescription: "Kedarnath Temple is one of the Char Dham pilgrimage sites and one of the holiest temples in India.",
+    extraDescription:
+      "Kedarnath Temple is one of the Char Dham pilgrimage sites and one of the holiest temples in India.",
     location: "Kedarnath Temple, Uttarakhand, India",
   },
   {
     id: 18,
-    image: "https://www.thechardhamyatra.com/wp-content/uploads/2023/02/triyuginarayan.jpg",
+    image:
+      "/v1742328135/triyuginarayan_xi4bkm.jpg",
     title: "Triyuginarayan Temple",
     description: "Approximately 110 km",
-    extraDescription: "Triyuginarayan Temple is known for its association with the wedding of Lord Shiva and Parvati.",
+    extraDescription:
+      "Triyuginarayan Temple is known for its association with the wedding of Lord Shiva and Parvati.",
     location: "Triyuginarayan Temple, Uttarakhand, India",
   },
   {
     id: 19,
-    image: "https://www.taxiservicedehradun.com/image/rishikesh-to-badrinath-tempo-traveller.webp",
+    image:
+      "/v1742328128/badrinath_zqalit.webp",
     title: "Badrinath",
     description: "Approximately 118 km",
-    extraDescription: "Badrinath is a prominent pilgrimage site and one of the Char Dham temples in Uttarakhand.",
+    extraDescription:
+      "Badrinath is a prominent pilgrimage site and one of the Char Dham temples in Uttarakhand.",
     location: "Badrinath, Uttarakhand, India",
   },
   {
     id: 20,
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjDSUE0JEkzK6SPUdGY-HmvS_ppRkRisERUw&s",
+    image:
+      "/v1742328139/vasudhara_falls_r5yrjy.jpg",
     title: "Vasudhara Falls",
     description: "Approximately 125 km",
-    extraDescription: "Vasudhara Falls is a scenic waterfall located in the Kedarnath region of Uttarakhand.",
+    extraDescription:
+      "Vasudhara Falls is a scenic waterfall located in the Kedarnath region of Uttarakhand.",
     location: "Vasudhara Falls, Uttarakhand, India",
   },
 ];
-
-

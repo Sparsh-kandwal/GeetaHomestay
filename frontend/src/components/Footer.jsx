@@ -91,7 +91,7 @@ const Footer = () => {
                 <FaFacebookF size={24} /> {/* React Icon for Facebook */}
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/geetahomestay/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-gray-300"

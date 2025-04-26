@@ -4,7 +4,8 @@ import {
   FaChevronLeft, 
   FaHeart, 
   FaExclamationTriangle,
-  FaCartPlus
+  FaCartPlus,
+  FaShoppingBag
 } from 'react-icons/fa';
 import 'react-datepicker/dist/react-datepicker.css';
 import { toast } from 'react-toastify';
@@ -20,6 +21,7 @@ import { RoomContext, UserContext } from '../auth/Userprovider';
 import { useGoogleLogin } from "@react-oauth/google";
 import { googleAuth } from "../auth/api";
 import OpacityLoader from '../components/OpacityLoader';
+import axios from 'axios';
 
 const RoomDetails = () => {
   const { id } = useParams();
@@ -151,10 +153,10 @@ const RoomDetails = () => {
 
   const calculateTotalPrice = () => {
     if (!checkInDate || !checkOutDate) return roomDetails.price;
-    checkInDate = new Date(checkInDate)
-    checkOutDate = new Date(checkOutDate)
-    const timeDiff = checkOutDate - checkInDate;
-    const dayCount = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    const startDate = new Date(checkInDate);
+    const endDate = new Date(checkOutDate);
+    const timeDiff = endDate - startDate;
+    const dayCount = Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
     return dayCount * roomDetails.price * roomCount;
   };
 
@@ -196,6 +198,69 @@ const RoomDetails = () => {
     } catch (error) {
       console.error("Error adding to cart:", error);
       toast.error("internal server error");
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (isInvalidDateRange() || !checkInDate || !checkOutDate) {
+      toast.error('Please select valid check-in and check-out dates before booking.');
+      return;
+    }
+
+    try {
+      // First check availability
+      const availabilityResponse = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/checkAvailability`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+          }),
+        }
+      );
+
+      const availabilityData = await availabilityResponse.json();
+
+      // Check if the requested room type is available
+      if (!availabilityData.success || 
+          !availabilityData.availability[roomDetails.roomType] ||
+          availabilityData.availability[roomDetails.roomType].availableRooms < roomCount) {
+        toast.error('Selected rooms are not available for these dates');
+        return;
+      }
+
+      // Add to cart
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/addToCart`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          checkIn: checkInDate, 
+          checkOut: checkOutDate, 
+          members: guests,
+          roomType: roomDetails.roomType, 
+          quantity: roomCount,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Room added to cart!');
+        // Redirect to cart page
+        navigate('/cart');
+      } else {
+        const data = await response.json();
+        toast.error(data.message || 'Failed to add to cart');
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Internal server error");
     }
   };
 
@@ -441,12 +506,29 @@ const RoomDetails = () => {
 
           {/* Booking and Add to Cart Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* Book Now Button */}
-            
+            {/* Buy Now Button */}
+            <button
+              onClick={user ? handleBuyNow : googleLogin}
+              className={`w-full sm:w-1/2 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200 ${
+                isInvalidDateRange() || !checkInDate || !checkOutDate
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
+              }`}
+              title={isInvalidDateRange() || !checkInDate || !checkOutDate 
+                ? 'Please select a Checkout Date' 
+                : ''}
+              disabled={isInvalidDateRange() || !checkInDate || !checkOutDate}
+              aria-label="Buy Now"
+            >
+              <div className="flex items-center justify-center">
+                <FaShoppingBag className="mr-2" />
+                Buy Now
+              </div>
+            </button>
 
             {/* Add to Cart Button */}
             <button
-              onClick={user ? handleAddToCart: googleLogin}
+              onClick={user ? handleAddToCart : googleLogin}
               className={`w-full sm:w-1/2 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-200 ${
                 isInvalidDateRange() || !checkInDate || !checkOutDate
                   ? 'opacity-50 cursor-not-allowed'
