@@ -9,8 +9,18 @@
       background-color: #f3f4f6;
       font-family: Arial, sans-serif;
       text-align: center;
-      padding: 5rem 1rem;
       color: #111827;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+    }
+    main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem 1rem;
     }
     h1 {
       font-size: 2.5rem;
@@ -20,10 +30,27 @@
       font-size: 1.2rem;
       color: #6b7280;
     }
+    footer {
+      padding: 1rem 1rem;
+      border-top: 1px solid #d1d5db;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+    footer p {
+      margin: 0.3rem 0;
+    }
   </style>
 </head>
 <body>
-  <h1>🚧 Site Under Maintenance</h1>
-  <p>We're currently working on updates. Please check back soon.</p>
+  <main>
+    <h1>🚧 Site Under Maintenance</h1>
+    <p>We're currently working on updates. Please check back soon.</p>
+  </main>
+
+  <footer>
+    <p>📧 geetahomestaykaranprayag@gmail.com</p>
+    <p>📞 +91 9756198989</p>
+    <p>📍 Geeta HomeStay, near Petrol Pump, Main Market, Karanprayag, Chamoli, Uttarakhand (246444)</p>
+  </footer>
 </body>
 </html>
