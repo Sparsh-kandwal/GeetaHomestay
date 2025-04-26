@@ -87,7 +87,7 @@ const Cart = () => {
                     { withCredentials: true } 
                     );
 
-
+                    
                     try {
                         navigate('/booking-confirmation', { 
                             state: { 
