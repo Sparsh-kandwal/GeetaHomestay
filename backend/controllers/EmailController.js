@@ -38,8 +38,16 @@ const sendInvoice = async (req, res) => {
     const emailContent = InvoiceTemplate(invoiceData);
 
     await transporter.sendMail({
-      from: '"Geeta Home Stay" <geetahomestaykaranprayag@gmail.com>',
+      from: '"Geeta Home Stay" <geetahomestaykpg@gmail.com>',
       to: user.email,
+      subject: "Booking Confirmation & Invoice",
+      text: `Thankyou for choosing us`,
+      html: emailContent,
+    });
+
+    await transporter.sendMail({
+      from: '"Geeta Home Stay" <geetahomestaykpg@gmail.com>',
+      to: "geetahomestaykpg@gmail.com",
       subject: "Booking Confirmation & Invoice",
       text: `Thankyou for choosing us`,
       html: emailContent,

@@ -77,10 +77,10 @@ export const googleAuth = async (req, res) => {
         const emailContent = emailTemplate(userInfo.name);
 
         const info = await transporter.sendMail({
-          from: '"Geeta Home Stay" <geetahomestaykaranprayag@gmail.com>',
+          from: '"Geeta Home Stay" <geetahomestaykpg@gmail.com>',
           to: userInfo.email,
           subject: "Welcome to Geeta Home Stay!",
-          text: "Testing going on",
+          text: "Welcome to Geeta Home Stay!",
           html: emailContent,
         });
 

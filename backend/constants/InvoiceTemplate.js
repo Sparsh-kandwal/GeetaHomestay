@@ -51,7 +51,7 @@ export const InvoiceTemplate = ({ bookingId, userEmail, userName, totalAmount, b
         <ul>
           <li>Check-out time is 10:30 AM.</li>
           <li>Early check-in or late check-out is subject to availability.</li>
-          <li>Refund Policy: Before 7 days - 85%, Between 7 days-72 hrs - 50%, Less than 72hrs - No refund.</li>
+          <li>No Cancellation and Refund</li>
           <li>Damage to property will be charged accordingly.</li>
           <li>This is a computer-generated invoice and does not require a signature.</li>
         </ul>

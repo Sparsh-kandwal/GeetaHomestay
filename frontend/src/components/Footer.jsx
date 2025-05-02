@@ -62,7 +62,7 @@ const Footer = () => {
                   className="hover:underline"
                 >
                   {" "}
-                  geetahomestaykaranprayag@gmail.com
+                  geetahomestaykpg@gmail.com
                 </a>
               </li>
               <li className="text-sm">
@@ -119,8 +119,7 @@ const Footer = () => {
             </li>
             <li>Check-in time is 12:00 PM, Check-out time is 10:30 AM.</li>
             <li>
-              If cancelled before 7 days: 85% refund, Between 7 days-72 hrs: 50%
-              refund, Less than 72hrs, No-Shows or Early Checkout: No refund.
+            No Cancellations or Refunds
             </li>
             <li>
               It is mandatory for guests to present valid photo identification
