@@ -74,13 +74,15 @@ export const emailTemplate = (guestName) => `
         </div>
         <div class="content">
             <p>Dear ${guestName},</p>
-            <p>We are excited to welcome you to Geeta Home Stay! Thank you for choosing us for your upcoming stay. Our team is dedicated to providing you with a warm and comfortable environment to ensure you have a relaxing experience.</p>
-            <p>If you need any assistance or have special requests, please do not hesitate to reach out to us. We are here to help with anything you may need, whether it’s planning your activities, arranging special amenities, or simply offering recommendations.</p>
-            <p>We look forward to making your stay unforgettable!</p>
+            <p>Welcome to Geeta Home Stay!</p>
+            <p>Thank you for signing up. Your account has been successfully created, and we're excited to have you on board.</p>
+            <p>From here, you can explore our rooms, manage your bookings, and discover local attractions to make your stay memorable. If you need any assistance or have special requests, feel free to reach out—we’re always here to help.</p>
+            <p>Let’s make your experience with Geeta Home Stay warm, comfortable, and unforgettable!</p>
+
         </div>
         <div class="footer">
             <p>Geeta Home Stay | Your Home Away from Home</p>
-            <p><a href="https://www.geetahomestay.com">www.geetahomestay.com</a> | Contact: +91 9756198989</p>
+            <p><a href="https://www.geetahomestay.in">www.geetahomestay.in</a> | Contact: +91 9756198989</p>
         </div>
     </div>
 </body>

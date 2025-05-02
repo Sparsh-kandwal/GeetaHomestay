@@ -61,7 +61,7 @@ export const paymentVerification = async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
       user: userId,
-      amount,
+      amount: amount/100, // Convert back to INR
       status: "success",
     });
 
