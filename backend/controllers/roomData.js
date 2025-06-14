@@ -4,7 +4,7 @@ import Room from "../models/room.js";
 
 export const getAllRooms = async (req, res) => {
     try {
-        const rooms = await Room.find({});
+        const rooms = await Room.find({}).sort({ price: -1 });
         
         res.status(200).json(rooms);
     } catch (error) {
