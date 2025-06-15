@@ -5,7 +5,7 @@ const announcements = [
   { label: "NEW", text: "For More Details, Call: 9756198989" },
   { label: "NEW", text: "Book Direct on Website – 0% Commission!" },
   { label: "NEW", text: "Special Packages on Family Room (with Balcony)" },
-  { label: "NEW", text: "Free 45-Min Morning Yoga for 7+ Day Stays" },
+  { label: "NEW", text: "Free 45-Min Morning Yoga Sessions for 7+ Day Stays" },
   { label: "NEW", text: "CP & MAP Plans for Large Groups" },
   { label: "NEW", text: "Discounted Rates – Limited Time Offer!" },
 ];
