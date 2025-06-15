@@ -22,7 +22,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Profile from "./pages/Profile";
 import BookingHistory from "./pages/BookingHistory";
 import ScrollToTop from "./components/ScrollToTop";
-
+import InfoTicker from "./components/InfoTicker";
 
 //final build
 const App = () => {
@@ -32,7 +32,7 @@ const App = () => {
         <DateProvider>
           <Router>
             <div className="flex flex-col min-h-screen">
-              <div className="fixed top-0 left-0 right-0 z-50 bg-white mb-[64px]">
+              <div className="fixed top-0 left-0 right-0 z-50 bg-white">
                 <Navbar />
               </div>
               <div className="flex-grow  ">

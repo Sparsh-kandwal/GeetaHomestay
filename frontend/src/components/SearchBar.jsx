@@ -68,39 +68,41 @@ const SearchBar = ({setAvailableRooms}) => {
   };
 
   return (
-    <div className="flex flex-row items-center mt-5 gap-3 justify-center p-4 border border-gray-300 rounded-lg bg-white shadow-md w-[90%] md:w-fit mx-auto sticky bottom-5">
+    <div className="flex flex-row items-center gap-3 justify-center px-4 py-5 border border-gray-200 rounded-2xl bg-gray-50 shadow-xl w-[95%] md:w-fit mx-auto sticky bottom-5 z-40 backdrop-blur-md"
+      style={{ fontFamily: 'Merriweather Sans, ui-sans-serif, system-ui' }}>
       {/* Check-in Date */}
       <div className="flex flex-col w-[40%] md:w-full">
-        <label className="text-gray-700 text-sm mb-1">Check-in</label>
+        <label className="text-gray-700 text-xs md:text-sm mb-1 font-semibold tracking-wide">Check-in</label>
         <input
           type="date"
           value={checkInDate}
-          min={new Date().toISOString().split('T')[0]} // Ensure today or future date
+          min={new Date().toISOString().split('T')[0]}
           onChange={(e) => setCheckInDate(e.target.value)}
-          className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+          className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 transition placeholder-gray-400 text-base md:text-lg hover:border-indigo-300"
         />
       </div>
 
       {/* Check-out Date */}
-      <div className="flex flex-col w-[40%]">
-        <label className="text-gray-700 text-sm mb-1">Check-out</label>
+      <div className="flex flex-col w-[40%] md:w-full">
+        <label className="text-gray-700 text-xs md:text-sm mb-1 font-semibold tracking-wide">Check-out</label>
         <input
           type="date"
           value={checkOutDate}
-          min={minCheckOutDate} // Ensure day after check-in
+          min={minCheckOutDate}
           onChange={(e) => setCheckOutDate(e.target.value)}
-          className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+          className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 transition placeholder-gray-400 text-base md:text-lg hover:border-indigo-300"
         />
       </div>
 
-      <div className="flex flex-col w-[20%]">
-        <label className="text-gray-700 text-sm mb-1">Search</label>
+      {/* Search Button */}
+      <div className="flex flex-col w-[20%] md:w-auto items-center justify-end mt-5 md:mt-0">
+        <label className="text-gray-700 text-xs md:text-sm mb-1 font-semibold tracking-wide invisible md:visible">Search</label>
         <button
           onClick={handleSearch}
-          className="w-12 h-12 bg-blue-500 text-white rounded-full hover:bg-blue-600 flex items-center justify-center transition"
+          className="w-12 h-12 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 shadow-lg flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
           aria-label="Search"
         >
-          <FaSearch size={20} />
+          <FaSearch size={22} />
         </button>
       </div>
 

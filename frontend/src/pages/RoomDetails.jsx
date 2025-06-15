@@ -296,7 +296,7 @@ const RoomDetails = () => {
 
 
   return (
-    <div className="container mx-auto px-4 py-12 lg:py-24 mt-9 lg:mt-0">
+    <div className="container mx-auto px-4 py-28 lg:py-28 mt-1 lg:mt-19">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -341,9 +341,24 @@ const RoomDetails = () => {
         {/* Room Details and Booking */}
         <div className="flex flex-col">
           <h1 className="text-3xl lg:text-4xl font-bold mb-4 text-gray-800">{roomDetails.roomName}</h1>
-          <p className="text-xl lg:text-2xl font-semibold text-indigo-600 mb-6">
-            ₹{roomDetails.price && roomDetails.price.toLocaleString()} per night
-          </p>
+          <div className="flex flex-col items-start sm:items-end mb-6">
+            {/* Fake inflated price */}
+            <span className="text-xs sm:text-sm line-through text-gray-400 mb-1">
+              ₹{roomDetails.price ? Math.round(roomDetails.price * 1.4) : '--'}
+            </span>
+            {/* Real price and offer */}
+            <span className="text-xl lg:text-2xl font-bold text-indigo-600">
+              ₹{roomDetails.price && roomDetails.price.toLocaleString()}
+              <span className="ml-2 px-2 py-0.5 rounded bg-yellow-200 text-yellow-800 text-xs font-semibold align-middle">Limited Time Offer</span>
+            </span>
+            <span className="text-xs sm:text-sm font-medium text-gray-500">per night</span>
+            {/* You Save */}
+            {roomDetails.price && (
+              <span className="text-xs sm:text-sm font-semibold text-green-600 mt-1">
+                You Save ₹{Math.round(roomDetails.price * 1.4) - roomDetails.price}!
+              </span>
+            )}
+          </div>
           <p className="text-sm text-gray-600 mt-1">
                   ({roomDetails.maxAdults} guests per room)
                 </p>

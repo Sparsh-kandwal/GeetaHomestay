@@ -30,11 +30,15 @@ const Cart = () => {
         }
     }, [fetchRooms]);
 
+    // Recalculate total amount and total savings whenever availableItems changes
     useEffect(() => {
-        // Recalculate total amount whenever availableItems changes
         const newTotalAmount = availableItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
         setTotalAmount(newTotalAmount);
     }, [availableItems]);
+
+    // Calculate total inflated price and total savings
+    const totalInflatedPrice = availableItems.reduce((acc, item) => acc + (Math.round(item.price * 1.4) * item.quantity), 0);
+    const totalSavings = totalInflatedPrice - totalAmount;
 
     useEffect(() => {
         const fetchCart = async () => {
@@ -148,7 +152,7 @@ const Cart = () => {
     }
 
     return (
-        <div className="container mt-12  mx-auto px-4 py-8 lg:py-12">
+        <div className="container mt-28  mx-auto px-4 py-8 lg:py-12">
             <AnimatePresence mode="wait">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex flex-col lg:flex-row gap-8">
@@ -207,9 +211,17 @@ const Cart = () => {
                                 <div className="bg-gray-50 rounded-lg p-6 shadow-sm sticky top-4">
                                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
                                     <div className="space-y-4">
+                                        <div className="flex justify-between text-xs sm:text-sm text-gray-400 line-through">
+                                            <span>MRP</span>
+                                            <span>₹{totalInflatedPrice.toLocaleString()}</span>
+                                        </div>
                                         <div className="flex justify-between font-semibold">
                                             <span>Total Amount</span>
                                             <span>₹{totalAmount.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs sm:text-sm font-semibold text-green-600">
+                                            <span>You Save</span>
+                                            <span>₹{totalSavings.toLocaleString()}!</span>
                                         </div>
                                         <p className="text-sm text-gray-500 mt-1">(inclusive of all taxes)</p>
                                         <button

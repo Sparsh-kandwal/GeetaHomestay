@@ -117,8 +117,8 @@ const ExploreRooms = () => {
   }, [rooms, selectedAmenitiesInput, maxPriceInput, guestCountInput]);
 
   return (
-    <div className="mt-12 min-h-screen w-full bg-gray-50 py-8 px-8">
-      <h2 className="text-5xl font-semibold text-center text-gray-800 mb-10">
+    <div className="min-h-screen w-full bg-gray-50 py-8 px-4 sm:px-8 mt-[40px]">
+      <h2 className="text-3xl sm:text-5xl font-semibold text-center text-gray-800 mb-10 mt-12 sm:mt-[60px]">
         Explore Our Rooms
       </h2>
 

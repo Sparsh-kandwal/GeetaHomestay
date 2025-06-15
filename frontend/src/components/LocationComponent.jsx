@@ -6,7 +6,7 @@ const LocationComponent = () => {
     <div className="h-4/5 bg-[#3a328c] py-10 px-4">
       {/* Title Section */}
       <div className="mt-5 mb-10">
-        <h1 className="text-5xl md:text-7xl text-center font-extrabold text-gray-100 tracking-wide leading-tight">
+        <h1 className="text-5xl md:text-7xl text-center font-extrabold text-gray-100 tracking-wide leading-tight font-serif">
           Explore Popular Nearby Places
         </h1>
         <p className="mt-3 text-lg text-center text-gray-300">

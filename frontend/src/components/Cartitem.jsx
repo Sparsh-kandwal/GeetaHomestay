@@ -54,9 +54,23 @@ const CartItem = ({ item, isRemoved = false, setAvailableItems }) => (
             />
             <div className="w-full">
                 <h1 className="text-2xl font-semibold text-gray-900">{item.room.roomName || 'Room'}</h1>
-                <h2 className="text-md font-semibold text-gray-900">
-                    <p className="text-gray-600">₹{item.price.toLocaleString()} per room</p>
-                </h2>
+                {/* Price Section: Fake price, real price, savings */}
+                <div className="flex flex-col items-start sm:items-end mb-2">
+                    {/* Fake inflated price */}
+                    <span className="text-xs sm:text-sm line-through text-gray-400 mb-1">
+                        ₹{Math.round(item.price * 1.4)}
+                    </span>
+                    {/* Real price and offer */}
+                    <span className="text-lg sm:text-xl font-bold text-indigo-600">
+                        ₹{item.price.toLocaleString()}
+                        <span className="ml-2 px-2 py-0.5 rounded bg-yellow-200 text-yellow-800 text-xs font-semibold align-middle">Limited Time Offer</span>
+                    </span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-500">per room</span>
+                    {/* You Save */}
+                    <span className="text-xs sm:text-sm font-semibold text-green-600 mt-1">
+                        You Save ₹{Math.round(item.price * 1.4) - item.price}!
+                    </span>
+                </div>
                 <div className="flex flex-col md:flex-row md:items-center md:gap-20 items-start text-left">
                     <div>
                         <p className="text-gray-600">

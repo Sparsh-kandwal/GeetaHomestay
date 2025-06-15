@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import { googleAuth } from "../auth/api";
 import { UserContext } from "../auth/Userprovider";
+import InfoTicker from "./InfoTicker";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -90,117 +91,121 @@ const Navbar = () => {
   const isHomePage = location.pathname === "/" || location.pathname === "/home";
 
   return (
-    <header
-      className={`flex justify-between items-center h-[65px] px-8 fixed top-0 w-full z-50 transition-all duration-300 ${
-        isHomePage ? "bg-transparent" : "bg-indigo-700 shadow-lg"
-      }`}
-    >
-      {/* Logo */}
-      <h1 className="text-3xl text-white">
-        <Link to="/home">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="h-12"
-          />
-        </Link>
-      </h1>
-
-      {/* Hamburger Menu */}
-      <button
-        className="block md:hidden text-white text-3xl"
-        onClick={() => setIsMenuOpen((prev) => !prev)}
+    <>
+      <InfoTicker />
+      <header
+        className={`flex justify-between items-center h-[65px] px-8 fixed w-full z-50 transition-all duration-300 ${
+          isHomePage ? "bg-transparent" : "bg-indigo-700 shadow-lg"
+        }`}
+        style={{ top: "40px" }}
       >
-        ☰
-      </button>
+        {/* Logo */}
+        <h1 className="text-3xl text-white">
+          <Link to="/home">
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="h-12"
+            />
+          </Link>
+        </h1>
 
-      {/* Navigation Menu */}
-      <nav
-        className={`fixed top-0 right-0 h-full bg-indigo-700 p-8 transition-transform duration-300 ${
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
-        } md:static md:flex md:bg-transparent md:h-auto md:translate-x-0`}
-      >
+        {/* Hamburger Menu */}
         <button
-          className="block md:hidden text-white text-2xl mb-6"
-          onClick={() => setIsMenuOpen(false)}
+          className="block md:hidden text-white text-3xl"
+          onClick={() => setIsMenuOpen((prev) => !prev)}
         >
-          ✕
+          ☰
         </button>
-        <ul className="flex flex-col gap-6 md:flex-row md:gap-6 items-center">
-          {navItems.map((item) => (
-            <li key={item}>
-              <Link
-                to={`/${item.toLowerCase()}`}
-                className="text-lg font-semibold text-white hover:bg-indigo-600 px-4 py-2 rounded-full transition duration-300"
-              >
-                {item}
-              </Link>
-            </li>
-          ))}
 
-          {/* Add the user login/logout button as another list item */}
-          <li>
-            {isLoading ? (
-              <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : user ? (
-              // Display user's profile image
-              <div className="relative" ref={logoutMenuRef}>
-                <img
-                  src={user.photo || `/static/user.png`}
-                  alt="User Avatar"
-                  className="w-8 h-8 rounded-full cursor-pointer"
-                  onClick={() => setShowLogoutMenu((prev) => !prev)}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = `/static/user.png`;
-                  }}
-                />
+        {/* Navigation Menu */}
+        <nav
+          className={`fixed top-0 right-0 h-full bg-indigo-700 p-8 transition-transform duration-300 ${
+            isMenuOpen ? "translate-x-0" : "translate-x-full"
+          } md:static md:flex md:bg-transparent md:h-auto md:translate-x-0`}
+        >
+          <button
+            className="block md:hidden text-white text-2xl mb-6"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            ✕
+          </button>
+          <ul className="flex flex-col gap-6 md:flex-row md:gap-6 items-center">
+            {navItems.map((item) => (
+              <li key={item}>
+                <Link
+                  to={`/${item.toLowerCase()}`}
+                  className="text-lg font-semibold text-white hover:bg-indigo-600 px-4 py-2 rounded-full transition duration-300"
+                >
+                  {item}
+                </Link>
+              </li>
+            ))}
 
-                {showLogoutMenu && (
-                  <div className="absolute right-0 mt-5 w-40 bg-white rounded-lg shadow-lg z-50">
-                    <ul className="py-2">
-                      
-                      <li>
-                        <Link
-                          to="/profile"
-                          className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        >
-                          Profile
-                        </Link>
-                      </li>
+            {/* Add the user login/logout button as another list item */}
+            <li>
+              {isLoading ? (
+                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : user ? (
+                // Display user's profile image
+                <div className="relative" ref={logoutMenuRef}>
+                  <img
+                    src={user.photo || `/static/user.png`}
+                    alt="User Avatar"
+                    className="w-8 h-8 rounded-full cursor-pointer"
+                    onClick={() => setShowLogoutMenu((prev) => !prev)}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = `/static/user.png`;
+                    }}
+                  />
 
-                      <li>
-                        <Link
-                          to="/booking-history"
-                          className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        >
-                          Your Bookings
-                        </Link>
+                  {showLogoutMenu && (
+                    <div className="absolute right-0 mt-5 w-40 bg-white rounded-lg shadow-lg z-50">
+                      <ul className="py-2">
+                        
                         <li>
-                        <button
-                          onClick={() => setShowConfirmModal(true)}
-                          className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-600"
-                        >
-                          Logout
-                        </button>
-                      </li>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ) : (
-              // Show login button if not logged in
-              <button
-                onClick={googleLogin}
-                className="bg-white text-indigo-700 px-6 py-3 rounded-full font-medium transition-all duration-300 hover:bg-indigo-600 hover:text-white flex items-center justify-center"
-              >
-                Login
-              </button>
-            )}
-          </li>
-        </ul>
-      </nav>
+                          <Link
+                            to="/profile"
+                            className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                          >
+                            Profile
+                          </Link>
+                        </li>
+
+                        <li>
+                          <Link
+                            to="/booking-history"
+                            className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                          >
+                            Your Bookings
+                          </Link>
+                          <li>
+                          <button
+                            onClick={() => setShowConfirmModal(true)}
+                            className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-600"
+                          >
+                            Logout
+                          </button>
+                        </li>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Show login button if not logged in
+                <button
+                  onClick={googleLogin}
+                  className="bg-white text-indigo-700 px-6 py-3 rounded-full font-medium transition-all duration-300 hover:bg-indigo-600 hover:text-white flex items-center justify-center"
+                >
+                  Login
+                </button>
+              )}
+            </li>
+          </ul>
+        </nav>
+      </header>
       {/* Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -225,7 +230,7 @@ const Navbar = () => {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 };
 
