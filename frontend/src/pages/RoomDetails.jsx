@@ -347,10 +347,19 @@ const RoomDetails = () => {
               ₹{roomDetails.price ? Math.round(roomDetails.price * 1.4).toLocaleString() : '--'}
             </span>
             {/* Real price and offer */}
-            <span className="text-xl lg:text-2xl font-bold text-indigo-600">
-              ₹{roomDetails.price && roomDetails.price.toLocaleString()}
-              <span className="ml-2 px-2 py-0.5 rounded bg-yellow-200 text-yellow-800 text-xs font-semibold align-middle">Limited Time Offer</span>
-            </span>
+            <div className="text-xl lg:text-2xl font-bold text-indigo-600 flex flex-col items-start sm:items-end">
+  <span className="px-2 py-0.5 rounded bg-yellow-200 text-yellow-800 text-xs font-semibold w-fit">
+    Limited Time Offer
+  </span>
+  <span className="w-full text-start sm:text-end">
+    ₹{roomDetails.price && roomDetails.price.toLocaleString('en-IN')}
+  </span>
+</div>
+
+
+
+
+            
             <span className="text-xs sm:text-sm font-medium text-gray-500">per night</span>
             {/* You Save */}
             {roomDetails.price && (

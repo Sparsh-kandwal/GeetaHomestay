@@ -120,10 +120,19 @@ const RoomCard = ({ room }) => {
               ₹{Math.round(price * 1.4).toLocaleString()}
             </span>
             {/* Real price and offer */}
-            <span className="text-lg sm:text-xl font-bold text-indigo-600">
-              ₹{price.toLocaleString()}
-              <span className="ml-2 px-2 py-0.5 rounded bg-yellow-200 text-yellow-800 text-xs font-semibold align-middle">Limited Time Offer</span>
-            </span>
+            <div className="flex flex-col items-start sm:items-end">
+  {/* Badge on top */}
+  <span className="mb-1 px-2 py-0.5 rounded bg-yellow-200 text-yellow-800 text-xs font-semibold inline-block">
+    Limited Time Offer
+  </span>
+
+  {/* Price */}
+  <span className="text-lg sm:text-xl font-bold text-indigo-600">
+    ₹{price.toLocaleString('en-IN')}
+  </span>
+</div>
+
+
             <span className="text-xs sm:text-sm font-medium text-gray-500">per night</span>
             {/* You Save */}
             <span className="text-xs sm:text-sm font-semibold text-green-600 mt-1">
