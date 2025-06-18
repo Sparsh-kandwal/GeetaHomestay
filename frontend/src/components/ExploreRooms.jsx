@@ -16,7 +16,7 @@ const ExploreRooms = () => {
   const [filteredRooms, setFilteredRooms] = useState([]);
   const [rooms, setRooms] = useState([]);
 
-  const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffe-Kettle'];
+  const amenitiesOptions = ['AC', 'Non-AC', 'Balcony', 'Coffee-Kettle'];
   const bedOptions = ['2 Bed', '3 Bed', '4 Bed'];
 
   const { fetchRooms, roomsLoading } = useContext(RoomContext);

@@ -7,7 +7,6 @@ const announcements = [
   { label: "NEW", text: "Special Packages on Family Room (with Balcony)" },
   { label: "NEW", text: "Free 45-Min Morning Yoga sessions for 7+ Day Stays" },
   { label: "NEW", text: "CP & MAP Plans for Large Groups" },
-  { label: "NEW", text: "Discounted Rates – Limited Time Offer!" },
   { label: "NEW", text: "Auli, Valley of Flowers, Ranikhet, Mukteshwar, Roopkund, Benital (India’s 1st Astro Village), Tungnath Temple, Rudranath Temple, Madhyamaheshwar Temple, and Kartik Swami Temple — are nearby our homestay and can be comfortably explored within a day." },
   { label: "NEW", text: "We provide vehicles at affordable rates to explore all these breathtaking destinations. Contact us for more details." },
 ];

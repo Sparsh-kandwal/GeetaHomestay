@@ -344,7 +344,7 @@ const RoomDetails = () => {
           <div className="flex flex-col items-start sm:items-end mb-6">
             {/* Fake inflated price */}
             <span className="text-xs sm:text-sm line-through text-gray-400 mb-1">
-              ₹{roomDetails.price ? Math.round(roomDetails.price * 1.4) : '--'}
+              ₹{roomDetails.price ? Math.round(roomDetails.price * 1.4).toLocaleString() : '--'}
             </span>
             {/* Real price and offer */}
             <span className="text-xl lg:text-2xl font-bold text-indigo-600">
@@ -355,7 +355,7 @@ const RoomDetails = () => {
             {/* You Save */}
             {roomDetails.price && (
               <span className="text-xs sm:text-sm font-semibold text-green-600 mt-1">
-                You Save ₹{Math.round(roomDetails.price * 1.4) - roomDetails.price}!
+                You Save ₹{(Math.round(roomDetails.price * 1.4) - roomDetails.price).toLocaleString()}!
               </span>
             )}
           </div>

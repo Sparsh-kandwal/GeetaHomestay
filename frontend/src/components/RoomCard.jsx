@@ -117,17 +117,17 @@ const RoomCard = ({ room }) => {
           <div className="flex flex-col items-start sm:items-end mt-2 sm:mt-0">
             {/* Fake inflated price */}
             <span className="text-xs sm:text-sm line-through text-gray-400 mb-1">
-              ₹{Math.round(price * 1.4)}
+              ₹{Math.round(price * 1.4).toLocaleString()}
             </span>
             {/* Real price and offer */}
             <span className="text-lg sm:text-xl font-bold text-indigo-600">
-              ₹{price}
+              ₹{price.toLocaleString()}
               <span className="ml-2 px-2 py-0.5 rounded bg-yellow-200 text-yellow-800 text-xs font-semibold align-middle">Limited Time Offer</span>
             </span>
             <span className="text-xs sm:text-sm font-medium text-gray-500">per night</span>
             {/* You Save */}
             <span className="text-xs sm:text-sm font-semibold text-green-600 mt-1">
-              Save ₹{Math.round(price * 1.4) - price} Now !
+              Save ₹{(Math.round(price * 1.4) - price).toLocaleString()} Now !
             </span>
           </div>
         </div>
