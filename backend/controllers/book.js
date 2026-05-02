@@ -3,12 +3,33 @@ import Room from "../models/room.js";
 import BookedDate from "../models/bookedDates.js";
 import Cart_item from "../models/cart.js";
 import mongoose from "mongoose";
+import { rollbackBookings } from "../utils/rollbackBookings.js";
+
+const PENDING_VISIBILITY_WINDOW_MS = 5 * 60 * 1000;
 
 const createOrder = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const pendingCutoff = new Date(Date.now() - PENDING_VISIBILITY_WINDOW_MS);
+    await rollbackBookings(userId, { createdBefore: pendingCutoff });
+
+    const activePendingBookings = await Booking.find({
+      userId,
+      paymentStatus: "pending",
+      createdAt: { $gte: pendingCutoff },
+    }).sort({ createdAt: -1 });
+
+    if (activePendingBookings.length > 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Existing pending booking found",
+        bookings: activePendingBookings,
+        hasPendingPayment: true,
+      });
     }
 
     const cartItems = await Cart_item.find({ userId });
@@ -18,7 +39,6 @@ const createOrder = async (req, res) => {
 
     const bookings = [];
     const errors = [];
-
     const bookingId = new mongoose.Types.ObjectId();
 
     for (const cartItem of cartItems) {
@@ -37,7 +57,7 @@ const createOrder = async (req, res) => {
         continue;
       }
 
-      const totalAmount = totalDays * quantity * room.price ; 
+      const totalAmount = totalDays * quantity * room.price;
       const checkInDate = new Date(checkIn);
       const checkOutDate = new Date(checkOut);
 
@@ -76,7 +96,7 @@ const createOrder = async (req, res) => {
       }
 
       const booking = await Booking.create({
-        bookingId, 
+        bookingId,
         userId,
         roomType,
         members,
@@ -94,6 +114,7 @@ const createOrder = async (req, res) => {
       success: true,
       message: "Bookings created successfully",
       bookings,
+      hasPendingPayment: false,
     };
 
     if (errors.length > 0) {

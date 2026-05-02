@@ -1,5 +1,4 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -11,8 +10,6 @@ import cookieParser from 'cookie-parser';
 dotenv.config();
 const app = express();
 
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
