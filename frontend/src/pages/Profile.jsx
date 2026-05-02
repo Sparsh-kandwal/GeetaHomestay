@@ -1,8 +1,7 @@
 // frontend/src/pages/Profile.jsx
 
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { UserContext } from "../auth/Userprovider";
-import { FaUserCircle } from "react-icons/fa";
 import { Transition } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 
@@ -12,7 +11,7 @@ const Profile = () => {
     name: "",
     email: "",
   });
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 

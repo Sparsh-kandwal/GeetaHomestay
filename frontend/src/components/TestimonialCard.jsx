@@ -1,43 +1,33 @@
-import React from 'react';
-
 const TestimonialCard = ({ username, testimonial, rating, image }) => {
-  const starCount = parseInt(rating, 10); // Extract the numeric part of the rating string (e.g., '5 stars' -> 5)
-  const stars = Array.from({ length: 5 }, (_, index) => index < starCount ? '★' : '☆'); // Create star rating
-  console.log(image)
+  const starCount = Math.max(0, Math.min(5, parseInt(rating, 10) || 0));
+  const stars = Array.from({ length: 5 }, (_, index) =>
+    index < starCount ? "★" : "☆"
+  );
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-lg w-3/5 h-[40vh] sm:h-[30vh] mx-auto">
-      {/* Display the image */}
-      <div className="flex items-center">
-        {/* Add the image and ensure it has a fixed size and is rounded */}
+    <div className="w-full rounded-[28px] border border-[#e8dfd0] bg-white p-6 shadow-[0_18px_38px_rgba(23,50,46,0.08)] sm:p-8">
+      <div className="flex items-center gap-4">
         <img
           src={image || `/static/user.png`}
-          alt="User Avatar"
-          className="w-8 h-8 rounded-full cursor-pointer"
-          onClick={() => setShowLogoutMenu((prev) => !prev)}
+          alt={username || "Guest avatar"}
+          className="h-14 w-14 rounded-full object-cover"
           onError={(e) => {
-            e.target.onerror = null; 
-            e.target.src = `/static/user.png`; 
+            e.target.onerror = null;
+            e.target.src = `/static/user.png`;
           }}
         />
-        <h3
-          className="ml-4 text-2xl font-semibold text-[#3a328c] truncate"
-          style={{ maxWidth: '200px' }}
-        >
-  {username}
-</h3>
-
+        <div className="min-w-0">
+          <h3 className="truncate text-xl font-semibold text-[#17322e]">{username}</h3>
+          <div className="mt-1 text-lg text-[#d38c37]" aria-label={`${starCount} stars`}>
+            {stars.map((star, index) => (
+              <span key={index}>{star}</span>
+            ))}
+          </div>
+        </div>
       </div>
-      <p className="text-gray-600 mt-4 text-lg overflow-hidden line-clamp-4">
-        {testimonial}
+      <p className="mt-5 text-sm leading-7 text-[#5e635d] sm:text-base">
+        “{testimonial}”
       </p>
-
-      {/* Display stars */}
-      <div className="text-yellow-500 mt-2" aria-label={`${starCount} stars`}>
-        {stars.map((star, index) => (
-          <span key={index} className="text-xl">{star}</span>
-        ))}
-      </div>
     </div>
   );
 };

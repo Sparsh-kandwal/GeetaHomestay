@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MapPin } from "lucide-react";
 import { carouselItems } from "../constants/PopularSites";
+import { buildAssetUrl, getFallbackRoomImage } from "../utils/roomData";
 
 const HomeCarousel = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   const prevImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? carouselItems.length - 1 : prevIndex - 1
     );
     setIsLoading(true);
+    setImageError(false);
   };
 
   const nextImage = () => {
@@ -19,12 +22,11 @@ const HomeCarousel = () => {
       prevIndex === carouselItems.length - 1 ? 0 : prevIndex + 1
     );
     setIsLoading(true);
+    setImageError(false);
   };
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      nextImage();
-    }, 5000);
+    const intervalId = setInterval(nextImage, 5000);
     return () => clearInterval(intervalId);
   }, []);
 
@@ -36,60 +38,59 @@ const HomeCarousel = () => {
   };
 
   return (
-    <div className="relative w-[80vh] md:w-[800px] h-96 md:h-[500px] overflow-hidden rounded-lg shadow-lg">
-      {/* Image with fade-in effect */}
-      <div className="absolute inset-0 bg-black/10 animate-fade-in">
-        {isLoading && <div className="absolute inset-0 bg-gray-300 animate-pulse"></div>}
-        <img
-          src={`${import.meta.env.VITE_CLOUDINARY_CLOUD}${currentItem.image}`}
-          alt={`${currentItem.title} Image`}
-          className={`w-full h-full object-cover transition-opacity duration-700 ${isLoading ? "opacity-0" : "opacity-100"}`}
-          onLoad={() => setIsLoading(false)}
-          onError={() => setIsLoading(false)}
-          loading="lazy"
-        />
-      </div>
+    <div className="relative w-full max-w-5xl overflow-hidden rounded-[28px] border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.25)]">
+      <div className="relative aspect-[16/11] md:aspect-[16/8] overflow-hidden">
+        <div className="absolute inset-0">
+          {isLoading && <div className="absolute inset-0 animate-pulse bg-slate-300/40" />}
+          <img
+            src={imageError ? getFallbackRoomImage() : buildAssetUrl(currentItem.image)}
+            alt={currentItem.title}
+            className={`h-full w-full object-cover transition-opacity duration-700 ${isLoading ? "opacity-0" : "opacity-100"}`}
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setIsLoading(false);
+              setImageError(true);
+            }}
+            loading="lazy"
+          />
+        </div>
 
-      {/* Navigation buttons */}
-      {carouselItems.length > 1 && (
-        <>
-          <button
-            onClick={prevImage}
-            className="absolute top-1/2 left-2 md:left-5 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 md:p-4 rounded-full hover:bg-opacity-75 transition z-10"
-            aria-label="Previous Image"
-          >
-            <FaChevronLeft size={24} />
-          </button>
-          <button
-            onClick={nextImage}
-            className="absolute top-1/2 right-2 md:right-5 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 md:p-4 rounded-full hover:bg-opacity-75 transition z-10"
-            aria-label="Next Image"
-          >
-            <FaChevronRight size={24} />
-          </button>
-        </>
-      )}
+        {carouselItems.length > 1 && (
+          <>
+            <button
+              onClick={prevImage}
+              className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/35 p-3 text-white transition hover:bg-black/55 md:left-5"
+              aria-label="Previous Image"
+            >
+              <FaChevronLeft size={18} />
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/35 p-3 text-white transition hover:bg-black/55 md:right-5"
+              aria-label="Next Image"
+            >
+              <FaChevronRight size={18} />
+            </button>
+          </>
+        )}
 
-      {/* Overlay Content */}
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-center bg-black/50 p-6">
-        <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-bold">
-          {currentItem.title}
-        </h1>
-        <p className="text-white opacity-80 mt-3 md:text-lg">
-          Distance from HomeStay: {currentItem.description}
-        </p>
-        <p className="text-white opacity-70 mt-2 md:text-base">
-          {currentItem.extraDescription}
-        </p>
-
-        {/* Locate Button */}
-        <button
-          onClick={() => openGoogleMaps(currentItem.location)}
-          className="mt-5 bg-white text-blue-600 px-6 py-2 rounded-md border border-blue-600 hover:bg-blue-50 transition duration-300 flex items-center"
-        >
-          <MapPin className="w-5 h-5 mr-2" />
-          Locate The Place
-        </button>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-black/10 to-transparent p-5 sm:p-8">
+          <div className="flex h-full flex-col justify-end text-white">
+            <div className="max-w-md">
+              <h3 className="text-3xl font-semibold sm:text-4xl">{currentItem.title}</h3>
+              <p className="mt-2 text-sm text-white/85 sm:text-base">
+                {currentItem.description.replace("Approximately ", "")} away
+              </p>
+              <button
+                onClick={() => openGoogleMaps(currentItem.location)}
+                className="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-[#fff4ea] px-5 py-3 text-sm font-semibold text-[#17322e] transition hover:bg-white"
+              >
+                <MapPin className="h-4 w-4" />
+                View route
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

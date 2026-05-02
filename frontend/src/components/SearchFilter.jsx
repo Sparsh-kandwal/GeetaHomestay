@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { SlidersHorizontal, RotateCcw } from "lucide-react";
 
 const SearchFilter = ({
   bedOptions,
+  searchTermInput,
   maxPriceInput,
   guestCountInput,
   amenitiesOptions,
@@ -10,34 +12,18 @@ const SearchFilter = ({
   setMaxPriceInput,
   setGuestCountInput,
 }) => {
-  const [isFilterVisible, setIsFilterVisible] = useState(false); 
-
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
 
   useEffect(() => {
     const handleResize = () => {
-      // Only set the filter visibility on initial load based on screen size
-      if (window.innerWidth >= 768) {
-        setIsFilterVisible(true);  // Show filters on larger screens
-      } else {
-        setIsFilterVisible(false);  // Hide filters on smaller screens
-      }
+      setIsFilterVisible(window.innerWidth >= 1024);
     };
-  
-    // Initial check
-    handleResize();
-  
-    // Attach resize event listener
-    window.addEventListener('resize', handleResize);
-  
-    // Cleanup event listener on component unmount
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);  // Empty dependency array means this runs only once on mount
-  
-  
 
-  const [selectedAmenities, setSelectedAmenities] = useState([]);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleAmenityChangeInput = (amenity) => {
     setSelectedAmenities((prev) =>
@@ -49,123 +35,144 @@ const SearchFilter = ({
   };
 
   const handleReset = () => {
-    setSearchTermInput('');
+    setSearchTermInput("");
     setSelectedAmenitiesInput([]);
     setMaxPriceInput(4000);
-    setGuestCountInput('');
+    setGuestCountInput("");
     setSelectedAmenities([]);
   };
 
   return (
-    <div className="lg:sticky top-20 h-fit w-full lg:w-1/4 p-6 bg-white shadow-md rounded-lg">
-      {/* Toggle Button for Mobile View */}
-      <button
-        onClick={() => setIsFilterVisible((prev) => !prev)}
-        className=" mb-4 w-full text-white bg-indigo-500 p-3 rounded-lg hover:bg-indigo-600 transition duration-200"
-      >
-        {isFilterVisible ? 'Hide Filters' : 'Show Filters'}
-      </button>
+    <div className="h-fit w-full lg:sticky lg:top-32 lg:w-[320px]">
+      <div className="rounded-[28px] border border-[#e5dccf] bg-white p-5 shadow-[0_16px_38px_rgba(23,50,46,0.06)] sm:p-6">
+        <button
+          onClick={() => setIsFilterVisible((prev) => !prev)}
+          className="flex w-full items-center justify-between rounded-2xl bg-[#f7efe3] px-4 py-3 text-left text-sm font-semibold text-[#17322e] transition hover:bg-[#efe4d3] lg:cursor-default"
+        >
+          <span className="inline-flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4" />
+            Refine your stay
+          </span>
+          <span className="text-xs uppercase tracking-[0.2em] text-[#8b4e31]">
+            {isFilterVisible ? "Hide" : "Show"}
+          </span>
+        </button>
 
-      {/* Filter Section */}
-      <div className={isFilterVisible ? 'space-y-6' : 'hidden'}>
-        <h3 className="text-lg font-semibold mb-6">Search & Filters</h3>
-
-        {/* Filter by Beds */}
-        <div className="mb-6">
-          <h4 className="text-md font-semibold mb-2">Filter by Beds</h4>
-          <div className="space-y-2">
-            {bedOptions.map((beds, index) => (
-              <label key={index} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  checked={selectedAmenities.includes(beds)}
-                  onChange={() => handleAmenityChangeInput(beds)}
-                  className="h-5 w-5"
-                />
-                <span className="ml-1 mr-3 text-gray-700">{beds}</span>
-              </label>
-            ))}
+        <div className={isFilterVisible ? "mt-6 space-y-7" : "hidden"}>
+          <div>
+            <label className="text-sm font-semibold uppercase tracking-[0.2em] text-[#8b4e31]">
+              Search room
+            </label>
+            <input
+              type="text"
+              value={searchTermInput}
+              onChange={(e) => setSearchTermInput(e.target.value)}
+              placeholder="Search by room name or vibe"
+              className="mt-3 w-full rounded-2xl border border-[#e3dacd] bg-[#fffdf9] px-4 py-3 text-sm text-[#17322e] outline-none transition focus:border-[#1f5b52]"
+            />
           </div>
-        </div>
 
-        {/* Filter by Amenities */}
-        <div className="mb-6">
-          <h4 className="text-md font-semibold mb-2">Filter by Amenities</h4>
-          <div className="space-y-2">
-            {amenitiesOptions.map((amenity, index) => (
-              <label key={index} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  checked={selectedAmenities.includes(amenity)}
-                  onChange={() => handleAmenityChangeInput(amenity)}
-                  className="h-5 w-5"
-                />
-                <span className="ml-1 mr-3 text-gray-700">{amenity}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Filter by Price Range */}
-        <div className="mb-6">
-          <h4 className="text-md font-semibold mb-3">Filter by Price (₹)</h4>
-          <div className="flex flex-col space-y-4">
-            <div>
-              <label
-                className="block text-gray-700 text-sm mb-1"
-                htmlFor="maxPrice"
-              >
-                Max Price: ₹{maxPriceInput}
-              </label>
-              <input
-                type="range"
-                id="maxPrice"
-                min="1200"
-                max="4000"
-                step="100"
-                value={maxPriceInput}
-                onChange={(e) => setMaxPriceInput(e.target.value)}
-                className="w-full"
-              />
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#8b4e31]">
+              Bed type
+            </h3>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {bedOptions.map((beds) => (
+                <label
+                  key={beds}
+                  className={`rounded-full border px-3 py-2 text-sm transition ${
+                    selectedAmenities.includes(beds)
+                      ? "border-[#1f5b52] bg-[#eef5f2] text-[#1f5b52]"
+                      : "border-[#e3dacd] bg-[#fffdf9] text-[#5e635d]"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedAmenities.includes(beds)}
+                    onChange={() => handleAmenityChangeInput(beds)}
+                    className="sr-only"
+                  />
+                  {beds}
+                </label>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Filter by Guest Count */}
-        <div className="mb-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-gray-700">Total Guests</label>
-              <select
-                value={guestCountInput}
-                onChange={(e) => setGuestCountInput(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">Any</option>
-                <option value="1">1 Guest</option>
-                <option value="2">2 Guests</option>
-                <option value="3">3 Guests</option>
-                <option value="4">4 Guests</option>
-                <option value="5">5 Guests</option>
-                <option value="6">6 Guests</option>
-              </select>
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#8b4e31]">
+              Amenities
+            </h3>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {amenitiesOptions.map((amenity) => (
+                <label
+                  key={amenity}
+                  className={`rounded-full border px-3 py-2 text-sm transition ${
+                    selectedAmenities.includes(amenity)
+                      ? "border-[#c97953] bg-[#fff1ea] text-[#8b4e31]"
+                      : "border-[#e3dacd] bg-[#fffdf9] text-[#5e635d]"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedAmenities.includes(amenity)}
+                    onChange={() => handleAmenityChangeInput(amenity)}
+                    className="sr-only"
+                  />
+                  {amenity}
+                </label>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Reset Button */}
-        <div className="mt-4">
+          <div>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#8b4e31]">
+                Price
+              </h3>
+              <span className="text-sm font-semibold text-[#17322e]">Rs. {maxPriceInput}</span>
+            </div>
+            <input
+              type="range"
+              id="maxPrice"
+              min="1200"
+              max="4000"
+              step="100"
+              value={maxPriceInput}
+              onChange={(e) => setMaxPriceInput(e.target.value)}
+              className="mt-4 w-full accent-[#1f5b52]"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold uppercase tracking-[0.2em] text-[#8b4e31]">
+              Total guests
+            </label>
+            <select
+              value={guestCountInput}
+              onChange={(e) => setGuestCountInput(e.target.value)}
+              className="mt-3 w-full rounded-2xl border border-[#e3dacd] bg-[#fffdf9] px-4 py-3 text-sm text-[#17322e] outline-none transition focus:border-[#1f5b52]"
+            >
+              <option value="">Any</option>
+              <option value="1">1 Guest</option>
+              <option value="2">2 Guests</option>
+              <option value="3">3 Guests</option>
+              <option value="4">4 Guests</option>
+              <option value="5">5 Guests</option>
+              <option value="6">6 Guests</option>
+            </select>
+          </div>
+
           <button
             onClick={handleReset}
-            className="w-full bg-red-500 text-gray-100 p-3 rounded-lg hover:bg-red-700 transition duration-200"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#fff1ea] px-4 py-3 text-sm font-semibold text-[#8b4e31] transition hover:bg-[#fde6db]"
           >
-            Reset
+            <RotateCcw className="h-4 w-4" />
+            Reset filters
           </button>
         </div>
       </div>
     </div>
   );
 };
-
 
 export default SearchFilter;

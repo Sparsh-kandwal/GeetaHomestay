@@ -1,70 +1,75 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  FaChevronLeft, 
-  FaHeart, 
+import { useState, useEffect, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  FaChevronLeft,
+  FaHeart,
   FaExclamationTriangle,
   FaCartPlus,
-  FaShoppingBag
-} from 'react-icons/fa';
-import 'react-datepicker/dist/react-datepicker.css';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
-import { useDateContext } from '../contexts/DateContext';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
-import { RoomContext, UserContext } from '../auth/Userprovider';
+  FaShoppingBag,
+} from "react-icons/fa";
+import { ShieldCheck, CalendarDays, Users, BedDouble, Lock, Sparkles } from "lucide-react";
+import "react-datepicker/dist/react-datepicker.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
+import { useDateContext } from "../contexts/DateContext";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/effect-fade";
+import { RoomContext, UserContext } from "../auth/Userprovider";
 import { useGoogleLogin } from "@react-oauth/google";
 import { googleAuth } from "../auth/api";
-import OpacityLoader from '../components/OpacityLoader';
-import axios from 'axios';
+import BookingFlowIndicator from "../components/BookingFlowIndicator";
+import {
+  buildAssetUrl,
+  findRoomByIdentifier,
+  getFallbackRoomImage,
+  normalizeRoom,
+  toRoomSlug,
+} from "../utils/roomData";
 
 const RoomDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
-  const { user, isLoading, setUser, setIsLoading } = useContext(UserContext);
-  let { checkInDate, setCheckInDate, checkOutDate, setCheckOutDate } = useDateContext();
+  const { user, setUser } = useContext(UserContext);
+  const { checkInDate, setCheckInDate, checkOutDate, setCheckOutDate } = useDateContext();
   const { fetchRooms, roomsLoading, rooms } = useContext(RoomContext);
-  const [ room, setRoom ] = useState();
+  const [room, setRoom] = useState();
   const [load, setLoad] = useState(true);
-  const [minCheckOutDate, setMinCheckOutDate] = useState('');
-  const [guests, setGuests] = useState(1); 
+  const [minCheckOutDate, setMinCheckOutDate] = useState("");
+  const [guests, setGuests] = useState(1);
   const [roomCount, setRoomCount] = useState(1);
+  const [galleryFallbacks, setGalleryFallbacks] = useState({});
   const [roomDetails, setRoomDetails] = useState({
     roomType: null,
     roomName: null,
     price: null,
     description: null,
-    amenities: null,
-    maxAdults: null,
-    gallery: null,
-    totalRooms: null,
+    amenities: [],
+    maxAdults: 1,
+    gallery: [],
+    totalRooms: 0,
+    availableRooms: null,
   });
-
 
   const responseGoogle = async (authResult) => {
     try {
-        if (authResult.code) {
-            const result = await googleAuth(authResult.code);
-            console.log("Backend response:", result);
-            if (result.data?.user) {
-                setUser(result.data.user);
-            } else {
-                console.error("User data missing in backend response");
-                alert("Error while processing login.");
-            }
+      if (authResult.code) {
+        const result = await googleAuth(authResult.code);
+        if (result.data?.user) {
+          setUser(result.data.user);
         } else {
-            console.error("No authorization code in auth result:", authResult);
-            alert("Google Login failed. Please try again.");
+          alert("Error while processing login.");
         }
+      } else {
+        alert("Google Login failed. Please try again.");
+      }
     } catch (error) {
-        console.error("Error during Google Login:", error);
-        alert("Error while Google Login...");
+      console.error("Error during Google Login:", error);
+      alert("Error while Google Login...");
     }
   };
 
@@ -75,41 +80,57 @@ const RoomDetails = () => {
     scope: "openid profile email",
   });
 
-
-
   useEffect(() => {
-    if (!rooms) {
+    if (!rooms?.length) {
       fetchRooms();
     }
-  }, [fetchRooms]);
+  }, [fetchRooms, rooms]);
 
   useEffect(() => {
-    setRoom(rooms.find((r) => r.roomType === id));
-  }, [rooms, fetchRooms, roomsLoading]);
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [id]);
+
+  useEffect(() => {
+    if (roomsLoading) {
+      setRoom(undefined);
+      return;
+    }
+
+    if (rooms && rooms.length > 0) {
+      const matchedRoom = findRoomByIdentifier(rooms, id);
+      setRoom(matchedRoom);
+    } else {
+      setRoom(undefined);
+    }
+  }, [roomsLoading, rooms, id]);
 
   useEffect(() => {
     if (room) {
+      const normalizedRoom = normalizeRoom(room);
+      setGalleryFallbacks({});
       setLoad(false);
       setRoomDetails({
-        roomType: room.roomType || null,
-        roomName: room.roomName || null,
-        price: room.price || null,
-        description: room.description || null,
-        amenities: room.amenities || null,
-        maxAdults: room.maxAdults || null,
-        gallery: room.gallery || null,
-        totalRooms: room.totalRooms || null,
+        roomType: normalizedRoom.roomType || null,
+        roomName: normalizedRoom.roomName || null,
+        price: normalizedRoom.price || null,
+        description: normalizedRoom.description || null,
+        amenities: normalizedRoom.amenities || [],
+        maxAdults: normalizedRoom.maxAdults || 1,
+        gallery: normalizedRoom.gallery || [getFallbackRoomImage()],
+        totalRooms: normalizedRoom.totalRooms || null,
+        availableRooms: normalizedRoom.availableRooms ?? null,
       });
+      return;
     }
-  }, [room]);
 
-
-
-
+    if (!roomsLoading) {
+      setLoad(false);
+    }
+  }, [room, roomsLoading]);
 
   useEffect(() => {
     if (!checkInDate) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       setCheckInDate(today);
       setMinCheckOutDate(today);
     }
@@ -119,37 +140,46 @@ const RoomDetails = () => {
     if (checkInDate) {
       const nextDay = new Date(checkInDate);
       nextDay.setDate(nextDay.getDate() + 1);
-      setMinCheckOutDate(nextDay.toISOString().split('T')[0]);
+      setMinCheckOutDate(nextDay.toISOString().split("T")[0]);
     }
   }, [checkInDate]);
-  
+
   const isInvalidDateRange = () => {
     return checkInDate && checkOutDate && checkInDate >= checkOutDate;
   };
 
+  const getBookingBlockMessage = () => {
+    if (!checkOutDate) {
+      return "Please select a check-out date first.";
+    }
+
+    if (isInvalidDateRange()) {
+      return "Please choose a valid check-out date after check-in.";
+    }
+
+    if (!user) {
+      return "Please log in first to continue.";
+    }
+
+    return "";
+  };
+
+  const handleBlockedBookingAction = () => {
+    const message = getBookingBlockMessage();
+
+    if (message) {
+      toast.info(message);
+      return true;
+    }
+
+    return false;
+  };
 
   useEffect(() => {
     if (guests > roomDetails.maxAdults * roomCount) {
       setGuests(roomDetails.maxAdults * roomCount);
     }
-  }, [guests, roomDetails.maxAdults, roomCount, roomsLoading]);
-  
-
-
-
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-  };
-
-  const handleGuestsChange = (value) => {
-    setGuests(value);
-  };
-
-  const handleRoomCountChange = (value) => {
-    setRoomCount(value);
-  };
-
-  
+  }, [guests, roomDetails.maxAdults, roomCount]);
 
   const calculateTotalPrice = () => {
     if (!checkInDate || !checkOutDate) return roomDetails.price;
@@ -160,63 +190,52 @@ const RoomDetails = () => {
     return dayCount * roomDetails.price * roomCount;
   };
 
-  const handleBookNow = () => {
-    if (isInvalidDateRange() || !checkInDate || !checkOutDate) {
-      toast.error('Please select valid check-in and check-out dates before booking.');
-      return;
-    }
-    toast.success('Booking confirmed!');
-  };
-
   const handleAddToCart = async () => {
-    if (isInvalidDateRange() || !checkInDate || !checkOutDate) {
-      toast.error('Please select valid check-in and check-out dates before adding to cart.');
+    if (handleBlockedBookingAction()) {
       return;
     }
     try {
-      const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/addToCart`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/addToCart`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
         body: JSON.stringify({
-          checkIn: checkInDate, 
-          checkOut: checkOutDate, 
+          checkIn: checkInDate,
+          checkOut: checkOutDate,
           members: guests,
-          roomType: roomDetails.roomType, 
+          roomType: roomDetails.roomType,
           quantity: roomCount,
         }),
       });
       const data = await response.json();
       if (response.ok) {
-        toast.success('Room added to cart!');
+        toast.success("Added to cart");
       }
       if (response.status === 400) {
         toast.error(data.message);
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
-      toast.error("internal server error");
+      toast.error("Internal server error");
     }
   };
 
   const handleBuyNow = async () => {
-    if (isInvalidDateRange() || !checkInDate || !checkOutDate) {
-      toast.error('Please select valid check-in and check-out dates before booking.');
+    if (handleBlockedBookingAction()) {
       return;
     }
 
     try {
-      // First check availability
       const availabilityResponse = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/checkAvailability`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          credentials: 'include',
+          credentials: "include",
           body: JSON.stringify({
             checkIn: checkInDate,
             checkOut: checkOutDate,
@@ -226,37 +245,36 @@ const RoomDetails = () => {
 
       const availabilityData = await availabilityResponse.json();
 
-      // Check if the requested room type is available
-      if (!availabilityData.success || 
-          !availabilityData.availability[roomDetails.roomType] ||
-          availabilityData.availability[roomDetails.roomType].availableRooms < roomCount) {
-        toast.error('Selected rooms are not available for these dates');
+      if (
+        !availabilityData.success ||
+        !availabilityData.availability[roomDetails.roomType] ||
+        availabilityData.availability[roomDetails.roomType].availableRooms < roomCount
+      ) {
+        toast.error("Not available for selected dates");
         return;
       }
 
-      // Add to cart
-      const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/addToCart`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/addToCart`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
         body: JSON.stringify({
-          checkIn: checkInDate, 
-          checkOut: checkOutDate, 
+          checkIn: checkInDate,
+          checkOut: checkOutDate,
           members: guests,
-          roomType: roomDetails.roomType, 
+          roomType: roomDetails.roomType,
           quantity: roomCount,
         }),
       });
 
       if (response.ok) {
-        toast.success('Room added to cart!');
-        // Redirect to cart page
-        navigate('/cart');
+        toast.success("Added to cart");
+        navigate("/cart");
       } else {
         const data = await response.json();
-        toast.error(data.message || 'Failed to add to cart');
+        toast.error(data.message || "Failed to add to cart");
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -267,329 +285,383 @@ const RoomDetails = () => {
   const swiperSettings = {
     modules: [Autoplay, Navigation, Pagination, EffectFade],
     autoplay: {
-      delay: 5000, // 5 seconds
+      delay: 5000,
       disableOnInteraction: false,
     },
     navigation: true,
     pagination: { clickable: true },
-    effect: 'fade', // Change to 'slide', 'cube', etc., for different effects
+    effect: "fade",
     loop: true,
-    speed: 1000, // Transition speed in ms
+    speed: 1000,
   };
 
   if (roomsLoading || load) {
-    return <div className="min-h-screen"> loading </div>
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="h-72 animate-pulse rounded-[28px] bg-[#ece4d7]" />
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
+          <div className="space-y-5">
+            <div className="h-12 w-2/3 animate-pulse rounded-2xl bg-[#ece4d7]" />
+            <div className="h-32 animate-pulse rounded-[24px] bg-[#ece4d7]" />
+            <div className="h-48 animate-pulse rounded-[24px] bg-[#ece4d7]" />
+          </div>
+          <div className="h-[420px] animate-pulse rounded-[24px] bg-[#ece4d7]" />
+        </div>
+      </div>
+    );
   }
 
   if (!room && !load) {
     return (
-      <div className="container mx-auto px-4 py-24 text-center text-red-500">
-        <FaExclamationTriangle className="mx-auto mb-4 text-4xl" />
-        <p>Room not found.</p>
+      <div className="mx-auto max-w-3xl px-4 py-20 text-center">
+        <div className="rounded-[28px] border border-[#efc9be] bg-[#fff5f0] p-8">
+          <FaExclamationTriangle className="mx-auto mb-4 text-4xl text-[#8b4e31]" />
+          <h2 className="text-3xl font-semibold text-[#17322e]">Room not found</h2>
+          <button
+            onClick={() => navigate("/rooms")}
+            className="mt-6 rounded-full bg-[#1f5b52] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#17322e]"
+          >
+            Back to rooms
+          </button>
+        </div>
       </div>
     );
-  }  
+  }
 
-
-
-
-
+  const totalPrice = roomDetails.price ? calculateTotalPrice() : 0;
+  const bookingBlockMessage = getBookingBlockMessage();
+  const isBookingReady = !bookingBlockMessage;
+  const galleryImages =
+    roomDetails.gallery && roomDetails.gallery.length > 0
+      ? roomDetails.gallery
+      : [getFallbackRoomImage()];
+  const availabilityCopy =
+    roomDetails.availableRooms === null || roomDetails.availableRooms === undefined
+      ? `${roomDetails.totalRooms} rooms`
+      : roomDetails.availableRooms > 0
+        ? `${roomDetails.availableRooms} available`
+        : "Unavailable";
 
   return (
-    <div className="container mx-auto px-4 py-28 lg:py-28 mt-1 lg:mt-19">
-      {/* Back Button */}
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <button
         onClick={() => navigate(-1)}
-        className="mb-6 flex items-center text-indigo-600 hover:text-indigo-800 focus:outline-none"
+        className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#f7efe3] px-4 py-2.5 text-sm font-semibold text-[#17322e] transition hover:bg-[#ece1ce]"
       >
-        <FaChevronLeft className="mr-2" />
+        <FaChevronLeft />
         Back
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Image Gallery with Swiper */}
-        <div className="relative">
-          {/* Wrapping Swiper to maintain 4:3 aspect ratio */}
-          <div className="w-full aspect-w-4 aspect-h-3 relative">
-            <Swiper {...swiperSettings}>
-              
-              {roomDetails.gallery && roomDetails.gallery.map((image, index) => (
-                <SwiperSlide key={index}>
-                  <img
-                    src={import.meta.env.VITE_CLOUDINARY_CLOUD+image}
-                    alt={`${roomDetails.roomName} Image ${index + 1}`}
-                    className="w-full h-full object-cover rounded-lg shadow-lg"
-                    loading="lazy"
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-
-            {/* Favorite Button */}
-            <button
-              onClick={toggleFavorite}
-              className="absolute top-4 right-4 bg-white bg-opacity-75 text-red-500 p-3 rounded-full hover:bg-opacity-100 transition"
-              aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-            >
-              <FaHeart
-                className={`${isFavorite ? 'text-red-600' : 'text-gray-400'} transition-colors duration-200`}
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* Room Details and Booking */}
-        <div className="flex flex-col">
-          <h1 className="text-3xl lg:text-4xl font-bold mb-4 text-gray-800">{roomDetails.roomName}</h1>
-          <div className="flex flex-col items-start sm:items-end mb-6">
-            {/* Fake inflated price */}
-            <span className="text-xs sm:text-sm line-through text-gray-400 mb-1">
-              ₹{roomDetails.price ? Math.round(roomDetails.price * 1.4).toLocaleString() : '--'}
-            </span>
-            {/* Real price and offer */}
-            <div className="text-xl lg:text-2xl font-bold text-indigo-600 flex flex-col items-start sm:items-end">
-  <span className="px-2 py-0.5 rounded bg-yellow-200 text-yellow-800 text-xs font-semibold w-fit">
-    Limited Time Offer
-  </span>
-  <span className="w-full text-start sm:text-end">
-    ₹{roomDetails.price && roomDetails.price.toLocaleString('en-IN')}
-  </span>
-</div>
-
-
-
-
-            
-            <span className="text-xs sm:text-sm font-medium text-gray-500">per night</span>
-            {/* You Save */}
-            {roomDetails.price && (
-              <span className="text-xs sm:text-sm font-semibold text-green-600 mt-1">
-                You Save ₹{(Math.round(roomDetails.price * 1.4) - roomDetails.price).toLocaleString()}!
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-gray-600 mt-1">
-                  ({roomDetails.maxAdults} guests per room)
-                </p>
-          <p className="text-gray-700 mb-6">{roomDetails.description}</p>
-
-          {/* Room Availability */}
-          {/* Select Dates */}
-          <div className="mb-6">
-            {/* <h2 className="text-xl lg:text-2xl font-semibold mb-3 text-gray-800">Select Dates</h2> */}
-            <div className="relative flex items-center md:flex-row gap-10">
-            <div className="flex flex-col w-full md:w-auto">
-              <label className="text-gray-700 text-sm mb-1">Check-in</label>
-              <input
-                type="date"
-                value={checkInDate}
-                min={new Date().toISOString().split('T')[0]}
-                onChange={(e) => setCheckInDate(e.target.value)}
-                className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-              />
-            </div>
-            <div className="flex flex-col w-full md:w-auto">
-              <label className="text-gray-700 text-sm mb-1">Check-out</label>
-              <input
-                type="date"
-                value={checkOutDate}
-                min={minCheckOutDate}
-                onChange={(e) => setCheckOutDate(e.target.value)}
-                className="w-full px-3 py-2 border text-gray-700 border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-              />
-            </div>
-            </div>
-            {isInvalidDateRange() && (
-              <div className="mt-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded flex items-center">
-                <FaExclamationTriangle className="mr-2" />
-                <span>Departure date must be after arrival date.</span>
-              </div>
-            )}
-          </div>
-          <div className='relative flex items-center md:flex-row gap-10'>
-
-            {/* Room Availability */}
-            <div className="mb-6">
-              <label
-                htmlFor="quantity-input"
-                className="font-medium text-gray-700"
-              >
-                Rooms:
-              </label>
-              <div className="relative flex items-center max-w-[8rem]">
-                <button
-                  type="button"
-                  onClick={() => handleRoomCountChange(roomCount - 1)}
-                  disabled={roomCount <= 1} // Disable if room count is already 1
-                  className="mt-2 bg-indigo-600 hover:bg-indigo-700 border border-indigo-600 rounded-s-lg p-3 h-11"
-                >
-                  <svg
-                    className="w-3 h-3 text-gray-900 dark:text-white"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 2"
-                  >
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h16" />
-                  </svg>
-                </button>
-                <input
-                  type="number"
-                  id="quantity-input"
-                  value={roomCount}
-                  readOnly
-                  className="mt-2 text-indigo-600 h-11 text-center block w-full py-2.5"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRoomCountChange(roomCount + 1)}
-                  disabled={roomCount >= roomDetails.totalRooms} // Disable if room count exceeds total available
-                  className="mt-2 bg-gray-100 bg-indigo-600 hover:bg-indigo-700 border border-indigo-600 rounded-e-lg p-3 h-11"
-                >
-                  <svg
-                    className="w-3 h-3 text-gray-900 dark:text-white"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16m8-8H1" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            {/* Occupancy Controls */}
-            <div className="mb-6">
-              <div className='flex items-center'>
-              <label className="font-medium text-gray-700">Guests </label>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="guest-input">
-                      (Max: {roomDetails.maxAdults * roomCount})
-                    </label>
-                    :
-              </div>
-              
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="flex-1">
-                  <div className="relative flex items-center max-w-[8rem]">
-                    <button
-                    type="button"
-                    onClick={() => setGuests(guests - 1)}
-                    disabled={guests <= 1} // Disable if room count is already 1
-                    className="mt-2 bg-gray-100 bg-indigo-600 hover:bg-indigo-700 border border-indigo-600 rounded-s-lg p-3 h-11"
-                    >
-                      <svg
-                        className="w-3 h-3 text-gray-900 dark:text-white"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 18 2"
-                      >
-                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h16" />
-                      </svg>
-                    </button>
-                    <input
-                      type="number"
-                      id="guest-input"
-                      min="1"
-                      max={roomDetails.maxAdults * roomCount}
-                      value={guests}
-                      readOnly
-                      className="mt-2 text-indigo-600 h-11 text-center block w-full py-2.5"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setGuests(guests + 1)}
-                      disabled={guests >= roomDetails.maxAdults * roomCount} // Disable if room count exceeds total available
-                      className="mt-2 bg-gray-100 bg-indigo-600 hover:bg-indigo-700 border border-indigo-600 rounded-e-lg p-3 h-11"
-                    >
-                      <svg
-                        className="w-3 h-3 text-gray-900 dark:text-white"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 18 18"
-                      >
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16m8-8H1" />
-                      </svg>
-                    </button>
-                  </div>
-                  
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Total Price */}
-          <div className="mb-6">
-            <h2 className="text-xl lg:text-2xl font-semibold mb-2 text-gray-800">Total Price</h2>
-            <p className="text-xl font-bold text-indigo-600">
-              ₹{roomDetails.price && calculateTotalPrice().toLocaleString()} 
-              <span className="text-gray-600"> for {roomCount} room{roomCount > 1 ? 's' : ''}</span>
+      <div className="rounded-[28px] bg-[linear-gradient(135deg,#17322e_0%,#295046_100%)] p-5 text-white shadow-[0_22px_50px_rgba(23,50,46,0.16)] sm:p-6">
+        <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#f1c8af]">
+              Room
             </p>
+            <h1 className="mt-2 text-4xl font-semibold sm:text-5xl">{roomDetails.roomName}</h1>
+            <p className="mt-3 text-sm text-white/75">{availabilityCopy}</p>
           </div>
-
-          {/* Booking and Add to Cart Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Buy Now Button */}
-            <button
-              onClick={user ? handleBuyNow : googleLogin}
-              className={`w-full sm:w-1/2 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200 ${
-                isInvalidDateRange() || !checkInDate || !checkOutDate
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
-              }`}
-              title={isInvalidDateRange() || !checkInDate || !checkOutDate 
-                ? 'Please select a Checkout Date' 
-                : ''}
-              disabled={isInvalidDateRange() || !checkInDate || !checkOutDate}
-              aria-label="Buy Now"
-            >
-              <div className="flex items-center justify-center">
-                <FaShoppingBag className="mr-2" />
-                Buy Now
-              </div>
-            </button>
-
-            {/* Add to Cart Button */}
-            <button
-              onClick={user ? handleAddToCart : googleLogin}
-              className={`w-full sm:w-1/2 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-200 ${
-                isInvalidDateRange() || !checkInDate || !checkOutDate
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
-              }`}
-              title={isInvalidDateRange() || !checkInDate || !checkOutDate 
-                ? 'Please select a Checkout Date' 
-                : ''}
-              disabled={isInvalidDateRange() || !checkInDate || !checkOutDate}
-              aria-label="Add to Cart"
-            >
-              <div className="flex items-center justify-center">
-                <FaCartPlus className="mr-2" />
-                Add to Cart
-              </div>
-            </button>
-          </div>
+          <BookingFlowIndicator currentStep={2} compact />
         </div>
       </div>
 
-      {/* Amenities */}
-      <div className="mt-12">
-        <h2 className="text-2xl lg:text-3xl font-semibold mb-6 text-gray-800">Amenities</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {roomDetails.amenities && roomDetails.amenities.map((amenity, index) => (
-            <span
-              key={index}
-              className="flex items-center text-gray-700 text-sm bg-gray-100 px-4 py-2 rounded-full shadow-sm"
-            >
-              {amenity.icon && (
-                <span className="text-base mr-2">
-                  {amenity.icon}
-                </span>
+      <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] xl:gap-8">
+        <div className="space-y-6">
+          <div className="overflow-hidden rounded-[28px] border border-[#e7dfd2] bg-white shadow-[0_18px_48px_rgba(23,50,46,0.08)]">
+            <div className="relative">
+              <Swiper {...swiperSettings}>
+                {galleryImages.map((image, index) => (
+                  <SwiperSlide key={`${roomDetails.roomType}-${index}`}>
+                    <img
+                      src={
+                        galleryFallbacks[index]
+                          ? getFallbackRoomImage()
+                          : buildAssetUrl(image)
+                      }
+                      alt={`${roomDetails.roomName} ${index + 1}`}
+                      className="h-[280px] w-full object-cover sm:h-[420px] lg:h-[520px]"
+                      loading="lazy"
+                      onError={() =>
+                        setGalleryFallbacks((prev) => ({ ...prev, [index]: true }))
+                      }
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+
+              <button
+                onClick={() => setIsFavorite((prev) => !prev)}
+                className="absolute right-4 top-4 rounded-full bg-white/90 p-3 text-red-500 shadow-md transition hover:bg-white"
+                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              >
+                <FaHeart className={isFavorite ? "text-red-600" : "text-gray-400"} />
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-[24px] border border-[#e7dfd2] bg-white p-5 shadow-[0_18px_42px_rgba(23,50,46,0.06)]">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#eef5f2] px-3 py-1 text-xs font-semibold text-[#1f5b52]">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    Trusted
+                  </span>
+                  <span className="rounded-full bg-[#f7efe3] px-3 py-1 text-xs font-semibold text-[#8b4e31]">
+                    {availabilityCopy}
+                  </span>
+                </div>
+                <p className="mt-4 max-w-2xl text-sm leading-6 text-[#5e635d]">
+                  {roomDetails.description || "Clean stay with simple comfort and mountain access."}
+                </p>
+              </div>
+              <div className="rounded-[20px] bg-[#f8f3eb] p-4 sm:min-w-[200px]">
+                <p className="text-sm text-[#90897c] line-through">
+                  Rs. {roomDetails.price ? Math.round(roomDetails.price * 1.4).toLocaleString("en-IN") : "--"}
+                </p>
+                <p className="mt-2 text-3xl font-semibold text-[#17322e]">
+                  Rs. {roomDetails.price?.toLocaleString("en-IN")}
+                </p>
+                <p className="text-sm text-[#6f746d]">per night</p>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-[#f7efe3] px-4 py-4">
+                <div className="flex items-center gap-2 text-[#8b4e31]">
+                  <Users className="h-4 w-4" />
+                  <p className="text-sm font-semibold">Guests</p>
+                </div>
+                <p className="mt-2 text-sm text-[#5e635d]">Up to {roomDetails.maxAdults}</p>
+              </div>
+              <div className="rounded-2xl bg-[#eef5f2] px-4 py-4">
+                <div className="flex items-center gap-2 text-[#1f5b52]">
+                  <BedDouble className="h-4 w-4" />
+                  <p className="text-sm font-semibold">Rooms</p>
+                </div>
+                <p className="mt-2 text-sm text-[#5e635d]">{roomDetails.totalRooms}</p>
+              </div>
+              <div className="rounded-2xl bg-[#fff1ea] px-4 py-4">
+                <div className="flex items-center gap-2 text-[#8b4e31]">
+                  <CalendarDays className="h-4 w-4" />
+                  <p className="text-sm font-semibold">Price</p>
+                </div>
+                <p className="mt-2 text-sm text-[#5e635d]">Per night</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-[24px] border border-[#e7dfd2] bg-white p-5 shadow-[0_18px_42px_rgba(23,50,46,0.06)]">
+            <h2 className="text-2xl font-semibold text-[#17322e]">Amenities</h2>
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {roomDetails.amenities.length > 0 ? (
+                roomDetails.amenities.map((amenity, index) => (
+                  <span
+                    key={index}
+                    className="flex min-h-[56px] items-center rounded-2xl border border-[#e3dacd] bg-[#fffdf9] px-4 py-3 text-sm text-[#4f5750]"
+                  >
+                    {amenity.icon && <span className="mr-2 text-base">{amenity.icon}</span>}
+                    {amenity.name}
+                  </span>
+                ))
+              ) : (
+                <p className="col-span-full text-sm text-[#6f746d]">
+                  Amenities will be updated soon.
+                </p>
               )}
-              {amenity.name}
-            </span>
-          ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="min-w-0">
+          <div className="rounded-[24px] border border-[#e7dfd2] bg-white p-5 shadow-[0_18px_42px_rgba(23,50,46,0.08)] xl:sticky xl:top-32">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#8b4e31]">
+                  Book
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-[#17322e]">
+                  Select dates
+                </h2>
+              </div>
+              <div className="rounded-full bg-[#eef5f2] px-3 py-1 text-xs font-semibold text-[#1f5b52]">
+                Price clear
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <label className="rounded-2xl border border-[#e6ddd1] bg-[#fffdf9] px-4 py-3">
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-[#8b4e31]">
+                  Check-in
+                </span>
+                <input
+                  type="date"
+                  value={checkInDate}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setCheckInDate(e.target.value)}
+                  className="w-full bg-transparent text-sm font-medium text-[#17322e] outline-none"
+                />
+              </label>
+              <label className="rounded-2xl border border-[#e6ddd1] bg-[#fffdf9] px-4 py-3">
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.2em] text-[#8b4e31]">
+                  Check-out
+                </span>
+                <input
+                  type="date"
+                  value={checkOutDate}
+                  min={minCheckOutDate}
+                  onChange={(e) => setCheckOutDate(e.target.value)}
+                  className="w-full bg-transparent text-sm font-medium text-[#17322e] outline-none"
+                />
+              </label>
+            </div>
+
+            {isInvalidDateRange() && (
+              <div className="mt-4 rounded-2xl border border-[#efc9be] bg-[#fff1ea] px-4 py-3 text-sm text-[#8b4e31]">
+                Check-out must be after check-in.
+              </div>
+            )}
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl bg-[#f9f4eb] p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-[#17322e]">Rooms</p>
+                  <p className="text-xs text-[#8b4e31]">Max {roomDetails.totalRooms || 1}</p>
+                </div>
+                <div className="mt-4 flex items-center justify-between rounded-full bg-white p-2">
+                  <button
+                    type="button"
+                    onClick={() => setRoomCount((prev) => prev - 1)}
+                    disabled={roomCount <= 1}
+                    className="h-10 w-10 rounded-full bg-[#1f5b52] text-white disabled:opacity-40"
+                  >
+                    -
+                  </button>
+                  <span className="text-lg font-semibold text-[#17322e]">{roomCount}</span>
+                  <button
+                    type="button"
+                    onClick={() => setRoomCount((prev) => prev + 1)}
+                    disabled={roomCount >= (roomDetails.totalRooms || 1)}
+                    className="h-10 w-10 rounded-full bg-[#1f5b52] text-white disabled:opacity-40"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-[#f9f4eb] p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-[#17322e]">Guests</p>
+                  <p className="text-xs text-[#8b4e31]">Max {roomDetails.maxAdults * roomCount}</p>
+                </div>
+                <div className="mt-4 flex items-center justify-between rounded-full bg-white p-2">
+                  <button
+                    type="button"
+                    onClick={() => setGuests((prev) => prev - 1)}
+                    disabled={guests <= 1}
+                    className="h-10 w-10 rounded-full bg-[#1f5b52] text-white disabled:opacity-40"
+                  >
+                    -
+                  </button>
+                  <span className="text-lg font-semibold text-[#17322e]">{guests}</span>
+                  <button
+                    type="button"
+                    onClick={() => setGuests((prev) => prev + 1)}
+                    disabled={guests >= roomDetails.maxAdults * roomCount}
+                    className="h-10 w-10 rounded-full bg-[#1f5b52] text-white disabled:opacity-40"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-[20px] bg-[#f7efe3] p-4">
+              <div className="flex items-center gap-2 text-[#8b4e31]">
+                <CalendarDays className="h-4 w-4" />
+                <p className="text-sm font-semibold">Total</p>
+              </div>
+              <p className="mt-2 text-3xl font-semibold text-[#17322e]">
+                Rs. {totalPrice.toLocaleString("en-IN")}
+              </p>
+            </div>
+
+            <div className="mt-5 rounded-[24px] border border-[#eadcca] bg-[linear-gradient(180deg,#fffdf8_0%,#fbf4ea_100%)] p-4 shadow-[0_16px_35px_rgba(139,78,49,0.08)]">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b4e31]">
+                    Next step
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-[#17322e]">
+                    {isBookingReady ? "You are ready to book" : "One quick step left"}
+                  </h3>
+                </div>
+                <div
+                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
+                    isBookingReady
+                      ? "bg-[#eef5f2] text-[#1f5b52]"
+                      : "bg-[#fff1ea] text-[#8b4e31]"
+                  }`}
+                >
+                  {isBookingReady ? <Sparkles className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                  {isBookingReady ? "Ready" : "Action needed"}
+                </div>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-[#6b6258]">
+                {isBookingReady
+                  ? "Continue to reserve this room now or save it to your cart for later."
+                  : bookingBlockMessage}
+              </p>
+
+              <div className="mt-4 space-y-3">
+              <button
+                onClick={() => {
+                  if (handleBlockedBookingAction()) {
+                    return;
+                  }
+
+                  handleBuyNow();
+                }}
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-4 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(31,91,82,0.24)] transition ${
+                  isBookingReady
+                    ? "bg-[#1f5b52] hover:-translate-y-0.5 hover:bg-[#17322e]"
+                    : "bg-[linear-gradient(135deg,#b97a5a_0%,#8b4e31_100%)] hover:-translate-y-0.5 hover:brightness-105"
+                }`}
+                aria-label="Book Now"
+              >
+                <FaShoppingBag />
+                Book now
+              </button>
+
+              <button
+                onClick={() => {
+                  if (handleBlockedBookingAction()) {
+                    return;
+                  }
+
+                  handleAddToCart();
+                }}
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-full border px-5 py-4 text-sm font-semibold transition ${
+                  isBookingReady
+                    ? "border-[#f1d7c5] bg-[#fff1ea] text-[#8b4e31] hover:-translate-y-0.5 hover:bg-[#fde6db]"
+                    : "border-[#ead1bc] bg-white text-[#8b4e31] hover:-translate-y-0.5 hover:bg-[#fff8f3]"
+                }`}
+                aria-label="Add to Cart"
+              >
+                <FaCartPlus />
+                Add to cart
+              </button>
+
+              {bookingBlockMessage && (
+                <div className="rounded-[20px] border border-[#efc9be] bg-white/80 px-4 py-3 text-sm text-[#8b4e31]">
+                  <p className="font-semibold">Booking tip</p>
+                  <p className="mt-1 text-[#946047]">{bookingBlockMessage}</p>
+                </div>
+              )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

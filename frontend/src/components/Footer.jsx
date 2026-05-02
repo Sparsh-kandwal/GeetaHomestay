@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaFacebookF, FaInstagram } from "react-icons/fa";
 import Modal from "./Modal"; // Import the reusable Modal component
 
@@ -13,7 +13,7 @@ const Footer = () => {
   const handleClosePrivacyModal = () => setIsPrivacyModalOpen(false);
 
   return (
-    <div className="bg-[#3a328c] text-white py-10">
+    <div className="bg-[#1f5b52] text-white py-10">
       <div className="max-w-7xl mx-auto px-4">
         {/* Footer Container */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8">

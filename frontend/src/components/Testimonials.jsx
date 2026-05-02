@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import TestimonialCard from "./TestimonialCard";
 import LoadingCard from "./LoadingCard";
 
@@ -7,108 +7,112 @@ const Testimonials = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch testimonials from API or sessionStorage
   useEffect(() => {
-    // Check if testimonials exist in sessionStorage
     const storedTestimonials = sessionStorage.getItem("testimonials");
 
     if (storedTestimonials) {
-      // If found in sessionStorage, parse it and set the state
       setTestimonials(JSON.parse(storedTestimonials));
-      setLoading(false); // Data loaded, stop the loader
-    } else {
-      // If not found, fetch from the backend
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/testimonials`)
-        .then((response) => response.json())
-        .then((data) => {
-          setTestimonials(data);
-          sessionStorage.setItem("testimonials", JSON.stringify(data)); // Store in sessionStorage
-          setLoading(false); // Data loaded, stop the loader
-        })
-        .catch((error) => {
-          console.error("Error fetching testimonials:", error);
-        });
+      setLoading(false);
+      return;
     }
+
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/testimonials`)
+      .then((response) => response.json())
+      .then((data) => {
+        setTestimonials(data);
+        sessionStorage.setItem("testimonials", JSON.stringify(data));
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching testimonials:", error);
+        setLoading(false);
+      });
   }, []);
 
-  // Go to the next testimonial
   const goToNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
   };
 
-  // Go to the previous testimonial
   const goToPrevious = () => {
     setCurrentIndex(
       (prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length
     );
   };
 
-  // Go to a specific testimonial by index (from dots)
-  const goToTestimonial = (index) => {
-    setCurrentIndex(index);
-  };
-
-  // Automatically scroll to the next testimonial every 5 seconds
   useEffect(() => {
+    if (!testimonials.length) return undefined;
     const interval = setInterval(goToNext, 5000);
-    return () => clearInterval(interval); // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, [testimonials.length]);
 
   if (loading) {
     return <LoadingCard />;
   }
 
+  if (!testimonials.length) {
+    return null;
+  }
+
   return (
-    <div className="bg-[#f5f5f5] py-10">
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center text-[#3a328c] mb-10">
-          What Our Customers Say
-        </h2>
-
-        {/* Carousel container */}
-        <div className="flex justify-center items-center space-x-6">
-          {/* Previous button */}
-          <button
-            onClick={goToPrevious}
-            className="text-white bg-[#3a328c] p-3 rounded-full hover:bg-[#4d65b4] focus:outline-none focus:ring-2 focus:ring-[#3a328c]"
-          >
-            &lt;
-          </button>
-
-          {/* Testimonial card */}
-          <TestimonialCard
-            username={testimonials[currentIndex]?.username}
-            testimonial={testimonials[currentIndex]?.testimonial}
-            rating={testimonials[currentIndex]?.rating}
-            image={
-              testimonials[currentIndex]?.image ||
-              "https://via.placeholder.com/64"
-            } // Fallback image
-          />
-
-          {/* Next button */}
-          <button
-            onClick={goToNext}
-            className="text-white bg-[#3a328c] p-3 rounded-full hover:bg-[#4d65b4] focus:outline-none focus:ring-2 focus:ring-[#3a328c]"
-          >
-            &gt;
-          </button>
+    <section className="py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#8b4e31]">
+            Guest stories
+          </p>
+          <h2 className="mt-3 text-4xl font-semibold text-[#17322e]">
+            Reviews that build confidence before guests book
+          </h2>
         </div>
 
-        {/* Dots navigation */}
-        <div className="flex justify-center mt-4">
-          {testimonials.map((_, index) => (
-            <span
-              key={index}
-              className={`w-3 h-3 mx-2 rounded-full cursor-pointer ${
-                currentIndex === index ? "bg-[#3a328c]" : "bg-gray-400"
-              }`}
-              onClick={() => goToTestimonial(index)}
-            ></span>
-          ))}
+        <div className="mt-12 rounded-[36px] border border-[#e7dfd2] bg-[linear-gradient(180deg,#fffdf9_0%,#f7efe3_100%)] p-5 shadow-[0_22px_60px_rgba(23,50,46,0.08)] sm:p-8">
+          <div className="grid items-center gap-8 lg:grid-cols-[0.35fr_1fr]">
+            <div>
+              <p className="text-5xl font-semibold text-[#17322e]">4.9</p>
+              <p className="mt-2 text-sm font-medium text-[#6f746d]">Guest satisfaction from recent stays</p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={goToPrevious}
+                  className="rounded-full bg-[#17322e] p-3 text-white transition hover:bg-[#254842]"
+                  aria-label="Previous testimonial"
+                >
+                  ←
+                </button>
+                <button
+                  onClick={goToNext}
+                  className="rounded-full bg-[#17322e] p-3 text-white transition hover:bg-[#254842]"
+                  aria-label="Next testimonial"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <TestimonialCard
+                username={testimonials[currentIndex]?.username}
+                testimonial={testimonials[currentIndex]?.testimonial}
+                rating={testimonials[currentIndex]?.rating}
+                image={testimonials[currentIndex]?.image}
+              />
+
+              <div className="mt-5 flex justify-center gap-2">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`h-2.5 rounded-full transition ${
+                      currentIndex === index ? "w-8 bg-[#1f5b52]" : "w-2.5 bg-[#cfc4b3]"
+                    }`}
+                    onClick={() => setCurrentIndex(index)}
+                    aria-label={`Go to testimonial ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

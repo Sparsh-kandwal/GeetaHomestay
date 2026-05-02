@@ -5,7 +5,6 @@ import { verifyToken } from '../middleware/auth.js';
 import getRoomAvailability from '../controllers/availabilityController.js';
 import { getAllRooms } from '../controllers/roomData.js';
 import { getAllTestimonials } from '../controllers/TestimonialController.js';
-import Booking from '../models/booking.js';
 import { getUserBookings } from '../controllers/bookingController.js';
 import sendInvoice from '../controllers/EmailController.js';
 

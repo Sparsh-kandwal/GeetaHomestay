@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect, useCallback } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
+import { normalizeRooms } from "../utils/roomData";
 
 const UserContext = createContext();
 const RoomContext = createContext();
@@ -14,24 +15,26 @@ const RoomProvider = ({ children }) => {
         { method: "GET" }
       );
       const data = await response.json();
-      console.log(data);
       if (data) {
-        sessionStorage.setItem("rooms", JSON.stringify(data)); // Save rooms to sessionStorage
-        setRooms(data); // Set rooms state
+        const normalizedRooms = normalizeRooms(data);
+        sessionStorage.setItem("rooms", JSON.stringify(normalizedRooms));
+        setRooms(normalizedRooms);
       } else {
         console.error("Invalid data received from API:", data);
       }
       setRoomsLoading(false);
     } catch (error) {
       console.error("Error fetching rooms:", error);
+      setRoomsLoading(false);
     }
   }, []);
 
   useEffect(() => {
     const storedRooms = sessionStorage.getItem("rooms");
     if (storedRooms) {
-      const parsedRooms = JSON.parse(storedRooms);
+      const parsedRooms = normalizeRooms(JSON.parse(storedRooms));
       setRooms(parsedRooms);
+      sessionStorage.setItem("rooms", JSON.stringify(parsedRooms));
       setRoomsLoading(false);
     } else {
       fetchRooms();

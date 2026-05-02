@@ -1,5 +1,5 @@
 // DateContext.js
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 // Create the context
 const DateContext = createContext();
