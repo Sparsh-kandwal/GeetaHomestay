@@ -1,5 +1,3 @@
-import React from "react";
-
 const LoadingCard = () => {
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg w-3/5 mx-auto my-5">

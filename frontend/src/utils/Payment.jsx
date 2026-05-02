@@ -1,30 +1,33 @@
-import axios from 'axios';
+import axios from "axios";
 
-export const checkouthandler = async (amount, user, callback) => {
+export const checkouthandler = async (amount, user, callback, options = {}) => {
   try {
-    console.log(user);
-    const { data: { order } } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkout`, {
-      amount
+    const { bookingId } = options;
+    const {
+      data: { order },
+    } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkout`, {
+      amount,
     });
 
-    const { data: { key } } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/payment/getKey`);
+    const {
+      data: { key },
+    } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/payment/getKey`);
 
     if (!user || !user._id) {
-      console.error("🔴 User data is missing!");
+      console.error("User data is missing.");
       return;
     }
 
-    const options = {
-      "key": key,
-      "amount": order.amount,
-      "currency": "INR",
-      "name": "Geeta HomeStay",
-      "description": "Test Transaction",
-      "image": "frontend/public/logo.png",
-      "order_id": order.id,
-      "handler": async function (response) {
+    const razor = new Razorpay({
+      key,
+      amount: order.amount,
+      currency: "INR",
+      name: "Geeta HomeStay",
+      description: "Room Booking Payment",
+      image: "frontend/public/logo.png",
+      order_id: order.id,
+      handler: async (response) => {
         try {
-          // Call backend to verify the payment
           const verificationRes = await axios.post(
             `${import.meta.env.VITE_BACKEND_URL}/payment/paymentVerification`,
             {
@@ -33,51 +36,38 @@ export const checkouthandler = async (amount, user, callback) => {
               razorpay_signature: response.razorpay_signature,
               userId: user._id,
               amount: order.amount,
+              bookingId,
             },
             { withCredentials: true }
           );
 
-          console.log("🟢 Backend Verification Response:", verificationRes.data);
-
           if (verificationRes.data.success) {
             callback(verificationRes.data.paymentId);
           } else {
-            console.error("🔴 Payment Verification Failed on Backend!");
+            console.error("Payment verification failed on backend.");
           }
         } catch (error) {
-          console.error("🔴 Payment Verification Failed:", error);
+          console.error("Payment verification failed:", error);
         }
       },
-      "prefill": {
-        "name": user?.userName || "",
-        "email": user?.email || "",
+      prefill: {
+        name: user?.userName || "",
+        email: user?.email || "",
       },
-      "notes": {
-        "address": "Geeta HomeStay, Uttarakhand"
+      notes: {
+        address: "Geeta HomeStay, Uttarakhand",
       },
-      "theme": {
-        "color": "#3399cc"
+      theme: {
+        color: "#3399cc",
       },
-      "modal": {
+      modal: {
         escape: false,
-        ondismiss: async function () {
-          console.warn("🔴 User exited the payment process!");
-          try {
-            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/rollbackBooking`, { userId: user._id });
-            console.log("🔄 Booking rolled back successfully!");
-          } catch (rollbackError) {
-            console.error("🔴 Booking rollback failed:", rollbackError);
-          }
-        }
-      }
-    };
+        ondismiss: () => {},
+      },
+    });
 
-    const razor = new Razorpay(options);
     razor.open();
-
   } catch (error) {
     console.error("Payment Error:", error);
   }
 };
-
-

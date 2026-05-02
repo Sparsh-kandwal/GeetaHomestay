@@ -1,5 +1,3 @@
-import React from 'react';
-
 const OpacityLoader = () => {
   return (
     <div className="absolute min-h-screen loader-overlay">

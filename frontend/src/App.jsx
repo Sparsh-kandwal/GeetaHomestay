@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -21,10 +20,13 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Profile from "./pages/Profile";
 import BookingHistory from "./pages/BookingHistory";
-import ScrollToTop from "./components/ScrollToTop";
-import InfoTicker from "./components/InfoTicker";
 
-//final build
+const NAVBAR_HEIGHT_CLASS = "pt-[74px]";
+
+const RouteFrame = ({ children, flushToTop = false }) => (
+  <div className={`page ${flushToTop ? "" : NAVBAR_HEIGHT_CLASS}`}>{children}</div>
+);
+
 const App = () => {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
@@ -32,10 +34,8 @@ const App = () => {
         <DateProvider>
           <Router>
             <div className="flex flex-col min-h-screen">
-              <div className="fixed top-0 left-0 right-0 z-50 bg-white">
-                <Navbar />
-              </div>
-              <div className="flex-grow  ">
+              <Navbar />
+              <div className="flex-grow">
                 <AnimatedRoutes />
               </div>
               <Footer />
@@ -51,11 +51,12 @@ const App = () => {
 
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const isHomePage = location.pathname === "/" || location.pathname === "/home";
 
   return (
     <SwitchTransition mode="out-in">
       <CSSTransition key={location.pathname} classNames="fade" timeout={500}>
-        <div className="page">
+        <RouteFrame flushToTop={isHomePage}>
           <Routes location={location}>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
@@ -68,7 +69,7 @@ const AnimatedRoutes = () => {
             <Route path="/booking-history" element={<BookingHistory />} />
 
           </Routes>
-        </div>
+        </RouteFrame>
       </CSSTransition>
     </SwitchTransition>
   );

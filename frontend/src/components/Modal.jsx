@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 export default function Modal({ title, content, handleCloseModal, isOpen }) {
   // Don't render the modal if isOpen is false

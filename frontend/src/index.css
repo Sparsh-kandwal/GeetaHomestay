@@ -2,6 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --gh-bg: #fcfaf6;
+    --gh-surface: #fffdf9;
+    --gh-forest: #1f5b52;
+    --gh-forest-dark: #17322e;
+    --gh-sand: #f3ebde;
+    --gh-clay: #c97953;
+    --gh-text: #27322f;
+    --gh-muted: #6f746d;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(circle at top left, rgba(201, 121, 83, 0.09), transparent 30%),
+      radial-gradient(circle at top right, rgba(31, 91, 82, 0.1), transparent 28%),
+      var(--gh-bg);
+    color: var(--gh-text);
+    font-family: "Merriweather Sans", "Segoe UI", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: Georgia, "Times New Roman", serif;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: rgba(201, 121, 83, 0.22);
+  }
+}
+
 @layer utilities {
   .animate-marquee {
     animation: marquee 60s linear infinite;
@@ -10,5 +49,9 @@
   @keyframes marquee {
     0% { transform: translateX(0%); }
     100% { transform: translateX(-50%); }
+  }
+
+  .text-balance {
+    text-wrap: balance;
   }
 }

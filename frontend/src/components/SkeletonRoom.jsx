@@ -1,5 +1,3 @@
-import React from 'react';
-
 const SkeletonRoom = () => {
   return (
     <div className="w-full bg-white shadow-lg rounded-lg overflow-hidden flex flex-col md:flex-row animate-pulse">
