@@ -2,7 +2,7 @@ name: Ping GeetaHomestay
 
 on:
   schedule:
-    - cron: "*/9 * * * *"  # Every 9 minutes
+    - cron: "*/2 * * * *"
   workflow_dispatch:       # Allow manual triggering
 
 jobs:
