@@ -25,6 +25,7 @@ const HomePage = () => {
   }, []);
 
   return (
+    
     <div className="overflow-x-hidden">
       <section
         className="relative min-h-screen overflow-hidden"

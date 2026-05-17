@@ -167,7 +167,7 @@ const RoomDetails = () => {
     }
 
     if (!user) {
-      return "Please log in first to continue.";
+      return "Please log in to continue your booking.";
     }
 
     return "";
@@ -177,7 +177,12 @@ const RoomDetails = () => {
     const message = getBookingBlockMessage();
 
     if (message) {
-      toast.info(message);
+      if (!user && checkOutDate && !isInvalidDateRange()) {
+        googleLogin();
+      } else {
+        toast.info(message);
+      }
+
       return true;
     }
 
