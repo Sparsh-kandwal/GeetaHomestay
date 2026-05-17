@@ -54,4 +54,51 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .room-details-swiper,
+  .room-details-swiper .swiper-wrapper,
+  .room-details-swiper .swiper-slide {
+    height: 100%;
+  }
+
+  .room-details-swiper .swiper-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #efe7da;
+  }
+
+  .room-details-swiper .swiper-button-next,
+  .room-details-swiper .swiper-button-prev {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px;
+    background: rgba(255, 253, 249, 0.92);
+    color: #17322e;
+    box-shadow: 0 12px 26px rgba(23, 50, 46, 0.16);
+  }
+
+  .room-details-swiper .swiper-button-next::after,
+  .room-details-swiper .swiper-button-prev::after {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .room-details-swiper .swiper-pagination-bullet {
+    width: 0.55rem;
+    height: 0.55rem;
+    background: rgba(255, 253, 249, 0.9);
+    opacity: 1;
+  }
+
+  .room-details-swiper .swiper-pagination-bullet-active {
+    background: #1f5b52;
+  }
+
+  @media (max-width: 640px) {
+    .room-details-swiper .swiper-button-next,
+    .room-details-swiper .swiper-button-prev {
+      display: none;
+    }
+  }
 }

@@ -53,10 +53,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        logoutMenuRef.current &&
-        !logoutMenuRef.current.contains(event.target)
-      ) {
+      if (logoutMenuRef.current && !logoutMenuRef.current.contains(event.target)) {
         setShowLogoutMenu(false);
       }
     };
@@ -71,14 +68,11 @@ const Navbar = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/logout`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
 
       if (response.ok) {
         setUser(null);
@@ -100,7 +94,7 @@ const Navbar = () => {
     isHomePage && !isScrolled
       ? "text-white hover:bg-white/15"
       : "text-white hover:bg-[#295046]";
-  const logoTextClasses = isHomePage && !isScrolled ? "text-white" : "text-white";
+  const logoTextClasses = "text-white";
   const badgeClasses =
     isHomePage && !isScrolled
       ? "bg-white/15 text-white"
@@ -113,22 +107,36 @@ const Navbar = () => {
   return (
     <>
       <header
-        className={`fixed left-0 right-0 z-50 mx-auto flex h-[74px] w-full items-center justify-between px-4 sm:px-6 lg:px-10 transition-all duration-300 ${headerClasses}`}
+        className={`fixed left-0 right-0 z-50 mx-auto flex h-[74px] w-full items-center justify-between px-4 transition-all duration-300 sm:px-6 lg:px-10 ${headerClasses}`}
       >
-        <Link to="/home" className={`flex items-center gap-3 transition-all duration-300 ${isHomePage && !isScrolled ? "flex-1" : ""}`}>
-          {/* Logo with subtle shadow for visibility */}
-          <div className={`rounded-lg transition-all duration-300 ${isHomePage && !isScrolled ? "h-16" : "h-14 w-14 overflow-hidden"}`}>
+        <Link
+          to="/home"
+          className={`flex min-w-0 items-center gap-2 sm:gap-3 transition-all duration-300 ${
+            isHomePage && !isScrolled ? "flex-1" : ""
+          }`}
+        >
+          <div
+            className={`shrink-0 rounded-lg transition-all duration-300 ${
+              isHomePage && !isScrolled ? "h-14 sm:h-16" : "h-12 w-12 overflow-hidden sm:h-14 sm:w-14"
+            }`}
+          >
             <img
               src="/logo.png"
               alt="Geeta Homestay logo"
-              className={`object-contain shadow-md transition-all duration-300 ${isHomePage && !isScrolled ? "h-full" : "h-full w-full"}`}
+              className={`object-contain shadow-md transition-all duration-300 ${
+                isHomePage && !isScrolled ? "h-full" : "h-full w-full"
+              }`}
             />
           </div>
-          <div className={logoTextClasses}>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] opacity-80">
+          <div className={`min-w-0 ${logoTextClasses}`}>
+            <p className="truncate text-[10px] font-semibold uppercase tracking-[0.22em] opacity-80 sm:text-xs sm:tracking-[0.35em]">
               Geeta Homestay
             </p>
-            <p className={`font-medium opacity-90 ${isHomePage && !isScrolled ? "block text-base" : "hidden text-sm sm:block"}`}>
+            <p
+              className={`truncate font-medium opacity-90 ${
+                isHomePage && !isScrolled ? "hidden text-sm sm:block sm:text-base" : "hidden text-sm sm:block"
+              }`}
+            >
               Book a calm mountain stay
             </p>
           </div>
@@ -149,7 +157,7 @@ const Navbar = () => {
         </div>
 
         <button
-          className={`block rounded-full p-2 md:hidden ${isHomePage && !isScrolled ? "text-white" : "text-[#17322e]"}`}
+          className="block rounded-full p-2 text-white lg:hidden"
           onClick={() => setIsMenuOpen((prev) => !prev)}
           aria-label="Toggle navigation menu"
         >
@@ -157,40 +165,40 @@ const Navbar = () => {
         </button>
 
         <nav
-          className={`fixed right-0 top-0 h-full w-[84%] max-w-sm border-l border-[#e3dacb] bg-[#fffaf2] p-8 shadow-2xl transition-transform duration-300 md:static md:flex md:h-auto md:w-auto md:max-w-none md:items-center md:border-0 md:bg-transparent md:p-0 md:shadow-none ${
+          className={`fixed right-0 top-0 h-screen w-[30%] bg-[#1f5b52] shadow-2xl transition-transform duration-300 lg:static lg:flex lg:h-auto lg:w-auto lg:max-w-none lg:items-center lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none ${
             isMenuOpen ? "translate-x-0" : "translate-x-full"
-          } md:translate-x-0`}
+          } lg:translate-x-0`}
         >
           <button
-            className="mb-6 block text-[#17322e] md:hidden"
+            className="absolute right-4 top-4 block text-white lg:hidden"
             onClick={() => setIsMenuOpen(false)}
             aria-label="Close navigation menu"
           >
             <X className="h-7 w-7" />
           </button>
 
-          <ul className="flex flex-col items-start gap-3 md:flex-row md:items-center md:gap-2">
+          <ul className="mt-20 flex flex-col items-start gap-1 px-6 lg:mt-0 lg:flex-row lg:items-center lg:gap-2 lg:px-0">
             {navItems.map((item) => (
               <li key={item}>
                 <Link
                   to={`/${item.toLowerCase()}`}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block rounded-full px-4 py-2 text-base font-semibold transition duration-300 ${linkClasses}`}
+                  className="block rounded-lg px-4 py-3 text-base font-semibold text-white transition duration-300 hover:bg-[#295046] lg:rounded-full"
                 >
                   {item}
                 </Link>
               </li>
             ))}
 
-            <li className="w-full md:w-auto">
+            <li className="w-full lg:w-auto">
               {isLoading ? (
-                <div className="h-8 w-8 rounded-full border-4 border-[#1f5b52] border-t-transparent animate-spin" />
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
               ) : user ? (
                 <div className="relative" ref={logoutMenuRef}>
                   <img
                     src={user.photo || `/static/user.png`}
                     alt="User Avatar"
-                    className="h-10 w-10 rounded-full border border-[#d8d0c1] object-cover shadow cursor-pointer"
+                    className="h-10 w-10 cursor-pointer rounded-full border border-white/30 object-cover shadow"
                     onClick={() => setShowLogoutMenu((prev) => !prev)}
                     onError={(e) => {
                       e.target.onerror = null;
@@ -199,12 +207,12 @@ const Navbar = () => {
                   />
 
                   {showLogoutMenu && (
-                    <div className="absolute right-0 mt-5 w-48 rounded-2xl border border-[#e2d8c9] bg-white shadow-xl z-50">
+                    <div className="absolute right-0 z-50 mt-5 w-48 rounded-2xl border border-white/20 bg-[#295046] shadow-xl">
                       <ul className="py-2">
                         <li>
                           <Link
                             to="/profile"
-                            className="block w-full px-4 py-2 text-left text-[#17322e] hover:bg-[#f7efe3]"
+                            className="block w-full px-4 py-2 text-left text-white hover:bg-[#1f5b52]"
                             onClick={() => {
                               setShowLogoutMenu(false);
                               setIsMenuOpen(false);
@@ -216,7 +224,7 @@ const Navbar = () => {
                         <li>
                           <Link
                             to="/booking-history"
-                            className="block w-full px-4 py-2 text-left text-[#17322e] hover:bg-[#f7efe3]"
+                            className="block w-full px-4 py-2 text-left text-white hover:bg-[#1f5b52]"
                             onClick={() => {
                               setShowLogoutMenu(false);
                               setIsMenuOpen(false);
@@ -228,7 +236,7 @@ const Navbar = () => {
                         <li>
                           <button
                             onClick={() => setShowConfirmModal(true)}
-                            className="block w-full px-4 py-2 text-left text-[#8b4e31] hover:bg-[#fff1ea]"
+                            className="block w-full px-4 py-2 text-left text-orange-300 hover:bg-[#1f5b52]"
                           >
                             Logout
                           </button>
@@ -240,7 +248,7 @@ const Navbar = () => {
               ) : (
                 <button
                   onClick={googleLogin}
-                  className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-[#1f5b52] px-6 py-3 font-medium text-white transition-all duration-300 hover:bg-[#17322e] md:mt-0 md:w-auto"
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-3 font-medium text-[#1f5b52] transition-all duration-300 hover:bg-[#f0f0f0] lg:mt-0 lg:w-auto"
                 >
                   Login
                 </button>

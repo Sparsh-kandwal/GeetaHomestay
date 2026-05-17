@@ -31,14 +31,62 @@ export const buildAssetUrl = (path) => {
   return `${cloudBase}${cloudBase.endsWith("/") ? "" : "/"}${path}`;
 };
 
+const applyCloudinaryTransforms = (url, transformations = "") => {
+  if (!transformations || !url.includes("/upload/")) {
+    return url;
+  }
+
+  return url.replace("/upload/", `/upload/${transformations}/`);
+};
+
+const uniqueImages = (images = []) => {
+  const seen = new Set();
+
+  return images.filter((image) => {
+    if (!image || seen.has(image)) {
+      return false;
+    }
+
+    seen.add(image);
+    return true;
+  });
+};
+
+export const buildResponsiveRoomImageUrl = (
+  path,
+  { width = 720, height = 540, crop = "fill" } = {}
+) => {
+  const assetUrl = buildAssetUrl(path);
+  const transformations = `f_auto,q_auto,c_${crop},w_${width},h_${height},g_auto,dpr_auto`;
+
+  return applyCloudinaryTransforms(assetUrl, transformations);
+};
+
+export const getRoomGalleryImages = (room = {}, { includeFallback = true } = {}) => {
+  const normalizedRoom = normalizeRoom(room);
+
+  if (!includeFallback && !normalizedRoom.hasRoomImages) {
+    return [];
+  }
+
+  return normalizedRoom.gallery;
+};
+
+export const buildRoomCardImageUrl = (path) =>
+  buildResponsiveRoomImageUrl(path, {
+    width: 900,
+    height: 620,
+  });
+
 export const normalizeRoom = (room = {}) => {
-  const rawGallery = Array.isArray(room.gallery) ? room.gallery.filter(Boolean) : [];
-  const fallbackGallery = [room.coverImage, room.image].filter(Boolean);
+  const rawGallery = Array.isArray(room.gallery) ? uniqueImages(room.gallery) : [];
+  const fallbackGallery = uniqueImages([room.coverImage, room.image]);
   const gallery = rawGallery.length > 0 ? rawGallery : fallbackGallery;
   const roomName = room.roomName || room.name || "Room";
   const roomType = room.roomType || room.id || toSlug(roomName) || "room";
   const maxAdults = room.maxAdults ?? room.maxGuests ?? 1;
   const coverImage = gallery[0] || FALLBACK_ROOM_IMAGE;
+  const hasRoomImages = gallery.length > 0;
 
   return {
     ...room,
@@ -52,6 +100,7 @@ export const normalizeRoom = (room = {}) => {
     availableRooms: room.availableRooms,
     gallery: gallery.length > 0 ? gallery : [FALLBACK_ROOM_IMAGE],
     coverImage,
+    hasRoomImages,
   };
 };
 

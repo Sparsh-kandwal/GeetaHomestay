@@ -17,7 +17,7 @@ const TestimonialCard = ({ username, testimonial, rating, image }) => {
           }}
         />
         <div className="min-w-0">
-          <h3 className="truncate text-xl font-semibold text-[#17322e]">{username}</h3>
+          <h3 className="truncate text-lg font-semibold text-[#17322e] sm:text-xl">{username}</h3>
           <div className="mt-1 text-lg text-[#d38c37]" aria-label={`${starCount} stars`}>
             {stars.map((star, index) => (
               <span key={index}>{star}</span>
@@ -26,7 +26,7 @@ const TestimonialCard = ({ username, testimonial, rating, image }) => {
         </div>
       </div>
       <p className="mt-5 text-sm leading-7 text-[#5e635d] sm:text-base">
-        “{testimonial}”
+        "{testimonial}"
       </p>
     </div>
   );

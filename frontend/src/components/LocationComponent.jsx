@@ -9,7 +9,7 @@ const LocationComponent = () => {
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#f1c8af]">
               Explore nearby
             </p>
-            <h2 className="mt-3 text-balance text-4xl font-semibold text-[#fff8ef] sm:text-5xl">
+            <h2 className="mt-3 text-balance text-3xl font-semibold text-[#fff8ef] sm:text-5xl">
               Scenic spots near your stay
             </h2>
             <p className="mt-4 text-sm leading-6 text-[#d3ddd7] sm:text-base">

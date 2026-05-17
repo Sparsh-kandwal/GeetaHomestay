@@ -69,8 +69,8 @@ const SearchBar = ({ setAvailableRooms }) => {
 
   return (
     <div className="sticky bottom-4 z-40 mt-8 rounded-[30px] border border-[#e3dacd] bg-[rgba(255,252,247,0.96)] p-4 shadow-[0_20px_50px_rgba(23,50,46,0.12)] backdrop-blur sm:p-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
-        <div className="lg:w-56">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
+        <div className="xl:w-56">
           <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#8b4e31]">
             <Sparkles className="h-4 w-4" />
             Check dates
@@ -110,7 +110,7 @@ const SearchBar = ({ setAvailableRooms }) => {
           <button
             onClick={handleSearch}
             disabled={isSearching}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1f5b52] px-5 py-4 text-sm font-semibold text-white transition hover:bg-[#17322e] disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1f5b52] px-5 py-4 text-sm font-semibold text-white transition hover:bg-[#17322e] disabled:cursor-not-allowed disabled:opacity-70 sm:col-span-2 xl:col-span-1"
           >
             {isSearching ? (
               <>
