@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 
 export default function Modal({ title, content, handleCloseModal, isOpen }) {
-  // Don't render the modal if isOpen is false
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add("overflow-hidden");
@@ -17,13 +16,13 @@ export default function Modal({ title, content, handleCloseModal, isOpen }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg max-w-2xl max-h-[80vh] overflow-y-auto">
-        <h3 className="text-2xl font-bold mb-4 text-indigo-600">{title}</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
+      <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-[24px] bg-white p-5 shadow-2xl sm:p-8">
+        <h3 className="mb-4 text-2xl font-bold text-indigo-600">{title}</h3>
         <div className="mb-4 text-black">{content}</div>
         <button
           onClick={handleCloseModal}
-          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
+          className="rounded bg-blue-600 px-4 py-2 text-white transition duration-300 hover:bg-blue-700"
         >
           Close
         </button>

@@ -1,5 +1,3 @@
-// frontend/src/pages/Profile.jsx
-
 import { useState, useEffect, useContext } from "react";
 import { UserContext } from "../auth/Userprovider";
 import { Transition } from "@headlessui/react";
@@ -14,7 +12,6 @@ const Profile = () => {
   const [, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,17 +39,14 @@ const Profile = () => {
     setSuccess("");
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/profile`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(profileData),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(profileData),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -71,32 +65,30 @@ const Profile = () => {
 
   if (userLoading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-50">
-        <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex min-h-[70vh] items-center justify-center bg-gray-50 px-4">
+        <div className="h-16 w-16 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-50">
-        <p className="text-red-500 text-lg">{error}</p>
+      <div className="flex min-h-[70vh] items-center justify-center bg-gray-50 px-4 text-center">
+        <p className="text-lg text-red-500">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white shadow-xl rounded-lg p-8">
-        <h2 className="text-3xl font-semibold text-indigo-600 mb-6 text-center">
-          Your Profile
-        </h2>
+    <div className="min-h-[calc(100vh-74px)] bg-gray-100 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-md rounded-2xl bg-white p-6 shadow-xl sm:p-8">
+        <h2 className="mb-6 text-center text-3xl font-semibold text-indigo-600">Your Profile</h2>
 
-        <div className="flex justify-center mb-6">
+        <div className="mb-6 flex justify-center">
           <img
             src={user.photo || `/static/user.png`}
             alt="User Avatar"
-            className="w-16 h-16 rounded-full cursor-default"
+            className="h-16 w-16 rounded-full object-cover"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = `/static/user.png`;
@@ -104,7 +96,6 @@ const Profile = () => {
           />
         </div>
 
-        {/* Success Message */}
         <Transition
           show={success !== ""}
           enter="transition-opacity duration-500"
@@ -114,18 +105,12 @@ const Profile = () => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div
-            className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
-            role="alert"
-          >
+          <div className="relative mb-4 rounded border border-green-400 bg-green-100 px-4 py-3 text-green-700" role="alert">
             <strong className="font-bold">Success! </strong>
             <span className="block sm:inline">{success}</span>
-            <button
-              onClick={() => setSuccess("")}
-              className="absolute top-0 bottom-0 right-0 px-4 py-3"
-            >
+            <button onClick={() => setSuccess("")} className="absolute bottom-0 right-0 top-0 px-4 py-3">
               <svg
-                className="fill-current h-6 w-6 text-green-500"
+                className="h-6 w-6 fill-current text-green-500"
                 role="button"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -137,7 +122,6 @@ const Profile = () => {
           </div>
         </Transition>
 
-        {/* Error Message */}
         <Transition
           show={error !== ""}
           enter="transition-opacity duration-500"
@@ -147,18 +131,12 @@ const Profile = () => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div
-            className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-            role="alert"
-          >
+          <div className="relative mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700" role="alert">
             <strong className="font-bold">Error! </strong>
             <span className="block sm:inline">{error}</span>
-            <button
-              onClick={() => setError("")}
-              className="absolute top-0 bottom-0 right-0 px-4 py-3"
-            >
+            <button onClick={() => setError("")} className="absolute bottom-0 right-0 top-0 px-4 py-3">
               <svg
-                className="fill-current h-6 w-6 text-red-500"
+                className="h-6 w-6 fill-current text-red-500"
                 role="button"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -171,12 +149,8 @@ const Profile = () => {
         </Transition>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name */}
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
               Name
             </label>
             <input
@@ -187,16 +161,12 @@ const Profile = () => {
               onChange={handleChange}
               required
               disabled
-              className="mt-1 block w-full px-4 py-2 border text-black border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2 text-black shadow-sm transition focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>
 
-          {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
             </label>
             <input
@@ -207,17 +177,16 @@ const Profile = () => {
               onChange={handleChange}
               required
               disabled
-              className="mt-1 block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md cursor-not-allowed text-gray-500"
+              className="mt-1 block w-full cursor-not-allowed rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-500"
               placeholder="Email Address"
             />
           </div>
 
-          {/* Booking History Button */}
           <div>
             <button
               type="button"
               onClick={() => navigate("/booking-history")}
-              className="w-full flex justify-center items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              className="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-700 transition-colors hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               View Booking History
             </button>

@@ -43,7 +43,7 @@ const HomePage = () => {
                 <ShieldCheck className="h-4 w-4" />
                 Geeta Homestay
               </div>
-              <h1 className="text-balance text-5xl font-semibold leading-[0.98] sm:text-6xl lg:text-8xl">
+              <h1 className="text-balance text-4xl font-semibold leading-[1.02] sm:text-6xl sm:leading-[0.98] lg:text-8xl">
                 Cozy stay. Calm view. Easy booking.
               </h1>
 

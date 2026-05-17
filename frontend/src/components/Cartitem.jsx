@@ -50,7 +50,7 @@ const CartItem = ({ item, isRemoved = false, setAvailableItems }) => (
       </div>
     )}
 
-    <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
+    <div className="grid gap-5 md:grid-cols-[220px_1fr]">
       <img
         src={import.meta.env.VITE_CLOUDINARY_CLOUD + item.room.coverImage}
         alt={item.room.roomName || "Room"}
@@ -58,7 +58,7 @@ const CartItem = ({ item, isRemoved = false, setAvailableItems }) => (
       />
 
       <div className="min-w-0">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <h3 className="text-2xl font-semibold text-[#17322e]">
               {item.room.roomName || "Room"}
@@ -75,7 +75,7 @@ const CartItem = ({ item, isRemoved = false, setAvailableItems }) => (
             </div>
           </div>
 
-          <div className="rounded-[22px] bg-[#f8f3eb] p-4 lg:min-w-[200px]">
+          <div className="rounded-[22px] bg-[#f8f3eb] p-4 xl:min-w-[200px]">
             <span className="text-sm text-[#90897c] line-through">
               Rs. {Math.round(item.price * 1.4).toLocaleString("en-IN")}
             </span>

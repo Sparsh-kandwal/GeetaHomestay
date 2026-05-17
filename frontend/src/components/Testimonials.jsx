@@ -34,9 +34,7 @@ const Testimonials = () => {
   };
 
   const goToPrevious = () => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length
-    );
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
   };
 
   useEffect(() => {
@@ -60,7 +58,7 @@ const Testimonials = () => {
           <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#8b4e31]">
             Guest stories
           </p>
-          <h2 className="mt-3 text-4xl font-semibold text-[#17322e]">
+          <h2 className="mt-3 text-3xl font-semibold text-[#17322e] sm:text-4xl">
             Reviews that build confidence before guests book
           </h2>
         </div>
@@ -68,7 +66,7 @@ const Testimonials = () => {
         <div className="mt-12 rounded-[36px] border border-[#e7dfd2] bg-[linear-gradient(180deg,#fffdf9_0%,#f7efe3_100%)] p-5 shadow-[0_22px_60px_rgba(23,50,46,0.08)] sm:p-8">
           <div className="grid items-center gap-8 lg:grid-cols-[0.35fr_1fr]">
             <div>
-              <p className="text-5xl font-semibold text-[#17322e]">4.9</p>
+              <p className="text-4xl font-semibold text-[#17322e] sm:text-5xl">4.9</p>
               <p className="mt-2 text-sm font-medium text-[#6f746d]">Guest satisfaction from recent stays</p>
               <div className="mt-6 flex gap-3">
                 <button

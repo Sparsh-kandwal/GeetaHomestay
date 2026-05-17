@@ -59,14 +59,14 @@ const HomeCarousel = () => {
           <>
             <button
               onClick={prevImage}
-              className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/35 p-3 text-white transition hover:bg-black/55 md:left-5"
+              className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/35 p-2.5 text-white transition hover:bg-black/55 md:left-5 md:p-3"
               aria-label="Previous Image"
             >
               <FaChevronLeft size={18} />
             </button>
             <button
               onClick={nextImage}
-              className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/35 p-3 text-white transition hover:bg-black/55 md:right-5"
+              className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/35 p-2.5 text-white transition hover:bg-black/55 md:right-5 md:p-3"
               aria-label="Next Image"
             >
               <FaChevronRight size={18} />
@@ -77,7 +77,7 @@ const HomeCarousel = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-black/10 to-transparent p-5 sm:p-8">
           <div className="flex h-full flex-col justify-end text-white">
             <div className="max-w-md">
-              <h3 className="text-3xl font-semibold sm:text-4xl">{currentItem.title}</h3>
+              <h3 className="text-2xl font-semibold sm:text-4xl">{currentItem.title}</h3>
               <p className="mt-2 text-sm text-white/85 sm:text-base">
                 {currentItem.description.replace("Approximately ", "")} away
               </p>
