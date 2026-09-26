@@ -1,15 +1,18 @@
-import { CalendarDays, CreditCard, Clock3, Hash, IndianRupee } from "lucide-react";
+import { CalendarDays, CreditCard, Clock3, Hash, CheckCircle2, XCircle } from "lucide-react";
+import PropTypes from "prop-types";
 
 const BookingCard = ({ booking, onCompletePayment, isPaying }) => {
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "long",
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
       year: "numeric",
     });
   };
 
   const isPending = booking.paymentStatus === "pending";
+  const isCancelled = booking.paymentStatus === "cancelled";
   const pendingUntilText = booking.pendingExpiresAt
     ? new Date(booking.pendingExpiresAt).toLocaleTimeString("en-IN", {
         hour: "2-digit",
@@ -18,106 +21,111 @@ const BookingCard = ({ booking, onCompletePayment, isPaying }) => {
     : null;
 
   return (
-    <article className="overflow-hidden rounded-[28px] border border-[#e7dfd2] bg-white shadow-[0_18px_48px_rgba(23,50,46,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_65px_rgba(23,50,46,0.14)]">
-      <div
-        className={`p-5 text-white ${
-          isPending
-            ? "bg-[linear-gradient(135deg,#8b4e31_0%,#c77b52_100%)]"
-            : "bg-[linear-gradient(135deg,#17322e_0%,#295046_100%)]"
-        }`}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
-              Booking
-            </p>
-            <div className="mt-2 flex items-center gap-2 text-sm font-semibold">
-              <Hash className="h-4 w-4 shrink-0" />
-              <span className="truncate">{booking.bookingId}</span>
-            </div>
+    <article className="group flex flex-col justify-between overflow-hidden rounded-[28px] border border-[#ede3d5] bg-white p-6 shadow-[0_4px_24px_rgba(23,50,46,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(23,50,46,0.1)]">
+      <div>
+        {/* Card Header: Reference & Understated Status */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f0e7dc] pb-4">
+          <div className="flex items-center gap-1.5 font-mono text-xs font-semibold uppercase tracking-wider text-[#8f8679]">
+            <Hash className="h-3.5 w-3.5 text-[#8b4e31]" />
+            <span className="truncate">{booking.bookingId}</span>
           </div>
-          <span className="rounded-full bg-white/12 px-3 py-1 text-xs font-semibold">
-            {isPending ? "Payment Pending" : "Confirmed"}
-          </span>
+
+          {/* Understated Status Badge */}
+          {isPending ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fdf2eb] px-3 py-1 text-xs font-semibold text-[#8b4e31]">
+              <Clock3 className="h-3.5 w-3.5 text-[#8b4e31]" />
+              Payment Pending
+            </span>
+          ) : isCancelled ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f2f4f3] px-3 py-1 text-xs font-semibold text-[#6f746d]">
+              <XCircle className="h-3.5 w-3.5 text-[#6f746d]" />
+              Cancelled
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef5f2] px-3 py-1 text-xs font-semibold text-[#1f5b52]">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#1f5b52]" />
+              Confirmed
+            </span>
+          )}
+        </div>
+
+        {/* Room Types Listing */}
+        <div className="mt-4">
+          <h3 className="font-merriweather text-lg font-semibold text-[#17322e] leading-snug">
+            {booking.roomTypes.join(" · ")}
+          </h3>
+        </div>
+
+        {/* Dates Grid */}
+        <div className="mt-4 grid grid-cols-2 gap-2.5">
+          <div className="rounded-xl border border-[#e7dfd2]/70 bg-[#fffdf9] p-3">
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#8b4e31]">
+              <CalendarDays className="h-3.5 w-3.5" />
+              Check-in
+            </div>
+            <p className="mt-1 text-xs font-semibold text-[#17322e]">
+              {formatDate(booking.checkIn)}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-[#e7dfd2]/70 bg-[#fffdf9] p-3">
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#1f5b52]">
+              <CalendarDays className="h-3.5 w-3.5" />
+              Check-out
+            </div>
+            <p className="mt-1 text-xs font-semibold text-[#17322e]">
+              {formatDate(booking.checkOut)}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="p-5">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl bg-[#f7efe3] px-4 py-4">
-            <div className="flex items-center gap-2 text-[#8b4e31]">
-              <CalendarDays className="h-4 w-4" />
-              <p className="text-sm font-semibold">Check-in</p>
-            </div>
-            <p className="mt-2 text-sm font-semibold text-[#17322e]">{formatDate(booking.checkIn)}</p>
-          </div>
-
-          <div className="rounded-2xl bg-[#eef5f2] px-4 py-4">
-            <div className="flex items-center gap-2 text-[#1f5b52]">
-              <CalendarDays className="h-4 w-4" />
-              <p className="text-sm font-semibold">Check-out</p>
-            </div>
-            <p className="mt-2 text-sm font-semibold text-[#17322e]">{formatDate(booking.checkOut)}</p>
-          </div>
+      {/* Footer: Price & Retry Action */}
+      <div className="mt-5 pt-4 border-t border-[#f0e7dc]">
+        <div className="flex items-baseline justify-between">
+          <span className="text-xs font-medium text-[#6f746d]">
+            {isPending ? "Amount due" : "Total paid"}
+          </span>
+          <span className="font-merriweather text-2xl font-bold text-[#17322e]">
+            ₹{booking.totalAmount.toLocaleString("en-IN")}
+          </span>
         </div>
 
-        <div className="mt-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8f8679]">
-            Room Types
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {booking.roomTypes.map((roomType, index) => (
-              <span
-                key={`${roomType}-${index}`}
-                className="rounded-full border border-[#e3dacd] bg-[#fffdf9] px-3 py-1.5 text-sm font-medium text-[#4f5750]"
-              >
-                {roomType}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-5 flex items-center justify-between rounded-[22px] bg-[#fbf6ef] px-4 py-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8f8679]">Total Paid</p>
-            <div className="mt-2 flex items-center gap-1 text-2xl font-semibold text-[#17322e]">
-              <IndianRupee className="h-5 w-5" />
-              <span>{booking.totalAmount.toLocaleString("en-IN")}</span>
-            </div>
-          </div>
-          <div className="rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#1f5b52]">
-            {isPending ? "Awaiting payment" : "Reserved"}
-          </div>
-        </div>
-
+        {/* Pending payment notice & retry action */}
         {isPending && (
-          <div className="mt-5 rounded-[22px] border border-[#efc9be] bg-[#fff5ef] p-4">
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-[#fff1ea] p-2 text-[#8b4e31]">
-                <Clock3 className="h-4 w-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-[#8b4e31]">Complete your payment</p>
-                <p className="mt-1 text-sm leading-6 text-[#946047]">
-                  This booking is reserved for a short time.
-                  {pendingUntilText ? ` Finish payment before ${pendingUntilText}.` : ""}
-                </p>
-              </div>
-            </div>
+          <div className="mt-4 rounded-xl border border-[#f5d0c5] bg-[#fff6f2] p-3.5">
+            <p className="text-xs leading-relaxed text-[#8b4e31]">
+              Reserved temporarily. Finish payment before{" "}
+              <span className="font-semibold">{pendingUntilText || "expiry"}</span>.
+            </p>
 
             <button
               onClick={() => onCompletePayment?.(booking)}
               disabled={isPaying}
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#8b4e31] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#744127] disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1f5b52] px-4 py-3 text-xs font-semibold text-white transition hover:bg-[#17322e] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <CreditCard className="h-4 w-4" />
-              {isPaying ? "Opening payment..." : "Complete payment"}
+              <CreditCard className="h-3.5 w-3.5" />
+              {isPaying ? "Opening payment..." : "Complete payment now"}
             </button>
           </div>
         )}
       </div>
     </article>
   );
+};
+
+BookingCard.propTypes = {
+  booking: PropTypes.shape({
+    bookingId: PropTypes.string.isRequired,
+    paymentStatus: PropTypes.string,
+    pendingExpiresAt: PropTypes.string,
+    checkIn: PropTypes.string,
+    checkOut: PropTypes.string,
+    roomTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
+    totalAmount: PropTypes.number.isRequired,
+  }).isRequired,
+  onCompletePayment: PropTypes.func,
+  isPaying: PropTypes.bool,
 };
 
 export default BookingCard;

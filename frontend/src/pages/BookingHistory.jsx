@@ -202,112 +202,124 @@ const BookingHistory = () => {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="rounded-[28px] bg-[linear-gradient(135deg,#17322e_0%,#295046_100%)] p-6 text-white shadow-[0_22px_50px_rgba(23,50,46,0.16)] sm:p-7">
-        <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#f1c8af]">
-              Stays
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold sm:text-5xl">Your bookings</h1>
-            <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
-              Review confirmed stays, track pending payments, and complete checkout before a reservation expires.
-            </p>
-          </div>
-          <div className="rounded-[24px] border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold">
-              <ReceiptText className="h-4 w-4" />
-              Booking overview
-            </div>
-            <p className="mt-4 text-3xl font-semibold">{visibleBookings.length}</p>
-            <p className="text-sm text-white/70">visible booking groups</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <div className="rounded-[24px] border border-[#e7dfd2] bg-white p-5 shadow-[0_16px_36px_rgba(23,50,46,0.06)]">
-          <div className="inline-flex rounded-full bg-[#eef5f2] p-3 text-[#1f5b52]">
-            <Compass className="h-5 w-5" />
-          </div>
-          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.18em] text-[#8f8679]">Confirmed</p>
-          <p className="mt-2 text-3xl font-semibold text-[#17322e]">{confirmedBookings}</p>
-        </div>
-
-        <div className="rounded-[24px] border border-[#e7dfd2] bg-white p-5 shadow-[0_16px_36px_rgba(23,50,46,0.06)]">
-          <div className="inline-flex rounded-full bg-[#fff1ea] p-3 text-[#8b4e31]">
-            <CreditCard className="h-5 w-5" />
-          </div>
-          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.18em] text-[#8f8679]">Pending</p>
-          <p className="mt-2 text-3xl font-semibold text-[#17322e]">{pendingBookings}</p>
-        </div>
-
-        <div className="rounded-[24px] border border-[#e7dfd2] bg-white p-5 shadow-[0_16px_36px_rgba(23,50,46,0.06)]">
-          <div className="inline-flex rounded-full bg-[#f7efe3] p-3 text-[#8b4e31]">
-            <CalendarRange className="h-5 w-5" />
-          </div>
-          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.18em] text-[#8f8679]">This page</p>
-          <p className="mt-2 text-3xl font-semibold text-[#17322e]">{currentBookings.length}</p>
-        </div>
-      </div>
-
-      {visibleBookings.length === 0 ? (
-        <div className="mt-6 rounded-[28px] border border-dashed border-[#d9cfbf] bg-[rgba(255,252,247,0.92)] p-10 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f7efe3] text-[#8b4e31]">
-            <ReceiptText className="h-6 w-6" />
-          </div>
-          <h2 className="mt-5 text-2xl font-semibold text-[#17322e]">No bookings to show</h2>
-          <p className="mt-2 text-sm text-[#6f746d]">
-            Confirmed stays and active payment-pending reservations will appear here.
+    <div className="min-h-screen bg-[#faf7f2] py-8 sm:py-12">
+      <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-12">
+        
+        {/* Page Header */}
+        <div className="mb-8">
+          <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8b4e31]">
+            Stays & Reservations
+          </span>
+          <h1 className="mt-2 font-merriweather text-3xl font-bold text-[#17322e] sm:text-4xl">
+            My Bookings
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#4f5750]">
+            Review your confirmed reservations at Geeta Homestay, check stay details, or complete pending payments.
           </p>
         </div>
-      ) : (
-        <>
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            {currentBookings.map((booking) => (
-              <BookingCard
-                key={booking.bookingId}
-                booking={booking}
-                onCompletePayment={handleCompletePayment}
-                isPaying={activeBookingId === booking.bookingId}
-              />
-            ))}
-          </div>
 
-          <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-[24px] border border-[#e7dfd2] bg-white px-5 py-4 shadow-[0_16px_36px_rgba(23,50,46,0.06)] sm:flex-row">
-            <p className="text-sm text-[#6f746d]">
-              Page <span className="font-semibold text-[#17322e]">{currentPage}</span> of{" "}
-              <span className="font-semibold text-[#17322e]">{totalPages}</span>
-            </p>
-
+        {/* Overview Stats */}
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-[#e7dfd2] bg-white p-5 shadow-[0_4px_20px_rgba(23,50,46,0.04)]">
             <div className="flex items-center gap-3">
-              <button
-                onClick={prevPage}
-                disabled={currentPage === 1}
-                className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-                  currentPage === 1
-                    ? "cursor-not-allowed bg-[#ece4d7] text-[#9c968b]"
-                    : "bg-[#f7efe3] text-[#17322e] hover:bg-[#ece1ce]"
-                }`}
-              >
-                Previous
-              </button>
-
-              <button
-                onClick={nextPage}
-                disabled={currentPage === totalPages}
-                className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-                  currentPage === totalPages
-                    ? "cursor-not-allowed bg-[#ece4d7] text-[#9c968b]"
-                    : "bg-[#1f5b52] text-white hover:bg-[#17322e]"
-                }`}
-              >
-                Next
-              </button>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f7efe3] text-[#8b4e31]">
+                <ReceiptText className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#6f746d]">Total Bookings</p>
+                <p className="text-2xl font-bold text-[#17322e]">{visibleBookings.length}</p>
+              </div>
             </div>
           </div>
-        </>
-      )}
+
+          <div className="rounded-2xl border border-[#e7dfd2] bg-white p-5 shadow-[0_4px_20px_rgba(23,50,46,0.04)]">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef5f2] text-[#1f5b52]">
+                <Compass className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#6f746d]">Confirmed</p>
+                <p className="text-2xl font-bold text-[#1f5b52]">{confirmedBookings}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-[#e7dfd2] bg-white p-5 shadow-[0_4px_20px_rgba(23,50,46,0.04)]">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff1ea] text-[#8b4e31]">
+                <CreditCard className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#6f746d]">Pending Payment</p>
+                <p className="text-2xl font-bold text-[#8b4e31]">{pendingBookings}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bookings List / Grid */}
+        {visibleBookings.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-[#d9cfbf] bg-white p-12 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#f7efe3] text-[#8b4e31]">
+              <CalendarRange className="h-6 w-6" />
+            </div>
+            <h2 className="mt-4 font-merriweather text-xl font-semibold text-[#17322e]">No bookings found</h2>
+            <p className="mt-2 text-sm text-[#6f746d]">
+              Your confirmed stays and active pending reservations will appear here.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {currentBookings.map((booking) => (
+                <BookingCard
+                  key={booking.bookingId}
+                  booking={booking}
+                  onCompletePayment={handleCompletePayment}
+                  isPaying={activeBookingId === booking.bookingId}
+                />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl border border-[#e7dfd2] bg-white px-6 py-4 sm:flex-row">
+                <p className="text-xs font-medium text-[#6f746d]">
+                  Page <span className="font-semibold text-[#17322e]">{currentPage}</span> of{" "}
+                  <span className="font-semibold text-[#17322e]">{totalPages}</span>
+                </p>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={prevPage}
+                    disabled={currentPage === 1}
+                    className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                      currentPage === 1
+                        ? "cursor-not-allowed bg-[#ece4d7]/60 text-[#9c968b]"
+                        : "bg-[#f7efe3] text-[#17322e] hover:bg-[#ece1ce]"
+                    }`}
+                  >
+                    Previous
+                  </button>
+
+                  <button
+                    onClick={nextPage}
+                    disabled={currentPage === totalPages}
+                    className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                      currentPage === totalPages
+                        ? "cursor-not-allowed bg-[#ece4d7]/60 text-[#9c968b]"
+                        : "bg-[#1f5b52] text-white hover:bg-[#17322e]"
+                    }`}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+      </div>
     </div>
   );
 };

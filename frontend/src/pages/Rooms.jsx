@@ -1,12 +1,10 @@
-import ExploreRooms from '../components/ExploreRooms';
+import ExploreRooms from "../components/ExploreRooms";
 
 const Rooms = () => {
   return (
-    <div>
-      <div className="flex flex-col items-center gap-6">
-        <ExploreRooms />
-      </div>
-    </div>
+    <main className="min-h-screen bg-[#faf7f2] text-[#17322e]">
+      <ExploreRooms />
+    </main>
   );
 };
 

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -27,12 +28,23 @@ const RouteFrame = ({ children, flushToTop = false }) => (
   <div className={`page ${flushToTop ? "" : NAVBAR_HEIGHT_CLASS}`}>{children}</div>
 );
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
 const App = () => {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <CartProvider>
         <DateProvider>
           <Router>
+            <ScrollToTop />
             <div className="flex flex-col min-h-screen">
               <Navbar />
               <div className="flex-grow">
@@ -41,7 +53,6 @@ const App = () => {
               <Footer />
               <ToastContainer />
             </div>
-          
           </Router>
         </DateProvider>
       </CartProvider>

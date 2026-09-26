@@ -2,14 +2,12 @@ import { useState, memo } from "react";
 import {
   FaChevronLeft,
   FaChevronRight,
-  FaBed,
-  FaUserFriends,
   FaHeart,
   FaRegHeart,
 } from "react-icons/fa";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import {
   buildRoomCardImageUrl,
   getRoomGalleryImages,
@@ -18,7 +16,7 @@ import {
   toRoomSlug,
 } from "../utils/roomData";
 
-const RoomCard = ({ room }) => {
+const RoomCard = ({ room, isFeatured = false }) => {
   const normalizedRoom = normalizeRoom(room);
   const {
     roomType,
@@ -38,12 +36,6 @@ const RoomCard = ({ room }) => {
   const navigate = useNavigate();
   const visibleAmenities = amenities.slice(0, 4);
   const inventoryCount = availableRooms ?? totalRooms;
-  const availabilityLabel =
-    availableRooms === undefined
-      ? "Check dates for live availability"
-      : availableRooms > 0
-        ? `${availableRooms} room${availableRooms > 1 ? "s" : ""} left`
-        : "Sold out for selected dates";
 
   const prevImage = (e) => {
     e.stopPropagation();
@@ -73,158 +65,159 @@ const RoomCard = ({ room }) => {
   };
 
   return (
-    <div
-      className="group flex w-full cursor-pointer flex-col overflow-hidden rounded-[30px] border border-[#e7dfd2] bg-white shadow-[0_18px_48px_rgba(23,50,46,0.07)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_65px_rgba(23,50,46,0.14)] xl:flex-row"
+    <article
       onClick={handleCardClick}
+      className={`group flex flex-col h-full cursor-pointer overflow-hidden rounded-[28px] border border-[#ede3d5] bg-white transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_22px_50px_rgba(23,50,46,0.1)] ${
+        isFeatured ? "md:col-span-2 lg:col-span-2" : ""
+      }`}
       role="button"
       tabIndex={0}
-      onKeyPress={(e) => {
-        if (e.key === "Enter") handleCardClick();
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleCardClick();
+        }
       }}
       aria-label={`View details for ${roomName}`}
     >
-      <div className="relative aspect-[16/11] w-full overflow-hidden bg-[#efe7da] xl:w-[38%] xl:aspect-auto">
+      {/* Large Focal Imagery */}
+      <div className="relative aspect-[16/11] w-full overflow-hidden bg-[#efe7da]">
         <img
           src={
             imageError
               ? getFallbackRoomImage()
               : buildRoomCardImageUrl(gallery[currentImageIndex] || gallery[0])
           }
-          alt={`${roomName} ${currentImageIndex + 1}`}
-          className="h-full w-full object-cover object-center"
+          alt={`${roomName} view ${currentImageIndex + 1}`}
+          className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-105"
           loading="lazy"
-          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 60vw, 38vw"
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           onError={() => setImageError(true)}
         />
 
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3 sm:p-4">
-          <span className="max-w-[70%] rounded-full bg-[rgba(255,250,242,0.92)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8b4e31] sm:px-3 sm:text-xs sm:tracking-[0.18em]">
-            Mountain comfort
-          </span>
+        {/* Carousel controls (subtle appearance on card hover) */}
+        {gallery.length > 1 && (
+          <div className="absolute inset-x-3 top-1/2 -translate-y-1/2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <button
+              onClick={prevImage}
+              className="rounded-full bg-black/45 p-2 text-white backdrop-blur-sm transition hover:bg-black/75"
+              aria-label="Previous image"
+            >
+              <FaChevronLeft className="h-3 w-3" />
+            </button>
+            <button
+              onClick={nextImage}
+              className="rounded-full bg-black/45 p-2 text-white backdrop-blur-sm transition hover:bg-black/75"
+              aria-label="Next image"
+            >
+              <FaChevronRight className="h-3 w-3" />
+            </button>
+          </div>
+        )}
+
+        {/* Top Overlay: Availability or Featured status + Favorite Button */}
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3.5">
+          {availableRooms !== undefined && availableRooms <= 2 && availableRooms > 0 ? (
+            <span className="rounded-full bg-black/55 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-md">
+              Only {availableRooms} left
+            </span>
+          ) : availableRooms === 0 ? (
+            <span className="rounded-full bg-[#8b4e31]/90 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-md">
+              Sold out for dates
+            </span>
+          ) : isFeatured ? (
+            <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#8b4e31] backdrop-blur-md shadow-sm">
+              Featured Suite
+            </span>
+          ) : (
+            <span />
+          )}
+
           <button
             onClick={toggleFavorite}
-            className="rounded-full bg-white/90 p-2 text-red-500 shadow-sm transition hover:bg-white sm:p-2.5"
+            className="ml-auto rounded-full bg-black/35 p-2 text-white backdrop-blur-md transition hover:bg-black/55 hover:scale-110"
             aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
             {isFavorite ? (
-              <FaHeart className="text-red-600" />
+              <FaHeart className="h-3.5 w-3.5 text-red-500" />
             ) : (
-              <FaRegHeart className="text-gray-400" />
+              <FaRegHeart className="h-3.5 w-3.5 text-white/90" />
             )}
           </button>
         </div>
 
+        {/* Bottom gallery indicator */}
         {gallery.length > 1 && (
-          <>
-            <button
-              onClick={prevImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/35 p-2 text-white transition hover:bg-black/55 sm:left-3"
-              aria-label="Previous image"
-            >
-              <FaChevronLeft />
-            </button>
-            <button
-              onClick={nextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/35 p-2 text-white transition hover:bg-black/55 sm:right-3"
-              aria-label="Next image"
-            >
-              <FaChevronRight />
-            </button>
-          </>
+          <div className="absolute bottom-3 right-3 rounded-full bg-black/40 px-2.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-md">
+            {currentImageIndex + 1} / {gallery.length}
+          </div>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-4 sm:p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#eef5f2] px-2.5 py-1 text-[11px] font-semibold text-[#1f5b52] sm:px-3 sm:text-xs">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                Trusted stay
-              </span>
-              <span
-                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold sm:px-3 sm:text-xs ${
-                  availableRooms === undefined
-                    ? "bg-[#f7efe3] text-[#8b4e31]"
-                    : availableRooms > 0
-                      ? "bg-[#eef5f2] text-[#1f5b52]"
-                      : "bg-[#fff1ea] text-[#8b4e31]"
-                }`}
-              >
-                {availabilityLabel}
-              </span>
-            </div>
-            <h3 className="mt-3 text-xl font-semibold leading-tight text-[#17322e] sm:mt-4 sm:text-3xl">
+      {/* Editorial Content: Clear Focal Point (Name + Price) */}
+      <div className="flex flex-1 flex-col justify-between p-6">
+        <div>
+          {/* Room Name and Price */}
+          <div className="flex flex-col gap-1.5">
+            <h3 className="font-merriweather text-xl font-semibold leading-snug text-[#17322e] transition group-hover:text-[#1f5b52]">
               {roomName}
             </h3>
-            <p className="mt-2 text-sm leading-6 text-[#60655f] line-clamp-3 sm:mt-3 sm:line-clamp-2">
+
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <span className="font-merriweather text-2xl font-bold text-[#17322e]">
+                ₹{price.toLocaleString("en-IN")}
+              </span>
+              <span className="text-xs font-normal text-[#6f746d]">/ night</span>
+            </div>
+          </div>
+
+          {/* Understated Specs */}
+          <div className="mt-3 flex items-center gap-2 text-xs font-medium text-[#8b4e31]">
+            <span>Up to {maxAdults} {maxAdults === 1 ? "Guest" : "Guests"}</span>
+            <span>•</span>
+            <span>Mountain View</span>
+            {inventoryCount > 0 && (
+              <>
+                <span>•</span>
+                <span className="text-[#596661] font-normal">{inventoryCount} total</span>
+              </>
+            )}
+          </div>
+
+          {/* Quiet Narrative Description */}
+          {description && (
+            <p className="mt-3 text-xs sm:text-sm font-light leading-relaxed text-[#596661] line-clamp-2">
               {description}
             </p>
-          </div>
+          )}
 
-          <div className="rounded-[24px] bg-[#f8f3eb] p-4 lg:min-w-[200px]">
-            <span className="text-xs text-[#918a7d] line-through sm:text-sm">
-              Rs. {Math.round(price * 1.4).toLocaleString("en-IN")}
-            </span>
-            <div className="mt-2 flex items-center gap-2 text-[#c97953]">
-              <Sparkles className="h-4 w-4" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] sm:text-xs sm:tracking-[0.18em]">
-                Limited offer
-              </span>
+          {/* Understated Amenities (Clean text list with bullet separators, NOT badge-heavy) */}
+          {visibleAmenities.length > 0 && (
+            <div className="mt-4 pt-3.5 border-t border-[#f0e7dc]">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-[#6e7772]">
+                {visibleAmenities.map((amenity, idx) => (
+                  <span key={amenity.name} className="flex items-center gap-1.5">
+                    {idx > 0 && <span className="text-[#c8bcab]">•</span>}
+                    <span>{amenity.name}</span>
+                  </span>
+                ))}
+              </div>
             </div>
-            <p className="mt-2 text-2xl font-semibold text-[#17322e] sm:text-3xl">
-              Rs. {price.toLocaleString("en-IN")}
-            </p>
-            <p className="text-xs text-[#6f746d] sm:text-sm">per night</p>
-            <p className="mt-2 text-xs font-semibold text-[#1f5b52] sm:text-sm">
-              Save Rs. {(Math.round(price * 1.4) - price).toLocaleString("en-IN")}
-            </p>
-          </div>
+          )}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2 sm:mt-5">
-          {visibleAmenities.map((amenity) => (
-            <span
-              key={amenity.name}
-              className="rounded-full border border-[#e3dacd] bg-[#fffdf9] px-3 py-1.5 text-xs text-[#4f5750] sm:text-sm"
-            >
-              {amenity.name}
-            </span>
-          ))}
-        </div>
-
-        <div className="mt-5 flex flex-wrap items-center gap-2.5 text-xs text-[#5e635d] sm:mt-6 sm:gap-3 sm:text-sm">
-          <div className="flex items-center gap-2 rounded-full bg-[#f7efe3] px-3 py-2 sm:px-4">
-            <FaUserFriends className="text-[#8b4e31]" />
-            Up to {maxAdults} guests
-          </div>
-          <div className="flex items-center gap-2 rounded-full bg-[#eef5f2] px-3 py-2 sm:px-4">
-            <FaBed className="text-[#1f5b52]" />
-            {inventoryCount} total room{inventoryCount > 1 ? "s" : ""}
-          </div>
-        </div>
-
-        <div className="mt-5 flex flex-col gap-3 sm:mt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[#6f746d] sm:text-sm">Photos, price, and quick booking.</p>
-          <button
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#1f5b52] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#17322e] sm:w-auto"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/rooms/${encodeURIComponent(toRoomSlug(roomType || roomName))}`, {
-                state: { room: normalizedRoom },
-              });
-            }}
-          >
-            View room
-            <ArrowRight className="h-4 w-4" />
-          </button>
+        {/* Minimalist Action */}
+        <div className="mt-6 pt-4 border-t border-[#f0e7dc] flex items-center justify-between text-xs sm:text-sm font-semibold text-[#1f5b52] group-hover:text-[#17322e] transition">
+          <span>View Room Details</span>
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 text-[#8b4e31]" />
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
 RoomCard.propTypes = {
+  isFeatured: PropTypes.bool,
   room: PropTypes.shape({
     roomType: PropTypes.string.isRequired,
     roomName: PropTypes.string.isRequired,
@@ -244,3 +237,4 @@ RoomCard.propTypes = {
 };
 
 export default memo(RoomCard);
+

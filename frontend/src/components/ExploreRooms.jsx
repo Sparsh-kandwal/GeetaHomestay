@@ -107,107 +107,147 @@ const ExploreRooms = () => {
     setFilteredRooms(nextFilteredRooms);
   }, [rooms, availableRooms, selectedAmenitiesInput, maxPriceInput, guestCountInput, searchTermInput]);
 
+  const [showFilters, setShowFilters] = useState(false);
+
+  const activeFilterCount =
+    (selectedAmenitiesInput.length > 0 ? selectedAmenitiesInput.length : 0) +
+    (guestCountInput ? 1 : 0) +
+    (maxPriceInput < 4000 ? 1 : 0) +
+    (searchTermInput ? 1 : 0);
+
   return (
-    <div className="min-h-screen w-full px-4 pb-10 pt-6 sm:px-6 sm:pt-8 lg:px-8">
+    <div className="min-h-screen w-full px-4 pb-16 pt-6 sm:px-6 sm:pt-10 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-[28px] bg-[linear-gradient(135deg,#17322e_0%,#295046_100%)] p-6 text-white shadow-[0_22px_50px_rgba(23,50,46,0.16)] sm:p-7">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold">
-              <Compass className="h-4 w-4" />
-              Rooms
+        {/* Boutique Header */}
+        <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#e8dfd3] pb-8">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <span className="h-px w-6 bg-[#8b4e31]" />
+              <span className="text-xs font-semibold uppercase tracking-[0.26em] text-[#8b4e31]">
+                Karnaprayag • Garhwal Himalayas
+              </span>
             </div>
-            <h1 className="mt-4 text-balance text-4xl font-semibold sm:text-5xl">
-              Find your stay
+            <p className="mt-2 font-grand text-3xl sm:text-4xl text-[#8b4e31]">
+              Sanctuary in the Hills
+            </p>
+            <h1 className="mt-1 font-merriweather text-3xl font-semibold tracking-tight text-[#17322e] sm:text-4xl lg:text-5xl">
+              Our Rooms & Suites
             </h1>
+            <p className="mt-3 max-w-2xl text-sm sm:text-base font-light leading-relaxed text-[#596661]">
+              Each room at Geeta Homestay is individually furnished with clean mountain linens,
+              modern private bathrooms, reliable hot water, and quiet balconies overlooking the Alaknanda valley.
+            </p>
           </div>
 
-          <div className="rounded-[28px] border border-[#e7dfd2] bg-[rgba(255,252,247,0.92)] p-5 shadow-[0_16px_40px_rgba(23,50,46,0.06)]">
+          <div className="shrink-0">
             <BookingFlowIndicator currentStep={1} compact />
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#eef5f2] px-4 py-2 text-sm text-[#1f5b52]">
-              <ShieldCheck className="h-4 w-4" />
-              Live availability
-            </div>
           </div>
-        </div>
+        </header>
 
-        <div className="mt-6">
+        {/* Date Search Bar */}
+        <div className="mb-8">
           <SearchBar setAvailableRooms={setAvailableRooms} />
         </div>
 
-        <div className="mt-6 flex flex-col gap-6 lg:flex-row">
-          <SearchFilter
-            bedOptions={bedOptions}
-            searchTermInput={searchTermInput}
-            selectedAmenitiesInput={selectedAmenitiesInput}
-            maxPriceInput={maxPriceInput}
-            guestCountInput={guestCountInput}
-            amenitiesOptions={amenitiesOptions}
-            setSearchTermInput={setSearchTermInput}
-            setSelectedAmenitiesInput={setSelectedAmenitiesInput}
-            setMaxPriceInput={setMaxPriceInput}
-            setGuestCountInput={setGuestCountInput}
-          />
-
-          <div className="min-w-0 flex-1">
-            <div className="mb-5 flex flex-col gap-3 rounded-[24px] border border-[#e7dfd2] bg-white p-4 shadow-[0_12px_30px_rgba(23,50,46,0.05)] sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="text-2xl font-semibold text-[#17322e]">
-                {roomsLoading ? "Loading..." : `${filteredRooms.length} room${filteredRooms.length === 1 ? "" : "s"}`}
-              </h2>
-              <span className="rounded-full bg-[#f7efe3] px-4 py-2 text-sm text-[#6f746d]">
-                Simple filters
+        {/* Refinement Controls & Live Availability Bar */}
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#e8dfd3] pb-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="font-merriweather text-lg sm:text-xl font-semibold text-[#17322e]">
+              {roomsLoading
+                ? "Checking available rooms..."
+                : `${filteredRooms.length} ${filteredRooms.length === 1 ? "Room" : "Rooms"} Available`}
+            </h2>
+            {!availableRooms.first && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef5f2] px-3 py-1 text-xs font-medium text-[#1f5b52]">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Live dates applied
               </span>
-            </div>
-
-            <div className="flex flex-col gap-8">
-              <AnimatePresence>
-                {roomsLoading ? (
-                  Array(3)
-                    .fill(0)
-                    .map((_, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <SkeletonRoom />
-                      </motion.div>
-                    ))
-                ) : filteredRooms.length > 0 ? (
-                  filteredRooms.map((room) => (
-                    <motion.div
-                      key={room.roomType}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <RoomCard room={room} />
-                    </motion.div>
-                  ))
-                ) : (
-                  <motion.div
-                    key="no-results"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="rounded-[24px] border border-dashed border-[#d9cfbf] bg-[rgba(255,252,247,0.9)] p-8 text-center"
-                  >
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f7efe3]">
-                      <Compass className="h-6 w-6 text-[#8b4e31]" />
-                    </div>
-                    <h3 className="mt-4 text-xl font-semibold text-[#17322e]">
-                      No rooms found
-                    </h3>
-                    <p className="mt-2 text-sm text-[#6f746d]">
-                      Try different dates or filters.
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            )}
           </div>
+
+          <button
+            onClick={() => setShowFilters((prev) => !prev)}
+            className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full border border-[#dcd3c5] bg-white px-5 py-2 text-xs font-semibold uppercase tracking-wider text-[#17322e] transition hover:border-[#17322e] hover:bg-[#faf6f0]"
+          >
+            <Compass className="h-3.5 w-3.5 text-[#8b4e31]" />
+            <span>{showFilters ? "Hide Filters" : "Filter Rooms"}</span>
+            {activeFilterCount > 0 && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#8b4e31] text-[10px] text-white">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Collapsible Filter Console */}
+        {showFilters && (
+          <div className="mb-10 rounded-[28px] border border-[#e8ded1] bg-white p-6 shadow-[0_12px_32px_rgba(23,50,46,0.05)]">
+            <SearchFilter
+              bedOptions={bedOptions}
+              searchTermInput={searchTermInput}
+              selectedAmenitiesInput={selectedAmenitiesInput}
+              maxPriceInput={maxPriceInput}
+              guestCountInput={guestCountInput}
+              amenitiesOptions={amenitiesOptions}
+              setSearchTermInput={setSearchTermInput}
+              setSelectedAmenitiesInput={setSelectedAmenitiesInput}
+              setMaxPriceInput={setMaxPriceInput}
+              setGuestCountInput={setGuestCountInput}
+            />
+          </div>
+        )}
+
+        {/* Responsive Grid: 1 col mobile, 2 col tablet, 3 col desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 lg:gap-8 items-stretch">
+          <AnimatePresence>
+            {roomsLoading ? (
+              Array(3)
+                .fill(0)
+                .map((_, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full"
+                  >
+                    <SkeletonRoom />
+                  </motion.div>
+                ))
+            ) : filteredRooms.length > 0 ? (
+              filteredRooms.map((room, index) => (
+                <motion.div
+                  key={room.roomType}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="h-full"
+                >
+                  <RoomCard room={room} isFeatured={index === 0} />
+                </motion.div>
+              ))
+            ) : (
+              <motion.div
+                key="no-results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="col-span-full rounded-[28px] border border-dashed border-[#dcd3c5] bg-[#fffdfa] p-12 text-center"
+              >
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f7efe3]">
+                  <Compass className="h-6 w-6 text-[#8b4e31]" />
+                </div>
+                <h3 className="mt-4 font-merriweather text-xl font-semibold text-[#17322e]">
+                  No matching rooms found
+                </h3>
+                <p className="mt-2 text-sm text-[#6f746d]">
+                  Please try adjusting your dates, budget, or amenity preferences.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
