@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import BookedDate from "../models/bookedDates.js";
 import Booking from "../models/booking.js";
 
@@ -21,7 +22,11 @@ export const rollbackBookings = async (userId, options = {}) => {
     const query = { userId, paymentStatus: "pending" };
 
     if (bookingId) {
-      query.bookingId = bookingId;
+      if (mongoose.Types.ObjectId.isValid(bookingId)) {
+        query.$or = [{ bookingId }, { _id: bookingId }];
+      } else {
+        query.bookingId = bookingId;
+      }
     }
 
     if (createdBefore) {

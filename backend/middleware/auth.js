@@ -1,11 +1,15 @@
 import jwt from "jsonwebtoken";
 
-export const verifyToken = (req, res, next) => {
+/**
+ * Strict auth middleware — rejects the request with 401 if no valid
+ * JWT is present. Attached to all protected routes by default.
+ */
+export const requireAuth = (req, res, next) => {
   const token = req.cookies.accessToken;
   const secretKey = process.env.JWT_SECRET;
 
   if (!token) {
-    return next();
+    return res.status(401).json({ message: "Authentication required" });
   }
 
   try {
@@ -25,3 +29,6 @@ export const verifyToken = (req, res, next) => {
     }
   }
 };
+
+// Default alias — all imports of verifyToken enforce strict requireAuth
+export const verifyToken = requireAuth;

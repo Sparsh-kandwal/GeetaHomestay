@@ -59,6 +59,11 @@ const ExploreRooms = () => {
         }),
       });
 
+      if (response.status === 401) {
+        setAvailabilityError("Please log in to check live room availability.");
+        return;
+      }
+
       const data = await response.json();
 
       if (data.success && data.availability) {

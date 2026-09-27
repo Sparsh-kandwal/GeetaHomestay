@@ -122,7 +122,6 @@ const Cart = () => {
               `${import.meta.env.VITE_BACKEND_URL}/payment/checkPaymentStatus`,
               {
                 paymentId,
-                userId: user._id,
                 bookingId,
               },
               { withCredentials: true }
