@@ -7,11 +7,11 @@ export const checkouthandler = async (amount, user, callback, options = {}) => {
       data: { order },
     } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkout`, {
       amount,
-    });
+    }, { withCredentials: true });
 
     const {
       data: { key },
-    } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/payment/getKey`);
+    } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/payment/getKey`, { withCredentials: true });
 
     if (!user || !user._id) {
       console.error("User data is missing.");
@@ -34,7 +34,6 @@ export const checkouthandler = async (amount, user, callback, options = {}) => {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              userId: user._id,
               amount: order.amount,
               bookingId,
             },

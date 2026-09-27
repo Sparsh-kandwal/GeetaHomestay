@@ -1,5 +1,6 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import mongoose from "mongoose";
 import Payment from "../models/paymentmodel.js";
 import Booking from "../models/booking.js";
 import Cart_item from "../models/cart.js";
@@ -35,21 +36,39 @@ export const paymentVerification = async (req, res) => {
   let bookingIdForRollback;
 
   try {
+    const userId = req.user.id;
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      userId,
       amount,
       bookingId,
     } = req.body;
 
     userIdForRollback = userId;
-    bookingIdForRollback = bookingId;
+    let targetBookingId = bookingId;
+
+    // Ownership check: if a bookingId is supplied, verify the
+    // authenticated user actually owns those booking docs in the DB.
+    // Supports either group bookingId or document _id.
+    if (bookingId) {
+      const query = mongoose.Types.ObjectId.isValid(bookingId)
+        ? { $or: [{ bookingId }, { _id: bookingId }] }
+        : { bookingId };
+      const ownershipCheck = await Booking.findOne(query);
+      if (!ownershipCheck) {
+        return res.status(404).json({ success: false, error: "Booking not found" });
+      }
+      if (ownershipCheck.userId.toString() !== userId) {
+        return res.status(403).json({ success: false, error: "You are not authorized to verify payment for this booking" });
+      }
+      targetBookingId = ownershipCheck.bookingId;
+    }
+    bookingIdForRollback = targetBookingId;
 
     const pendingQuery = { userId, paymentStatus: "pending" };
-    if (bookingId) {
-      pendingQuery.bookingId = bookingId;
+    if (targetBookingId) {
+      pendingQuery.bookingId = targetBookingId;
     }
 
     const pendingBookings = await Booking.find(pendingQuery);
@@ -115,18 +134,45 @@ export const getKey = (req, res) => {
 
 export const checkPaymentStatus = async (req, res) => {
   try {
-    const { paymentId, userId, bookingId } = req.body;
+    const userId = req.user.id;
+    const { paymentId, bookingId } = req.body;
 
-    if (!paymentId || !userId) {
-      return res.status(400).json({ success: false, message: "Missing paymentId or userId" });
+    if (!paymentId || !bookingId) {
+      return res.status(400).json({
+        success: false,
+        message: !paymentId ? "Missing paymentId" : "Missing bookingId",
+      });
     }
 
+    // 1. Fetch the booking from the DB first (supports either group bookingId or document _id)
+    const query = mongoose.Types.ObjectId.isValid(bookingId)
+      ? { $or: [{ bookingId }, { _id: bookingId }] }
+      : { bookingId };
+    const booking = await Booking.findOne(query);
+
+    // 2. If no booking is found, return 404
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    // 3. Compare booking's real owner (userId) against req.user.id —
+    // return 403 immediately and do NOT proceed to any Razorpay call if mismatch
+    if (booking.userId.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to check payment status for this booking",
+      });
+    }
+
+    const targetBookingId = booking.bookingId;
+
+    // 4. Only after ownership is confirmed, proceed with the Razorpay API call
     const payment = await instance.payments.fetch(paymentId);
 
     if (payment.status === "captured") {
       const pendingQuery = { userId, paymentStatus: "pending" };
-      if (bookingId) {
-        pendingQuery.bookingId = bookingId;
+      if (targetBookingId) {
+        pendingQuery.bookingId = targetBookingId;
       }
 
       const pendingBookings = await Booking.find(pendingQuery);
@@ -148,7 +194,7 @@ export const checkPaymentStatus = async (req, res) => {
     }
 
     if (payment.status === "failed") {
-      await rollbackBookings(userId, { bookingId });
+      await rollbackBookings(userId, { bookingId: targetBookingId });
       return res.status(400).json({ success: false, message: "Payment failed, booking rolled back" });
     }
 

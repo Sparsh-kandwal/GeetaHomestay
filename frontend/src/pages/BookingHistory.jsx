@@ -101,7 +101,6 @@ const BookingHistory = () => {
             `${import.meta.env.VITE_BACKEND_URL}/payment/checkPaymentStatus`,
             {
               paymentId,
-              userId: user._id,
               bookingId: booking.bookingId,
             },
             { withCredentials: true }

@@ -255,16 +255,16 @@ BookedDate is a denormalized day-level occupancy counter (not linked by FK)
 | POST | `/deleteFromCart` | JWT | `{roomType, checkIn, checkOut}` → remove item |
 | POST | `/bookroom` | JWT | Convert cart → pending Booking docs + BookedDate entries |
 | POST | `/bookings` | JWT | Get user's booking history (confirmed + recent pending) |
-| POST | `/email` | No | `{bookingId}` → send invoice email |
+| POST | `/email` | JWT | `{bookingId}` → send invoice email (requires ownership of booking) |
 
 ### Payment — prefix `/payment`
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/payment/checkout` | No | `{amount}` → create Razorpay order |
-| POST | `/payment/paymentVerification` | No | Verify Razorpay signature → confirm bookings → send invoice → clear cart |
+| POST | `/payment/checkout` | JWT | `{amount}` → create Razorpay order (requires login) |
+| POST | `/payment/paymentVerification` | JWT + ownership | Verify signature → confirm user's bookings → send invoice → clear cart. Fetches booking by `bookingId` or `_id` from DB, verifies `booking.userId === req.user.id` before proceeding. |
 | GET | `/payment/getKey` | No | Return Razorpay public key |
-| POST | `/payment/rollbackBooking` | No | `{userId, bookingId}` → rollback failed booking |
-| POST | `/payment/checkPaymentStatus` | No | `{paymentId, userId, bookingId}` → fetch Razorpay status, confirm/rollback |
+| POST | `/payment/rollbackBooking` | JWT + ownership | `{bookingId}` → rollback failed booking. Accepts group `bookingId` or document `_id`. Fetches booking from DB, verifies `booking.userId === req.user.id`, returns 403 if mismatch. |
+| POST | `/payment/checkPaymentStatus` | JWT + ownership | `{paymentId, bookingId}` → fetch Razorpay status, confirm/rollback. Accepts group `bookingId` or document `_id`. Fetches booking from DB, verifies `booking.userId === req.user.id`, returns 403 if mismatch. |
 
 ---
 
@@ -301,9 +301,11 @@ UserProvider → RoomProvider → GoogleOAuthProvider → CartProvider → DateP
 
 ### Auth pattern
 
-- `verifyToken` middleware reads JWT from `req.cookies.accessToken`
-- If no token is present, middleware calls `next()` (does **not** reject) — controllers must check `req.user?.id` and return 403 themselves
-- Frontend always sends `credentials: "include"` with fetch/axios
+- `requireAuth` middleware enforces strict JWT authentication from `req.cookies.accessToken` and returns 401 if missing or invalid. Attached to all non-public routes by default (cart, booking, availability, email, profile, and payment).
+- `verifyToken` strictly aliases `requireAuth` so that any route importing `verifyToken` defaults to requiring login. No permissive/optional auth pattern is used.
+- Only genuinely public, non-user-specific endpoints are unauthenticated: `GET /status`, `GET /allRooms`, `GET /testimonials`, `POST /auth/google`, and `GET /payment/getKey`.
+- Controllers for payment verification, rollback, status checks, and email invoicing extract `userId` strictly from `req.user.id` (JWT) and perform **explicit DB-level ownership verification**: they fetch the `Booking` document by `bookingId` from the database first, compare `booking.userId.toString()` against `req.user.id`, and return `403 Forbidden` if they do not match — before executing any mutation.
+- Frontend always sends `credentials: "include"` / `withCredentials: true` with fetch/axios.
 
 ### Error handling
 
@@ -359,8 +361,10 @@ UserProvider → RoomProvider → GoogleOAuthProvider → CartProvider → DateP
 |---|---|
 | **Client-side CartContext vs server cart** | `contexts/CartContext.jsx` maintains a separate client-side cart (localStorage) that is largely unused by the actual checkout flow. The `Cart.jsx` component fetches from the server. This dual-cart creates confusion. |
 | **Profile update** | `Profile.jsx` has a `handleSubmit` that PUTs to `/auth/profile`, but the backend has no PUT handler for that route — form inputs are `disabled` anyway. Profile is read-only in practice. |
-| **`verifyToken` is permissive** | If no cookie is present, middleware calls `next()` without setting `req.user`. Some protected routes might not properly guard against unauthenticated access. |
-| **Payment routes are unprotected** | `/payment/checkout`, `/payment/paymentVerification`, `/payment/rollbackBooking`, `/payment/checkPaymentStatus` have no auth middleware. |
+| **`verifyToken` is permissive [RESOLVED]** | Resolved: `requireAuth` strictly rejects unauthenticated requests with 401 on all non-public endpoints. `verifyToken` is now a strict alias for `requireAuth`. |
+| **Payment routes are unprotected [RESOLVED]** | Resolved: All payment routes are protected by `requireAuth` and derive `userId` from `req.user.id`. |
+| **IDOR on bookingId routes [RESOLVED]** | Found via manual penetration testing: User B could call `/payment/rollbackBooking` with User A's `bookingId` and the rollback executed successfully (HTTP 200). Root cause: controllers passed `req.user.id` into queries alongside the attacker-supplied `bookingId`, but never explicitly verified that the booking's DB-stored `userId` matched `req.user.id` before acting. The response also returned `{ success: true }` unconditionally, masking the issue. Fixed: `bookingFailed`, `paymentVerification`, `checkPaymentStatus`, and `sendInvoice` all now fetch the Booking document first, compare `booking.userId.toString() !== req.user.id`, and return 403 Forbidden before any mutation or external Razorpay lookup if ownership doesn't match. |
+| **`bookingId` vs document `_id` lookup mismatch [RESOLVED]** | Discovered during security testing: calling `/payment/rollbackBooking` returned 404 "No pending booking found with this ID" even for the legitimate owner immediately after `/bookroom`. Root cause: `/bookroom` creates documents with an individual document `_id` and a shared group `bookingId`. When clients/testers passed the document's `_id` as `bookingId`, `Booking.find({ bookingId })` failed because it only queried the group field, not `_id`. Fixed: `bookingFailed`, `rollbackBookings`, `paymentVerification`, `checkPaymentStatus`, and `sendInvoice` all now query `{ $or: [{ bookingId }, { _id: bookingId }] }` and normalize to the group `bookingId` so that lookups succeed whether supplied with `_id` or `bookingId`, while maintaining strict ownership verification. |
 | **Room model field mismatch** | The Mongoose `Room` model has `maxGuests` and `id`, but some controller code references `room.maxAdults`, `room.discount`, and `room.roomType` which aren't in the schema. The `normalizeRoom()` utility on the frontend patches this. |
 | **Mixed toast libraries** | Both `react-toastify` and `react-hot-toast` are imported and used in different components. |
 | **No test suite** | `"test": "echo \"Error: no test specified\""` in both packages. |

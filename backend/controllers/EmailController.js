@@ -1,10 +1,15 @@
+import mongoose from "mongoose";
 import Booking from "../models/booking.js";
 import User from "../models/user.js";
 import { transporter } from "../utils/MailClient.js";
 import { InvoiceTemplate } from "../constants/InvoiceTemplate.js";
 
 export const sendInvoiceForBookingId = async (bookingId) => {
-  const bookings = await Booking.find({ bookingId, paymentStatus: "confirmed" });
+  const query = mongoose.Types.ObjectId.isValid(bookingId)
+    ? { $or: [{ bookingId }, { _id: bookingId }], paymentStatus: "confirmed" }
+    : { bookingId, paymentStatus: "confirmed" };
+
+  const bookings = await Booking.find(query);
   if (bookings.length === 0) {
     const error = new Error("No confirmed bookings found for this ID");
     error.code = "BOOKINGS_NOT_CONFIRMED";
@@ -22,8 +27,10 @@ export const sendInvoiceForBookingId = async (bookingId) => {
     throw error;
   }
 
+  const actualGroupBookingId = bookings[0].bookingId;
+
   const invoiceData = {
-    bookingId,
+    bookingId: actualGroupBookingId,
     userEmail: user.email,
     userName: user.userName || "Guest",
     totalAmount: bookings.reduce((sum, booking) => sum + booking.totalAmount, 0),
@@ -60,7 +67,7 @@ export const sendInvoiceForBookingId = async (bookingId) => {
     html: emailContent,
   });
 
-  await Booking.updateMany({ bookingId }, { $set: { emailSent: true } });
+  await Booking.updateMany({ bookingId: actualGroupBookingId }, { $set: { emailSent: true } });
 
   console.log("Invoice sent successfully to:", user.email);
   return { alreadySent: false, email: user.email };
@@ -69,7 +76,27 @@ export const sendInvoiceForBookingId = async (bookingId) => {
 const sendInvoice = async (req, res) => {
   try {
     const { bookingId } = req.body;
-    const result = await sendInvoiceForBookingId(bookingId);
+    const userId = req.user?.id;
+
+    if (!bookingId) {
+      return res.status(400).json({ error: "Booking ID is required" });
+    }
+
+    const query = mongoose.Types.ObjectId.isValid(bookingId)
+      ? { $or: [{ bookingId }, { _id: bookingId }], paymentStatus: "confirmed" }
+      : { bookingId, paymentStatus: "confirmed" };
+
+    const bookings = await Booking.find(query);
+    if (bookings.length === 0) {
+      return res.status(409).json({ error: "Booking is not confirmed yet" });
+    }
+
+    // Verify ownership: user must own this booking
+    if (bookings[0].userId.toString() !== userId) {
+      return res.status(403).json({ error: "You are not authorized to view or send this booking invoice" });
+    }
+
+    const result = await sendInvoiceForBookingId(bookings[0].bookingId);
 
     return res.status(200).json({
       message: result.alreadySent ? "Invoice already sent" : "Invoice sent successfully",

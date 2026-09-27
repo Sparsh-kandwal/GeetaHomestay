@@ -32,5 +32,22 @@
 This is a live production app. Before any change to auth, payment
 routes, or middleware:
 - Flag the change explicitly as security-relevant before applying it.
-- Never weaken `verifyToken` further or remove auth checks without
+- Never weaken `requireAuth` further or remove auth checks without
   explicit confirmation.
+
+### Default auth posture
+
+This project is tightening security. Apply "require login by default"
+across the backend:
+- A route should only be reachable without authentication if it serves
+  genuinely public, non-user-specific data (e.g. room listings,
+  testimonials, a health check endpoint).
+- When adding a new route, or reviewing an existing one, default to
+  `requireAuth`. Only leave a route open if there's a clear, specific
+  reason — and state that reason when you do.
+- Never introduce an "optional auth" pattern (proceeding without
+  `req.user` when no token is present) without explicit confirmation
+  first. If a route seems to need anonymous + logged-in support, stop
+  and ask rather than deciding unilaterally.
+- If unsure whether a route should be public or protected, default to
+  protected and flag it for review rather than leaving it open.
