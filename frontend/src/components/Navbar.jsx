@@ -11,6 +11,7 @@ const Navbar = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const logoutMenuRef = useRef(null);
+  const mobileLogoutMenuRef = useRef(null);
   const location = useLocation();
 
   const navItems = ["Home", "Rooms", "Cart"];
@@ -53,7 +54,9 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (logoutMenuRef.current && !logoutMenuRef.current.contains(event.target)) {
+      const clickedDesktop = logoutMenuRef.current && logoutMenuRef.current.contains(event.target);
+      const clickedMobile = mobileLogoutMenuRef.current && mobileLogoutMenuRef.current.contains(event.target);
+      if (!clickedDesktop && !clickedMobile) {
         setShowLogoutMenu(false);
       }
     };
@@ -156,13 +159,82 @@ const Navbar = () => {
           </Link>
         </div>
 
-        <button
-          className="block rounded-full p-2 text-white lg:hidden"
-          onClick={() => setIsMenuOpen((prev) => !prev)}
-          aria-label="Toggle navigation menu"
-        >
-          {isMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
-        </button>
+        {/* Mobile controls: Login button / Avatar positioned to the LEFT of the hamburger icon */}
+        <div className="flex items-center gap-2 sm:gap-3 lg:hidden">
+          {isLoading ? (
+            <div className="h-7 w-7 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          ) : user ? (
+            <div className="relative" ref={mobileLogoutMenuRef}>
+              <img
+                src={user.photo || `/static/user.png`}
+                alt="User Avatar"
+                className="h-9 w-9 cursor-pointer rounded-full border border-white/40 object-cover shadow"
+                onClick={() => setShowLogoutMenu((prev) => !prev)}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = `/static/user.png`;
+                }}
+              />
+
+              {showLogoutMenu && (
+                <div className="absolute right-0 z-50 mt-3 w-44 rounded-2xl border border-white/20 bg-[#295046] shadow-xl">
+                  <ul className="py-2 text-sm">
+                    <li>
+                      <Link
+                        to="/profile"
+                        className="block w-full px-4 py-2 text-left text-white hover:bg-[#1f5b52]"
+                        onClick={() => {
+                          setShowLogoutMenu(false);
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        Profile
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/booking-history"
+                        className="block w-full px-4 py-2 text-left text-white hover:bg-[#1f5b52]"
+                        onClick={() => {
+                          setShowLogoutMenu(false);
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        Your Bookings
+                      </Link>
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => {
+                          setShowLogoutMenu(false);
+                          setShowConfirmModal(true);
+                        }}
+                        className="block w-full px-4 py-2 text-left text-orange-300 hover:bg-[#1f5b52]"
+                      >
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={googleLogin}
+              className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-[#1f5b52] shadow-sm transition-all duration-300 hover:bg-[#f0f0f0] active:scale-95"
+            >
+              Login
+            </button>
+          )}
+
+          <button
+            className="block rounded-full p-2 text-white lg:hidden"
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            aria-label="Toggle navigation menu"
+          >
+            {isMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
+          </button>
+        </div>
 
         <nav
           className={`fixed right-0 top-0 h-screen w-[30%] bg-[#1f5b52] shadow-2xl transition-transform duration-300 lg:static lg:flex lg:h-auto lg:w-auto lg:max-w-none lg:items-center lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none ${

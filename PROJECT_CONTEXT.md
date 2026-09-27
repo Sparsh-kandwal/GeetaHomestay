@@ -123,7 +123,7 @@ GeetaHomestay/
 | **Google OAuth login** | `Navbar.jsx`, `RoomDetails.jsx` (inline login), `auth/api.jsx`, `auth/Userprovider.jsx` | `controllers/authController.js`, `routes/authrouter.js`, `middleware/auth.js` |
 | **Room listing** | `pages/Rooms.jsx`, `components/ExploreRooms.jsx`, `components/RoomCard.jsx`, `components/SearchFilter.jsx`, `components/SearchBar.jsx`, `components/StatusRibbon.jsx` | `controllers/roomData.js` (GET `/allRooms`) |
 | **Room detail + gallery** | `pages/RoomDetails.jsx`, `components/BookingFlowIndicator.jsx` | — (room data already fetched) |
-| **Date-aware availability** | `pages/RoomDetails.jsx` (checks before add-to-cart), `components/ExploreRooms.jsx`, `components/SearchBar.jsx`, `components/StatusRibbon.jsx` (auto-checks when logged in + dates set; shows StatusRibbon warning if not) | `controllers/availabilityController.js`, `utils/roomAvailability.js` |
+| **Date-aware availability** | `pages/RoomDetails.jsx` & `components/ExploreRooms.jsx` (auto-checks via `/checkAvailability` when logged in + dates set; displays shared `components/StatusRibbon.jsx` warning banner when unmet), `components/SearchBar.jsx` | `controllers/availabilityController.js`, `utils/roomAvailability.js` |
 | **Server-side cart** | `components/Cart.jsx`, `components/Cartitem.jsx` | `controllers/cartController.js`, `models/cart.js` |
 | **Booking creation** | `components/Cart.jsx` → calls `/bookroom` | `controllers/book.js`, `models/booking.js`, `models/bookedDates.js` |
 | **Razorpay payment** | `utils/Payment.jsx` (checkouthandler), `components/Cart.jsx`, `pages/BookingHistory.jsx` | `controllers/paymentController.js`, `models/paymentmodel.js` |

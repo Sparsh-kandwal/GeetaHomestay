@@ -1,5 +1,6 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import {
   FaChevronLeft,
   FaHeart,
@@ -21,6 +22,7 @@ import { RoomContext, UserContext } from "../auth/Userprovider";
 import { useGoogleLogin } from "@react-oauth/google";
 import { googleAuth } from "../auth/api";
 import BookingFlowIndicator from "../components/BookingFlowIndicator";
+import StatusRibbon from "../components/StatusRibbon";
 import {
   buildRoomCardImageUrl,
   findRoomByIdentifier,
@@ -42,6 +44,7 @@ const RoomDetails = () => {
   const [guests, setGuests] = useState(1);
   const [roomCount, setRoomCount] = useState(1);
   const [galleryFallbacks, setGalleryFallbacks] = useState({});
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [roomDetails, setRoomDetails] = useState({
     roomType: null,
     roomName: null,
@@ -54,6 +57,61 @@ const RoomDetails = () => {
     totalRooms: 0,
     availableRooms: null,
   });
+
+  const isLoggedIn = Boolean(user && user._id);
+  const hasDates = Boolean(checkInDate && checkOutDate);
+  const isFullySatisfied = isLoggedIn && hasDates;
+
+  let statusMessage = "";
+  if (!isLoggedIn && !hasDates) {
+    statusMessage = "Please log in and select your check-in and check-out dates to see room availability.";
+  } else if (!isLoggedIn && hasDates) {
+    statusMessage = "Please log in to see room availability.";
+  } else if (isLoggedIn && !hasDates) {
+    statusMessage = "Please select your check-in and check-out dates to see room availability.";
+  }
+
+  const fetchAvailability = useCallback(async (inDate, outDate) => {
+    if (!inDate || !outDate || !roomDetails.roomType) return;
+    setAvailabilityLoading(true);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/checkAvailability`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          checkIn: inDate,
+          checkOut: outDate,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.availability && data.availability[roomDetails.roomType]) {
+        const roomAvail = data.availability[roomDetails.roomType];
+        setRoomDetails((prev) => ({
+          ...prev,
+          availableRooms: roomAvail.availableRooms,
+          price: roomAvail.price ?? prev.price,
+        }));
+      }
+    } catch (error) {
+      console.error("Error checking room availability:", error);
+    } finally {
+      setAvailabilityLoading(false);
+    }
+  }, [roomDetails.roomType]);
+
+  // Auto-availability check: fires the moment BOTH conditions are satisfied
+  // Also re-triggers if checkInDate or checkOutDate changes afterward
+  useEffect(() => {
+    if (isLoggedIn && hasDates && roomDetails.roomType) {
+      fetchAvailability(checkInDate, checkOutDate);
+    }
+  }, [isLoggedIn, hasDates, checkInDate, checkOutDate, fetchAvailability, roomDetails.roomType]);
 
   const responseGoogle = async (authResult) => {
     try {
@@ -361,11 +419,13 @@ const RoomDetails = () => {
     loop: galleryImages.length > 1,
   };
   const availabilityCopy =
-    roomDetails.availableRooms === null || roomDetails.availableRooms === undefined
-      ? `${roomDetails.totalRooms} rooms`
-      : roomDetails.availableRooms > 0
-        ? `${roomDetails.availableRooms} available`
-        : "Unavailable";
+    availabilityLoading
+      ? "Checking availability..."
+      : roomDetails.availableRooms === null || roomDetails.availableRooms === undefined
+        ? `${roomDetails.totalRooms} rooms`
+        : roomDetails.availableRooms > 0
+          ? `${roomDetails.availableRooms} available`
+          : "Unavailable";
 
   const nightCount =
     checkInDate && checkOutDate
@@ -538,6 +598,15 @@ const RoomDetails = () => {
       {/* Container for full page alignment — extended width for widescreen desktop */}
       <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 xl:px-12">
         
+        {/* ── Status Ribbon (Login / Dates required warning) ── */}
+        <AnimatePresence>
+          {!isFullySatisfied && statusMessage && (
+            <div className="mb-6">
+              <StatusRibbon message={statusMessage} />
+            </div>
+          )}
+        </AnimatePresence>
+
         {/* ── 1. Room Identity Header (below navbar) ── */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
