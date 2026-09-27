@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Compass, ShieldCheck } from "lucide-react";
+import { Compass, ShieldCheck, SlidersHorizontal, X } from "lucide-react";
 import RoomCard from "./RoomCard";
 import SearchFilter from "./SearchFilter";
 import SearchBar from "./SearchBar";
@@ -115,6 +115,13 @@ const ExploreRooms = () => {
     (maxPriceInput < 4000 ? 1 : 0) +
     (searchTermInput ? 1 : 0);
 
+  const handleResetFilters = () => {
+    setSearchTermInput("");
+    setSelectedAmenitiesInput([]);
+    setMaxPriceInput(4000);
+    setGuestCountInput("");
+  };
+
   return (
     <div className="min-h-screen w-full px-4 pb-16 pt-6 sm:px-6 sm:pt-10 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -150,29 +157,46 @@ const ExploreRooms = () => {
         </div>
 
         {/* Refinement Controls & Live Availability Bar */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#e8dfd3] pb-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <h2 className="font-merriweather text-lg sm:text-xl font-semibold text-[#17322e]">
+        <div className="mb-8 flex items-center justify-between gap-3 border-b border-[#e8dfd3] pb-4">
+          <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+            <h2 className="font-merriweather text-lg sm:text-xl font-semibold text-[#17322e] truncate">
               {roomsLoading
                 ? "Checking available rooms..."
                 : `${filteredRooms.length} ${filteredRooms.length === 1 ? "Room" : "Rooms"} Available`}
             </h2>
             {!availableRooms.first && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef5f2] px-3 py-1 text-xs font-medium text-[#1f5b52]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef5f2] px-2.5 py-0.5 sm:px-3 sm:py-1 text-xs font-medium text-[#1f5b52]">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Live dates applied
+                <span className="hidden sm:inline">Live dates applied</span>
+                <span className="sm:hidden">Live dates</span>
               </span>
             )}
           </div>
 
           <button
+            type="button"
             onClick={() => setShowFilters((prev) => !prev)}
-            className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full border border-[#dcd3c5] bg-white px-5 py-2 text-xs font-semibold uppercase tracking-wider text-[#17322e] transition hover:border-[#17322e] hover:bg-[#faf6f0]"
+            aria-expanded={showFilters}
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 sm:px-5 sm:py-2 text-xs font-semibold uppercase tracking-wider transition active:scale-95 ${
+              showFilters
+                ? "border-[#1f5b52] bg-[#1f5b52] text-white shadow-sm hover:bg-[#17322e]"
+                : "border-[#dcd3c5] bg-white text-[#17322e] hover:border-[#17322e] hover:bg-[#faf6f0]"
+            }`}
           >
-            <Compass className="h-3.5 w-3.5 text-[#8b4e31]" />
+            {showFilters ? (
+              <X className="h-3.5 w-3.5" />
+            ) : (
+              <SlidersHorizontal className="h-3.5 w-3.5 text-[#8b4e31]" />
+            )}
             <span>{showFilters ? "Hide Filters" : "Filter Rooms"}</span>
             {activeFilterCount > 0 && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#8b4e31] text-[10px] text-white">
+              <span
+                className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                  showFilters
+                    ? "bg-[#faf7f2] text-[#1f5b52]"
+                    : "bg-[#8b4e31] text-white"
+                }`}
+              >
                 {activeFilterCount}
               </span>
             )}
@@ -180,22 +204,34 @@ const ExploreRooms = () => {
         </div>
 
         {/* Collapsible Filter Console */}
-        {showFilters && (
-          <div className="mb-10 rounded-[28px] border border-[#e8ded1] bg-white p-6 shadow-[0_12px_32px_rgba(23,50,46,0.05)]">
-            <SearchFilter
-              bedOptions={bedOptions}
-              searchTermInput={searchTermInput}
-              selectedAmenitiesInput={selectedAmenitiesInput}
-              maxPriceInput={maxPriceInput}
-              guestCountInput={guestCountInput}
-              amenitiesOptions={amenitiesOptions}
-              setSearchTermInput={setSearchTermInput}
-              setSelectedAmenitiesInput={setSelectedAmenitiesInput}
-              setMaxPriceInput={setMaxPriceInput}
-              setGuestCountInput={setGuestCountInput}
-            />
-          </div>
-        )}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, y: -10 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -10 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="mb-10 overflow-hidden"
+            >
+              <SearchFilter
+                bedOptions={bedOptions}
+                searchTermInput={searchTermInput}
+                selectedAmenitiesInput={selectedAmenitiesInput}
+                maxPriceInput={maxPriceInput}
+                guestCountInput={guestCountInput}
+                amenitiesOptions={amenitiesOptions}
+                setSearchTermInput={setSearchTermInput}
+                setSelectedAmenitiesInput={setSelectedAmenitiesInput}
+                setMaxPriceInput={setMaxPriceInput}
+                setGuestCountInput={setGuestCountInput}
+                onReset={handleResetFilters}
+                onClose={() => setShowFilters(false)}
+                activeFilterCount={activeFilterCount}
+                totalResults={filteredRooms.length}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Responsive Grid: 1 col mobile, 2 col tablet, 3 col desktop */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 lg:gap-8 items-stretch">
