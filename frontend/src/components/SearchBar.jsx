@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { CalendarRange, Search, Sparkles } from "lucide-react";
 import { useDateContext } from "../contexts/DateContext";
 
-const SearchBar = ({ setAvailableRooms }) => {
+const SearchBar = ({ setAvailableRooms, isSearching: externalIsSearching, onSearch, externalError }) => {
   const {
     checkInDate,
     setCheckInDate,
@@ -12,7 +12,10 @@ const SearchBar = ({ setAvailableRooms }) => {
 
   const [minCheckOutDate, setMinCheckOutDate] = useState("");
   const [error, setError] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
+  const [isSearchingInternal, setIsSearchingInternal] = useState(false);
+
+  const isSearching = externalIsSearching !== undefined ? externalIsSearching : isSearchingInternal;
+  const displayError = externalError || error;
 
   useEffect(() => {
     if (!checkInDate) {
@@ -37,7 +40,13 @@ const SearchBar = ({ setAvailableRooms }) => {
     }
 
     setError("");
-    setIsSearching(true);
+
+    if (onSearch) {
+      onSearch();
+      return;
+    }
+
+    setIsSearchingInternal(true);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/checkAvailability`, {
@@ -63,7 +72,7 @@ const SearchBar = ({ setAvailableRooms }) => {
       console.error("Error fetching availability:", searchError);
       setError("There was a connection issue while checking room availability.");
     } finally {
-      setIsSearching(false);
+      setIsSearchingInternal(false);
     }
   };
 
@@ -127,9 +136,9 @@ const SearchBar = ({ setAvailableRooms }) => {
         </div>
       </div>
 
-      {error && (
+      {displayError && (
         <div className="mt-3 rounded-2xl border border-[#efc9be] bg-[#fff1ea] px-4 py-3 text-sm text-[#8b4e31]">
-          {error}
+          {displayError}
         </div>
       )}
     </div>

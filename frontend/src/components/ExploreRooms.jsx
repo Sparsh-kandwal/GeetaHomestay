@@ -1,10 +1,12 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Compass, ShieldCheck, SlidersHorizontal, X } from "lucide-react";
 import RoomCard from "./RoomCard";
 import SearchFilter from "./SearchFilter";
 import SearchBar from "./SearchBar";
-import { RoomContext } from "../auth/Userprovider";
+import StatusRibbon from "./StatusRibbon";
+import { RoomContext, UserContext } from "../auth/Userprovider";
+import { useDateContext } from "../contexts/DateContext";
 import SkeletonRoom from "./SkeletonRoom";
 import BookingFlowIndicator from "./BookingFlowIndicator";
 import { normalizeRooms } from "../utils/roomData";
@@ -16,11 +18,69 @@ const ExploreRooms = () => {
   const [guestCountInput, setGuestCountInput] = useState("");
   const [availableRooms, setAvailableRooms] = useState({ first: true });
   const [filteredRooms, setFilteredRooms] = useState([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState("");
 
   const amenitiesOptions = ["AC", "Non-AC", "Balcony", "Coffee-Kettle"];
   const bedOptions = ["2 Bed", "3 Bed", "4 Bed"];
 
   const { fetchRooms, roomsLoading, rooms } = useContext(RoomContext);
+  const { user } = useContext(UserContext);
+  const { checkInDate, checkOutDate } = useDateContext();
+
+  const isLoggedIn = Boolean(user && user._id);
+  const hasDates = Boolean(checkInDate && checkOutDate);
+  const isFullySatisfied = isLoggedIn && hasDates;
+
+  let statusMessage = "";
+  if (!isLoggedIn && !hasDates) {
+    statusMessage = "Please log in and select your check-in and check-out dates to see room availability.";
+  } else if (!isLoggedIn && hasDates) {
+    statusMessage = "Please log in to see room availability.";
+  } else if (isLoggedIn && !hasDates) {
+    statusMessage = "Please select your check-in and check-out dates to see room availability.";
+  }
+
+  const fetchAvailability = useCallback(async (inDate, outDate) => {
+    if (!inDate || !outDate) return;
+    setAvailabilityLoading(true);
+    setAvailabilityError("");
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/checkAvailability`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          checkIn: inDate,
+          checkOut: outDate,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.availability) {
+        setAvailableRooms(data.availability);
+      } else {
+        setAvailabilityError("We couldn’t fetch room availability right now. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error fetching room availability:", error);
+      setAvailabilityError("There was a connection issue while checking room availability.");
+    } finally {
+      setAvailabilityLoading(false);
+    }
+  }, []);
+
+  // Auto-availability check: fires the moment BOTH conditions are satisfied
+  // Also re-triggers if checkInDate or checkOutDate changes afterward
+  useEffect(() => {
+    if (isLoggedIn && hasDates) {
+      fetchAvailability(checkInDate, checkOutDate);
+    }
+  }, [isLoggedIn, hasDates, checkInDate, checkOutDate, fetchAvailability]);
 
   useEffect(() => {
     if (!rooms?.length) {
@@ -151,16 +211,30 @@ const ExploreRooms = () => {
           </div>
         </header>
 
+        {/* Status Ribbon (Login / Dates required warning) */}
+        <AnimatePresence>
+          {!isFullySatisfied && statusMessage && (
+            <div className="mb-6">
+              <StatusRibbon message={statusMessage} />
+            </div>
+          )}
+        </AnimatePresence>
+
         {/* Date Search Bar */}
         <div className="mb-8">
-          <SearchBar setAvailableRooms={setAvailableRooms} />
+          <SearchBar
+            setAvailableRooms={setAvailableRooms}
+            isSearching={availabilityLoading}
+            onSearch={() => fetchAvailability(checkInDate, checkOutDate)}
+            externalError={availabilityError}
+          />
         </div>
 
         {/* Refinement Controls & Live Availability Bar */}
         <div className="mb-8 flex items-center justify-between gap-3 border-b border-[#e8dfd3] pb-4">
           <div className="flex flex-wrap items-center gap-2.5 min-w-0">
             <h2 className="font-merriweather text-lg sm:text-xl font-semibold text-[#17322e] truncate">
-              {roomsLoading
+              {roomsLoading || availabilityLoading
                 ? "Checking available rooms..."
                 : `${filteredRooms.length} ${filteredRooms.length === 1 ? "Room" : "Rooms"} Available`}
             </h2>
@@ -236,12 +310,12 @@ const ExploreRooms = () => {
         {/* Responsive Grid: 1 col mobile, 2 col tablet, 3 col desktop */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 lg:gap-8 items-stretch">
           <AnimatePresence>
-            {roomsLoading ? (
+            {roomsLoading || availabilityLoading ? (
               Array(3)
                 .fill(0)
                 .map((_, index) => (
                   <motion.div
-                    key={index}
+                    key={`skeleton-${index}`}
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -15 }}
@@ -276,10 +350,20 @@ const ExploreRooms = () => {
                   <Compass className="h-6 w-6 text-[#8b4e31]" />
                 </div>
                 <h3 className="mt-4 font-merriweather text-xl font-semibold text-[#17322e]">
-                  No matching rooms found
+                  {availabilityError
+                    ? "Unable to check availability"
+                    : !availableRooms.first &&
+                      Object.values(availableRooms).every((a) => a?.availableRooms === 0)
+                    ? "No rooms available for these dates"
+                    : "No matching rooms found"}
                 </h3>
                 <p className="mt-2 text-sm text-[#6f746d]">
-                  Please try adjusting your dates, budget, or amenity preferences.
+                  {availabilityError
+                    ? availabilityError
+                    : !availableRooms.first &&
+                      Object.values(availableRooms).every((a) => a?.availableRooms === 0)
+                    ? "All our suites are currently reserved for your selected dates. Please try selecting different dates."
+                    : "Please try adjusting your dates, budget, or amenity preferences."}
                 </p>
               </motion.div>
             )}

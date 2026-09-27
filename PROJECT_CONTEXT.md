@@ -71,7 +71,7 @@ GeetaHomestay/
 │   │   │   ├── BookingConfirmation.jsx  # Post-payment success page
 │   │   │   ├── BookingHistory.jsx       # Lists all user bookings, retry pending payments
 │   │   │   └── Profile.jsx             # User profile (read-only currently)
-│   │   ├── components/           # 20 reusable UI components (see §4 for key ones)
+│   │   ├── components/           # Reusable UI components including StatusRibbon.jsx (see §4)
 │   │   ├── constants/
 │   │   │   └── PopularSites.jsx  # Array of nearby tourist attractions (Cloudinary images)
 │   │   └── utils/
@@ -121,9 +121,9 @@ GeetaHomestay/
 | Feature | Frontend files | Backend files |
 |---|---|---|
 | **Google OAuth login** | `Navbar.jsx`, `RoomDetails.jsx` (inline login), `auth/api.jsx`, `auth/Userprovider.jsx` | `controllers/authController.js`, `routes/authrouter.js`, `middleware/auth.js` |
-| **Room listing** | `pages/Rooms.jsx`, `components/ExploreRooms.jsx`, `components/RoomCard.jsx`, `components/SearchFilter.jsx`, `components/SearchBar.jsx` | `controllers/roomData.js` (GET `/allRooms`) |
+| **Room listing** | `pages/Rooms.jsx`, `components/ExploreRooms.jsx`, `components/RoomCard.jsx`, `components/SearchFilter.jsx`, `components/SearchBar.jsx`, `components/StatusRibbon.jsx` | `controllers/roomData.js` (GET `/allRooms`) |
 | **Room detail + gallery** | `pages/RoomDetails.jsx`, `components/BookingFlowIndicator.jsx` | — (room data already fetched) |
-| **Date-aware availability** | `pages/RoomDetails.jsx` (checks before add-to-cart) | `controllers/availabilityController.js`, `utils/roomAvailability.js` |
+| **Date-aware availability** | `pages/RoomDetails.jsx` (checks before add-to-cart), `components/ExploreRooms.jsx`, `components/SearchBar.jsx`, `components/StatusRibbon.jsx` (auto-checks when logged in + dates set; shows StatusRibbon warning if not) | `controllers/availabilityController.js`, `utils/roomAvailability.js` |
 | **Server-side cart** | `components/Cart.jsx`, `components/Cartitem.jsx` | `controllers/cartController.js`, `models/cart.js` |
 | **Booking creation** | `components/Cart.jsx` → calls `/bookroom` | `controllers/book.js`, `models/booking.js`, `models/bookedDates.js` |
 | **Razorpay payment** | `utils/Payment.jsx` (checkouthandler), `components/Cart.jsx`, `pages/BookingHistory.jsx` | `controllers/paymentController.js`, `models/paymentmodel.js` |
@@ -318,7 +318,7 @@ UserProvider → RoomProvider → GoogleOAuthProvider → CartProvider → DateP
 - Rounded card design system: `rounded-[24px]` / `rounded-[28px]` / `rounded-[32px]` with soft shadow patterns
 - Color palette: dark teal (`#17322e`, `#1f5b52`, `#295046`) + warm brown/terracotta (`#8b4e31`, `#f1c8af`) + cream/beige (`#f7efe3`, `#fffdf9`, `#faf7f2`)
 - Hero styling: Fullscreen viewport height (`h-screen min-h-[660px]`), natural unshadowed morning town photography (`/static/mount1.jpg`), clear screen boundary at the bottom, and transparent text layering with high-contrast text drop shadows rather than solid card backdrops
-- Room listing styling: Boutique responsive grid (1 col mobile, 2 col tablet `md:`, 3 col desktop `lg:`), large focal imagery, prominent name and honest price focus, understated bullet-separated text amenities (no fake crossed-out discounts or badge clutter). Unified collapsible filter console (`ExploreRooms.jsx` & `SearchFilter.jsx`) with a single source of truth toggle ("Filter Rooms" / "Hide Filters"), responsive 12-column layout on desktop, smooth Framer Motion accordion animations, direct state-synced pill filters, and dedicated mobile bottom actions ("Reset All" and "Show X Rooms" / "Close").
+- Room listing styling: Boutique responsive grid (1 col mobile, 2 col tablet `md:`, 3 col desktop `lg:`), large focal imagery, prominent name and honest price focus, understated bullet-separated text amenities (no fake crossed-out discounts or badge clutter). Unified collapsible filter console (`ExploreRooms.jsx` & `SearchFilter.jsx`) with a single source of truth toggle ("Filter Rooms" / "Hide Filters"), responsive 12-column layout on desktop, smooth Framer Motion accordion animations, direct state-synced pill filters, and dedicated mobile bottom actions ("Reset All" and "Show X Rooms" / "Close"). Prominent warning ribbon (`StatusRibbon.jsx`) with high-contrast red background (`#dc2626`), white text, and alert icon for immediate visibility when dates or login are required.
 - Room details styling: Clean boutique editorial structure — Room identity header (name + honest price) positioned right below navbar → "Reserve your stay" card placed below room name and above room photo on mobile & tablet (`lg:hidden`), while on desktop (`lg:`) it resides in a 2-column layout as a sticky card alongside room story, specs, and amenity list → expanded container max-width (`max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-12`) for an expansive desktop view with comfortable side margins. Honest pricing calculation (price × nights × rooms) without inflated strikethroughs or sales-y badges.
 - Booking confirmation styling: Warm and personal thank-you note from Geeta Homestay — single clean summary card displaying booking reference ID, total amount paid, room list with formatted date ranges, and an automatic invoice delivery notice. Minimalist design with no stock success graphics, heavy gradients, or filler cards.
 - Booking history & card styling: Redesigned to match RoomCard's visual identity — rounded cards (`rounded-[28px] border border-[#ede3d5] bg-white shadow-sm`), `font-merriweather` room titles, and understated palette status badges (`#1f5b52` Confirmed, `#8b4e31` Pending, `#6f746d` Cancelled). Responsive 2-column card grid with intact Razorpay retry-payment functionality.
