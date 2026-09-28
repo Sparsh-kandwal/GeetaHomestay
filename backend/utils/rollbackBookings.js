@@ -4,7 +4,7 @@ import Booking from "../models/booking.js";
 
 /**
  * Rolls back bookings by:
- * 1. Removing booked dates atomically with $inc: -roomsBooked.
+ * 1. Removing booked dates.
  * 2. Changing matching pending bookings to cancelled.
  * @param {String} userId
  * @param {Object} options
@@ -48,16 +48,17 @@ export const rollbackBookings = async (userId, options = {}) => {
         date.setDate(date.getDate() + 1)
       ) {
         const formattedDate = date.toISOString().split("T")[0];
-        const dateObj = new Date(formattedDate + "T00:00:00.000Z");
+        const existingDate = await BookedDate.findOne({ date: formattedDate, roomType });
 
-        // Atomic decrement using exact UTC midnight Date matching
-        await BookedDate.findOneAndUpdate(
-          { date: dateObj, roomType },
-          { $inc: { quantity: -roomsBooked } }
-        );
+        if (existingDate) {
+          existingDate.quantity -= roomsBooked;
 
-        // Clean up documents that have dropped to zero or below
-        await BookedDate.deleteOne({ date: dateObj, roomType, quantity: { $lte: 0 } });
+          if (existingDate.quantity <= 0) {
+            await BookedDate.deleteOne({ _id: existingDate._id });
+          } else {
+            await existingDate.save();
+          }
+        }
       }
     }
 

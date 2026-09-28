@@ -115,7 +115,7 @@ const Cart = () => {
         }
 
         await checkouthandler(
-          bookingId,
+          payableAmount,
           user,
           async (paymentId) => {
             await axios.post(

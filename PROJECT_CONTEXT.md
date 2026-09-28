@@ -191,31 +191,25 @@ GeetaHomestay/
 ### BookedDate (`models/bookedDates.js`)
 | Field | Type | Notes |
 |---|---|---|
-| `date` | Date | Single calendar day (UTC midnight BSON Date) |
+| `date` | Date | Single calendar day |
 | `roomType` | String | — |
-| `quantity` | Number | Rooms booked on that date (min: 0) |
-| *Indexes* | Compound Unique | `{ date: 1, roomType: 1 }` prevents duplicate records from concurrent creations |
+| `quantity` | Number | Rooms booked on that date |
 
 > **Purpose**: Tracks per-day room occupancy. The availability engine
 > (`utils/roomAvailability.js`) uses this to calculate remaining rooms.
-> Booking creation (`book.js`) atomically increments quantity conditional on
-> remaining room capacity (`$lte: totalRooms - quantity`).
 
 ### Payment (`models/paymentmodel.js`)
 | Field | Type | Notes |
 |---|---|---|
-| `razorpay_order_id` | String | Unique index; links to Razorpay order |
-| `razorpay_payment_id` | String | Unique index (partial filter for strings); set upon verification |
-| `razorpay_signature` | String | Stored on verification attempt |
-| `user` | ObjectId → User | Indexed |
-| `bookingId` | ObjectId → Booking | Indexed; links order to checkout group |
-| `expectedAmount` | Number | Server-computed total in rupees required to confirm |
-| `amount` | Number | Amount in rupees received from Razorpay (paise / 100) |
+| `razorpay_order_id` | String | — |
+| `razorpay_payment_id` | String | — |
+| `razorpay_signature` | String | — |
+| `user` | ObjectId → User | — |
+| `amount` | Number | In rupees (divided by 100 from paise) |
 | `currency` | String | Default `INR` |
-| `status` | Enum | `created` / `processing` / `success` / `failed` / `refunded` / `needs_review` |
+| `status` | Enum | `created` / `success` / `failed` / `refunded` |
 | `payment_method` | String | — |
-| `receipt` | String | Server-generated receipt string |
-| `failureReason` | String | Diagnostic text if payment verification or mismatch fails |
+| `receipt` | String | — |
 | `createdAt` | Date | — |
 
 ### Testimonial (`models/Testimonials.js`)
@@ -266,11 +260,11 @@ BookedDate is a denormalized day-level occupancy counter (not linked by FK)
 ### Payment — prefix `/payment`
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/payment/checkout` | JWT + ownership | `{bookingId}` → validates pending bookings, computes amount server-side from DB, creates Razorpay order with notes (`userId`, `bookingId`), persists Payment record in `created` status, returns `{order, expectedAmount}` |
-| POST | `/payment/paymentVerification` | JWT + ownership | `{razorpay_order_id, razorpay_payment_id, razorpay_signature}` → verifies HMAC signature, atomically claims Payment record (`created` → `processing`), verifies payment details against Razorpay API (matching order_id, currency INR, status captured, exact amount in paise), atomically confirms pending bookings (`modifiedCount > 0`), marks Payment `success`, sends invoice, clears cart. If bookings no longer pending, marks `needs_review` without confirming. |
+| POST | `/payment/checkout` | JWT | `{amount}` → create Razorpay order (requires login) |
+| POST | `/payment/paymentVerification` | JWT + ownership | Verify signature → confirm user's bookings → send invoice → clear cart. Fetches booking by `bookingId` or `_id` from DB, verifies `booking.userId === req.user.id` before proceeding. |
 | GET | `/payment/getKey` | No | Return Razorpay public key |
 | POST | `/payment/rollbackBooking` | JWT + ownership | `{bookingId}` → rollback failed booking. Accepts group `bookingId` or document `_id`. Fetches booking from DB, verifies `booking.userId === req.user.id`, returns 403 if mismatch. |
-| POST | `/payment/checkPaymentStatus` | JWT + ownership | `{paymentId, bookingId}` → checks ownership before Razorpay API call, verifies Razorpay payment belongs to stored order and expectedAmount matches, confirms via shared confirmation logic or rolls back if failed. |
+| POST | `/payment/checkPaymentStatus` | JWT + ownership | `{paymentId, bookingId}` → fetch Razorpay status, confirm/rollback. Accepts group `bookingId` or document `_id`. Fetches booking from DB, verifies `booking.userId === req.user.id`, returns 403 if mismatch. |
 
 ---
 
@@ -340,11 +334,11 @@ UserProvider → RoomProvider → GoogleOAuthProvider → CartProvider → DateP
 2. Select room (/rooms/:id) — pick dates, guests, room count
 3. Add to cart → server-side cart
 4. Review cart (/cart) — adjust quantities
-5. Proceed to pay → POST /bookroom (creates pending bookings with server-computed prices)
-                   → POST /payment/checkout (passes bookingId, server computes total, creates Razorpay order with notes, persists Payment record in "created" status)
-                   → Razorpay SDK modal opens with server-returned order.amount
-                   → POST /payment/paymentVerification (signature check + atomic claim "created" -> "processing" + Razorpay API amount & order validation)
-                   → Bookings confirmed, Payment marked "success", cart cleared, invoice emailed
+5. Proceed to pay → POST /bookroom (creates pending bookings)
+                   → POST /payment/checkout (Razorpay order)
+                   → Razorpay SDK modal opens
+                   → POST /payment/paymentVerification (signature check)
+                   → Bookings confirmed, cart cleared, invoice emailed
 6. Confirmation page (/booking-confirmation)
 ```
 
@@ -365,17 +359,13 @@ UserProvider → RoomProvider → GoogleOAuthProvider → CartProvider → DateP
 
 | Area | Issue |
 |---|---|
-| **Client-side CartContext vs server cart [RESOLVED]** | Resolved: Removed dead `contexts/CartContext.jsx` and its unused `<CartProvider>` wrapper from `App.jsx`. The application exclusively uses the server-backed cart (`/getCart`, `/addToCart`, `/updateCart`, `/deleteFromCart`), eliminating dual-cart confusion and duplicate toast containers. Dead orphan components `OpacityLoader.jsx` and `ScrollPrompt.jsx` were also deleted. |
+| **Client-side CartContext vs server cart** | `contexts/CartContext.jsx` maintains a separate client-side cart (localStorage) that is largely unused by the actual checkout flow. The `Cart.jsx` component fetches from the server. This dual-cart creates confusion. |
 | **Profile update** | `Profile.jsx` has a `handleSubmit` that PUTs to `/auth/profile`, but the backend has no PUT handler for that route — form inputs are `disabled` anyway. Profile is read-only in practice. |
 | **`verifyToken` is permissive [RESOLVED]** | Resolved: `requireAuth` strictly rejects unauthenticated requests with 401 on all non-public endpoints. `verifyToken` is now a strict alias for `requireAuth`. |
 | **Payment routes are unprotected [RESOLVED]** | Resolved: All payment routes are protected by `requireAuth` and derive `userId` from `req.user.id`. |
 | **IDOR on bookingId routes [RESOLVED]** | Found via manual penetration testing: User B could call `/payment/rollbackBooking` with User A's `bookingId` and the rollback executed successfully (HTTP 200). Root cause: controllers passed `req.user.id` into queries alongside the attacker-supplied `bookingId`, but never explicitly verified that the booking's DB-stored `userId` matched `req.user.id` before acting. The response also returned `{ success: true }` unconditionally, masking the issue. Fixed: `bookingFailed`, `paymentVerification`, `checkPaymentStatus`, and `sendInvoice` all now fetch the Booking document first, compare `booking.userId.toString() !== req.user.id`, and return 403 Forbidden before any mutation or external Razorpay lookup if ownership doesn't match. |
 | **`bookingId` vs document `_id` lookup mismatch [RESOLVED]** | Discovered during security testing: calling `/payment/rollbackBooking` returned 404 "No pending booking found with this ID" even for the legitimate owner immediately after `/bookroom`. Root cause: `/bookroom` creates documents with an individual document `_id` and a shared group `bookingId`. When clients/testers passed the document's `_id` as `bookingId`, `Booking.find({ bookingId })` failed because it only queried the group field, not `_id`. Fixed: `bookingFailed`, `rollbackBookings`, `paymentVerification`, `checkPaymentStatus`, and `sendInvoice` all now query `{ $or: [{ bookingId }, { _id: bookingId }] }` and normalize to the group `bookingId` so that lookups succeed whether supplied with `_id` or `bookingId`, while maintaining strict ownership verification. |
-| **Payment amount & order integrity [RESOLVED]** | Resolved vulnerabilities: (a) `/payment/checkout` now ignores client amount and computes `expectedAmount` strictly server-side from DB room prices, nights, and discounts; (b) links Razorpay order to user and booking via `notes` and persists initial `Payment` record in `created` status; (c) `/payment/paymentVerification` atomically claims payment (`created` → `processing`), verifies Razorpay payment details (`order_id`, `status: captured`, `currency: INR`, exact paise match) and confirms bookings conditionally (`modifiedCount > 0`), marking `needs_review` if bookings expired; (d) `/payment/checkPaymentStatus` verifies payment belongs to the order created for that booking and matches `expectedAmount`. |
-| **Room model field mismatch & guest cap [RESOLVED]** | Resolved: `models/room.js` schema updated to declare `roomType`, `maxAdults`, `discount`, and `totalRooms` with `strict: false`. Capacity checks fail closed (rejects if `maxAdults` undefined or invalid, or if guests exceed capacity). Date handling anchored to `Asia/Kolkata` with positive integer validations. |
-| **Inventory race condition & overbooking prevention [RESOLVED]** | Resolved: In `book.js`, eliminated the vulnerable check-then-reserve two-step. Implemented a 2-phase all-or-nothing reservation pipeline: (1) Pure pre-validation of all cart items; (2) Atomic reservation per night using `BookedDate.findOneAndUpdate` with conditional ceiling `{ quantity: { $lte: totalRooms - quantity } }` and `$inc: { quantity }` alongside compound unique index `{ date: 1, roomType: 1 }`. If any night of any room is full, all nights reserved during that request are rolled back atomically via compensation decrements and zero-count cleanup before returning HTTP 400. Booking records are only persisted once 100% of dates are secured. `rollbackBookings.js` updated to use atomic `$inc` decrements. |
-| **Rate limiting on auth, payment, and booking endpoints [RESOLVED]** | Resolved: Created `middleware/rateLimiter.js` with `express-rate-limit` using `ipKeyGenerator` and `trust proxy` enabled in `app.js`. Applied: (a) `authLimiter` (15 req/15min) on `/auth/google`; (b) `paymentLimiter` (30 req/5min per user+IP) on `/payment/checkout`, `/payment/paymentVerification`, `/payment/checkPaymentStatus`, `/payment/rollbackBooking`; (c) `bookingLimiter` (10 req/5min per user+IP) on `/bookroom` to prevent inventory exhaustion attacks. |
-| **Razorpay Webhook Integration [RESOLVED]** | Resolved: Implemented server-side Razorpay Webhook endpoint (`POST /payment/webhook`) in `controllers/webhookController.js`. Signature verification uses `RAZORPAY_WEBHOOK_SECRET` with HMAC-SHA256 and `crypto.timingSafeEqual`. Route is mounted in `app.js` before `express.json()` with `express.raw()` to preserve the raw body for signature verification. Handles `payment.captured` (confirms bookings via `processPaymentConfirmation`), `payment.failed` (marks payment failed and rolls back bookings), and `refund.processed` (marks payment refunded and rolls back bookings). All handlers are idempotent using atomic `findOneAndUpdate` transitions. Always returns HTTP 200 to Razorpay to prevent retries. |
+| **Room model field mismatch** | The Mongoose `Room` model has `maxGuests` and `id`, but some controller code references `room.maxAdults`, `room.discount`, and `room.roomType` which aren't in the schema. The `normalizeRoom()` utility on the frontend patches this. |
 | **Mixed toast libraries** | Both `react-toastify` and `react-hot-toast` are imported and used in different components. |
 | **No test suite** | `"test": "echo \"Error: no test specified\""` in both packages. |
 | **Welcome email** | The `isNewUser` flag in `authController.js` uses `user.wasNew` which is not a standard Mongoose property — the welcome email may never trigger after the first upsert. |
@@ -395,7 +385,6 @@ UserProvider → RoomProvider → GoogleOAuthProvider → CartProvider → DateP
 | `JWT_SECRET` | JWT signing key |
 | `RAZORPAY_KEY_ID` | Razorpay public key (test) |
 | `RAZORPAY_KEY_SECRET` | Razorpay secret key (test) |
-| `RAZORPAY_WEBHOOK_SECRET` | Razorpay webhook signature secret (from Dashboard → Webhooks) |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `GOOGLE_REDIRECT_URI` | OAuth redirect (matches frontend URL) |

@@ -93,6 +93,10 @@ const Navbar = () => {
     isHomePage && !isScrolled
       ? "bg-transparent"
       : "border-b border-white/50 bg-[#1f5b52] shadow-[0_18px_40px_rgba(23,50,46,0.08)] backdrop-blur-xl";
+  const linkClasses =
+    isHomePage && !isScrolled
+      ? "text-white hover:bg-white/15"
+      : "text-white hover:bg-[#295046]";
   const logoTextClasses = "text-white";
   const badgeClasses =
     isHomePage && !isScrolled
