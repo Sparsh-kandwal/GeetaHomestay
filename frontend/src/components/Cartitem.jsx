@@ -1,6 +1,6 @@
 import { FaTrashAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { CalendarDays, Users } from "lucide-react";
+import { CalendarDays, Users, BedDouble } from "lucide-react";
 
 const removeFromCart = async (roomType, checkIn, checkOut, setAvailableItems) => {
   try {

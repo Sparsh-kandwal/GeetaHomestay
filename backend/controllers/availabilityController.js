@@ -7,6 +7,7 @@ const getRoomAvailability = async (req, res) => {
         let availability;
         if (checkIn && checkOut) {
             availability = await calculateRoomAvailability(checkIn, checkOut, userId);
+            // return res.status(400).json({ message: 'Check-in and Check-out dates are required' });
         }
         res.status(200).json({ success: true, availability });
     } catch (error) {
