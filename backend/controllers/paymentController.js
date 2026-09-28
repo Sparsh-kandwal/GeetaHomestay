@@ -7,73 +7,207 @@ import Cart_item from "../models/cart.js";
 import { rollbackBookings } from "../utils/rollbackBookings.js";
 import { sendInvoiceForBookingId } from "./EmailController.js";
 
-const instance = new Razorpay({
+export const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+/**
+ * Shared confirmation function between paymentVerification and checkPaymentStatus.
+ * Confirms bookings only when payment amount matches expected amount exactly,
+ * marks Payment record with final state, and triggers invoice email on state change.
+ */
+export const processPaymentConfirmation = async ({
+  paymentDoc,
+  razorpayPayment,
+  signature = null,
+  paymentMethod = null,
+}) => {
+  const expectedPaise = Math.round(paymentDoc.expectedAmount * 100);
+
+  // Strict verification of Razorpay payment payload
+  if (
+    razorpayPayment.order_id !== paymentDoc.razorpay_order_id ||
+    razorpayPayment.currency !== "INR" ||
+    (razorpayPayment.status !== "captured" && razorpayPayment.status !== "authorized") ||
+    razorpayPayment.amount !== expectedPaise
+  ) {
+    paymentDoc.status = "failed";
+    paymentDoc.razorpay_payment_id = razorpayPayment.id;
+    if (signature) paymentDoc.razorpay_signature = signature;
+    paymentDoc.amount = (razorpayPayment.amount || 0) / 100;
+    paymentDoc.failureReason = `Payment details mismatch: order=${razorpayPayment.order_id}, status=${razorpayPayment.status}, amount=${razorpayPayment.amount} (expected ${expectedPaise})`;
+    await paymentDoc.save();
+    return {
+      success: false,
+      status: 400,
+      error: "Payment verification failed: payment details mismatch",
+    };
+  }
+
+  // Atomic update of bookings conditioned on paymentStatus: "pending"
+  const confirmResult = await Booking.updateMany(
+    {
+      $or: [{ bookingId: paymentDoc.bookingId }, { _id: paymentDoc.bookingId }],
+      userId: paymentDoc.user,
+      paymentStatus: "pending",
+    },
+    { $set: { paymentStatus: "confirmed" } }
+  );
+
+  // If bookings are no longer pending (e.g. rolled back/cancelled after 5 min),
+  // do NOT silently confirm. Mark for manual review/refund.
+  if (confirmResult.modifiedCount === 0) {
+    paymentDoc.status = "needs_review";
+    paymentDoc.razorpay_payment_id = razorpayPayment.id;
+    if (signature) paymentDoc.razorpay_signature = signature;
+    paymentDoc.amount = razorpayPayment.amount / 100;
+    paymentDoc.failureReason =
+      "Valid payment captured but matching bookings were no longer in pending status";
+    await paymentDoc.save();
+    console.error(
+      `CRITICAL: Booking ${paymentDoc.bookingId} was not pending but received valid payment ${razorpayPayment.id}. Status set to needs_review.`
+    );
+    return {
+      success: false,
+      status: 409,
+      error: "Booking is no longer pending (expired or cancelled). Payment held for review/refund.",
+    };
+  }
+
+  // Success path
+  paymentDoc.status = "success";
+  paymentDoc.razorpay_payment_id = razorpayPayment.id;
+  if (signature) paymentDoc.razorpay_signature = signature;
+  paymentDoc.amount = razorpayPayment.amount / 100;
+  paymentDoc.payment_method = paymentMethod || razorpayPayment.method || "card";
+  await paymentDoc.save();
+
+  // Send invoice email only because modifiedCount > 0
+  try {
+    await sendInvoiceForBookingId(paymentDoc.bookingId);
+  } catch (emailError) {
+    console.error(
+      `Failed to send invoice for booking ${paymentDoc.bookingId}:`,
+      emailError.message
+    );
+  }
+
+  await Cart_item.deleteMany({ userId: paymentDoc.user });
+
+  return {
+    success: true,
+    status: 200,
+    paymentId: razorpayPayment.id,
+  };
+};
+
 export const checkout = async (req, res) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const { bookingId } = req.body;
+    if (!bookingId) {
+      return res.status(400).json({ success: false, message: "Missing bookingId" });
+    }
+
+    // Lookup pending bookings for the bookingId (supports document _id or group bookingId)
+    const query = mongoose.Types.ObjectId.isValid(bookingId)
+      ? { $or: [{ bookingId }, { _id: bookingId }], paymentStatus: "pending" }
+      : { bookingId, paymentStatus: "pending" };
+
+    const pendingBookings = await Booking.find(query);
+    if (!pendingBookings || pendingBookings.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No pending bookings found for this ID" });
+    }
+
+    // Verify ownership
+    if (pendingBookings[0].userId.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to checkout this booking",
+      });
+    }
+
+    const groupBookingId = pendingBookings[0].bookingId;
+
+    // Server-side calculation of total from DB records (never trust client)
+    const expectedAmount = Math.round(
+      pendingBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0)
+    );
+
+    if (isNaN(expectedAmount) || expectedAmount <= 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid booking total amount" });
+    }
+
+    // Amount in paise: integer guaranteed
+    const amountInPaise = Math.round(expectedAmount * 100);
+
+    const receipt = `rcpt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     const options = {
-      amount: Number(req.body.amount) * 100,
+      amount: amountInPaise,
       currency: "INR",
-      receipt: `receipt_${Date.now()}`,
+      receipt,
+      notes: {
+        userId,
+        bookingId: groupBookingId.toString(),
+      },
     };
 
     const order = await instance.orders.create(options);
+
+    // Persist Payment record in "created" status linked to order, user, booking, and expectedAmount
+    await Payment.create({
+      razorpay_order_id: order.id,
+      user: userId,
+      bookingId: groupBookingId,
+      expectedAmount,
+      currency: "INR",
+      status: "created",
+      receipt,
+    });
+
     res.status(200).json({
       success: true,
       order,
+      expectedAmount,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("checkout error:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
 export const paymentVerification = async (req, res) => {
-  let bookingFailed = false;
-  let userIdForRollback;
-  let bookingIdForRollback;
+  let claimedPayment = null;
 
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Unauthorized" });
+    }
+
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      amount,
-      bookingId,
     } = req.body;
 
-    userIdForRollback = userId;
-    let targetBookingId = bookingId;
-
-    // Ownership check: if a bookingId is supplied, verify the
-    // authenticated user actually owns those booking docs in the DB.
-    // Supports either group bookingId or document _id.
-    if (bookingId) {
-      const query = mongoose.Types.ObjectId.isValid(bookingId)
-        ? { $or: [{ bookingId }, { _id: bookingId }] }
-        : { bookingId };
-      const ownershipCheck = await Booking.findOne(query);
-      if (!ownershipCheck) {
-        return res.status(404).json({ success: false, error: "Booking not found" });
-      }
-      if (ownershipCheck.userId.toString() !== userId) {
-        return res.status(403).json({ success: false, error: "You are not authorized to verify payment for this booking" });
-      }
-      targetBookingId = ownershipCheck.bookingId;
-    }
-    bookingIdForRollback = targetBookingId;
-
-    const pendingQuery = { userId, paymentStatus: "pending" };
-    if (targetBookingId) {
-      pendingQuery.bookingId = targetBookingId;
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required payment verification parameters",
+      });
     }
 
-    const pendingBookings = await Booking.find(pendingQuery);
-    const bookingIds = [...new Set(pendingBookings.map((booking) => String(booking.bookingId)))];
-
+    // 1. Verify HMAC signature
     const body = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -81,47 +215,56 @@ export const paymentVerification = async (req, res) => {
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      bookingFailed = true;
       return res.status(400).json({ success: false, error: "Invalid payment signature" });
     }
 
-    const payment = new Payment({
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-      user: userId,
-      amount: amount / 100,
-      status: "success",
-    });
+    // 2. Atomic claim of the Payment record
+    claimedPayment = await Payment.findOneAndUpdate(
+      { razorpay_order_id, user: userId, status: "created" },
+      { $set: { status: "processing" } },
+      { new: true }
+    );
 
-    await payment.save();
-
-    await Booking.updateMany(pendingQuery, {
-      $set: { paymentStatus: "confirmed" },
-    });
-
-    for (const groupedBookingId of bookingIds) {
-      try {
-        await sendInvoiceForBookingId(groupedBookingId);
-      } catch (emailError) {
-        console.error(`Failed to send invoice for booking ${groupedBookingId}:`, emailError.message);
+    if (!claimedPayment) {
+      const existing = await Payment.findOne({ razorpay_order_id, user: userId });
+      if (existing && existing.status === "success") {
+        return res
+          .status(409)
+          .json({ success: false, error: "Payment has already been processed" });
       }
+      return res.status(409).json({
+        success: false,
+        error: "Payment cannot be processed (already processed, in progress, or unauthorized)",
+      });
     }
 
-    await Cart_item.deleteMany({ userId });
+    // 3. Fetch payment details from Razorpay API
+    const razorpayPayment = await instance.payments.fetch(razorpay_payment_id);
+
+    // 4. Confirm payment and bookings via shared helper
+    const result = await processPaymentConfirmation({
+      paymentDoc: claimedPayment,
+      razorpayPayment,
+      signature: razorpay_signature,
+      paymentMethod: razorpayPayment.method,
+    });
+
+    if (!result.success) {
+      return res.status(result.status).json({ success: false, error: result.error });
+    }
 
     return res.status(200).json({
       success: true,
       message: "Payment Verified Successfully",
-      paymentId: razorpay_payment_id,
+      paymentId: result.paymentId,
     });
   } catch (error) {
-    bookingFailed = true;
     console.error("Payment Verification Error:", error);
-  }
-
-  if (bookingFailed) {
-    await rollbackBookings(userIdForRollback, { bookingId: bookingIdForRollback });
+    if (claimedPayment && claimedPayment.status === "processing") {
+      claimedPayment.status = "failed";
+      claimedPayment.failureReason = error.message;
+      await claimedPayment.save().catch(() => {});
+    }
     return res.status(500).json({ success: false, error: "Payment verification failed" });
   }
 };
@@ -134,7 +277,11 @@ export const getKey = (req, res) => {
 
 export const checkPaymentStatus = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
     const { paymentId, bookingId } = req.body;
 
     if (!paymentId || !bookingId) {
@@ -144,19 +291,17 @@ export const checkPaymentStatus = async (req, res) => {
       });
     }
 
-    // 1. Fetch the booking from the DB first (supports either group bookingId or document _id)
+    // 1. Fetch booking from DB first (supports either group bookingId or document _id)
     const query = mongoose.Types.ObjectId.isValid(bookingId)
       ? { $or: [{ bookingId }, { _id: bookingId }] }
       : { bookingId };
     const booking = await Booking.findOne(query);
 
-    // 2. If no booking is found, return 404
     if (!booking) {
       return res.status(404).json({ success: false, message: "Booking not found" });
     }
 
-    // 3. Compare booking's real owner (userId) against req.user.id —
-    // return 403 immediately and do NOT proceed to any Razorpay call if mismatch
+    // 2. Ownership check strictly before any external Razorpay call
     if (booking.userId.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -166,34 +311,59 @@ export const checkPaymentStatus = async (req, res) => {
 
     const targetBookingId = booking.bookingId;
 
-    // 4. Only after ownership is confirmed, proceed with the Razorpay API call
-    const payment = await instance.payments.fetch(paymentId);
+    // 3. Fetch payment from Razorpay API
+    const razorpayPayment = await instance.payments.fetch(paymentId);
 
-    if (payment.status === "captured") {
-      const pendingQuery = { userId, paymentStatus: "pending" };
-      if (targetBookingId) {
-        pendingQuery.bookingId = targetBookingId;
+    // 4. Verify payment belongs to the order created for this booking and user
+    const paymentDoc = await Payment.findOne({
+      razorpay_order_id: razorpayPayment.order_id,
+      user: userId,
+    });
+
+    if (!paymentDoc || paymentDoc.bookingId.toString() !== targetBookingId.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment does not belong to this booking order",
+      });
+    }
+
+    // If already confirmed
+    if (paymentDoc.status === "success") {
+      return res.status(200).json({ success: true, message: "Payment already confirmed" });
+    }
+
+    if (razorpayPayment.status === "captured") {
+      // Atomic claim to transition from "created" to "processing"
+      const claimedPayment = await Payment.findOneAndUpdate(
+        { _id: paymentDoc._id, status: "created" },
+        { $set: { status: "processing" } },
+        { new: true }
+      );
+
+      if (!claimedPayment) {
+        if (paymentDoc.status === "processing") {
+          return res.status(409).json({ success: false, message: "Payment is currently being processed" });
+        }
+        return res.status(409).json({ success: false, message: `Payment is already ${paymentDoc.status}` });
       }
 
-      const pendingBookings = await Booking.find(pendingQuery);
-      const bookingIds = [...new Set(pendingBookings.map((booking) => String(booking.bookingId)))];
-
-      await Booking.updateMany(pendingQuery, {
-        $set: { paymentStatus: "confirmed" },
+      const result = await processPaymentConfirmation({
+        paymentDoc: claimedPayment,
+        razorpayPayment,
+        paymentMethod: razorpayPayment.method,
       });
 
-      for (const groupedBookingId of bookingIds) {
-        try {
-          await sendInvoiceForBookingId(groupedBookingId);
-        } catch (emailError) {
-          console.error(`Failed to send invoice for booking ${groupedBookingId}:`, emailError.message);
-        }
+      if (!result.success) {
+        return res.status(result.status).json({ success: false, message: result.error });
       }
 
       return res.status(200).json({ success: true, message: "Payment confirmed" });
     }
 
-    if (payment.status === "failed") {
+    if (razorpayPayment.status === "failed") {
+      paymentDoc.status = "failed";
+      paymentDoc.failureReason = "Razorpay payment status marked as failed";
+      await paymentDoc.save();
       await rollbackBookings(userId, { bookingId: targetBookingId });
       return res.status(400).json({ success: false, message: "Payment failed, booking rolled back" });
     }

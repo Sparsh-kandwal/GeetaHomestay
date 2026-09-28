@@ -13,7 +13,6 @@ import Footer from "./components/Footer";
 import "./App.css";
 import RoomDetails from "./pages/RoomDetails";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { CartProvider } from "./contexts/CartContext";
 import { DateProvider } from "./contexts/DateContext";
 import Cart from "./components/Cart";
 import BookingConfirmation from "./pages/BookingConfirmation";
@@ -41,21 +40,19 @@ const ScrollToTop = () => {
 const App = () => {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <CartProvider>
-        <DateProvider>
-          <Router>
-            <ScrollToTop />
-            <div className="flex flex-col min-h-screen">
-              <Navbar />
-              <div className="flex-grow">
-                <AnimatedRoutes />
-              </div>
-              <Footer />
-              <ToastContainer />
+      <DateProvider>
+        <Router>
+          <ScrollToTop />
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <div className="flex-grow">
+              <AnimatedRoutes />
             </div>
-          </Router>
-        </DateProvider>
-      </CartProvider>
+            <Footer />
+            <ToastContainer />
+          </div>
+        </Router>
+      </DateProvider>
     </GoogleOAuthProvider>
   );
 };

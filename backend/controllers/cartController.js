@@ -1,6 +1,12 @@
 import Cart_item from "../models/cart.js";
 import { calculateRoomAvailability } from "../utils/roomAvailability.js";
 import Room from "../models/room.js";
+import {
+  getKolkataTodayString,
+  normalizeToKolkataDateString,
+  calculateNights,
+  isPositiveInteger,
+} from "../utils/dateUtils.js";
 
 export const addToCart = async (req, res) => {
   try {
@@ -9,16 +15,55 @@ export const addToCart = async (req, res) => {
     if (!userId) {
       return res.status(403).json({ message: "Unauthorized" });
     }
+
+    if (!isPositiveInteger(quantity)) {
+      return res.status(400).json({ message: "Quantity must be a positive integer" });
+    }
+
+    if (!isPositiveInteger(members)) {
+      return res.status(400).json({ message: "Members count must be a positive integer" });
+    }
+
+    const normCheckIn = normalizeToKolkataDateString(checkIn);
+    const normCheckOut = normalizeToKolkataDateString(checkOut);
+    if (!normCheckIn || !normCheckOut) {
+      return res.status(400).json({ message: "Invalid date format. Expected YYYY-MM-DD" });
+    }
+
+    const todayKolkata = getKolkataTodayString();
+    if (normCheckIn < todayKolkata) {
+      return res.status(400).json({ message: "Check-in date cannot be in the past" });
+    }
+
+    const nights = calculateNights(normCheckIn, normCheckOut);
+    if (isNaN(nights) || nights <= 0) {
+      return res.status(400).json({ message: "Check-out date must be after check-in date" });
+    }
+
+    const room = await Room.findOne({ roomType });
+    if (!room) {
+      return res.status(404).json({ message: "Room type not found" });
+    }
+
+    // Guest capacity check: Fail closed if maxAdults is missing or invalid
+    const maxAdults = room.maxAdults ?? room._doc?.maxAdults;
+    if (typeof maxAdults !== "number" || maxAdults <= 0) {
+      return res.status(400).json({ message: "Invalid room capacity configuration" });
+    }
+
+    if (members > maxAdults * quantity) {
+      return res.status(400).json({
+        message: `Too many guests. Maximum allowed for ${quantity} room(s) is ${maxAdults * quantity}`,
+      });
+    }
+
     const availability = await calculateRoomAvailability(
-      checkIn,
-      checkOut,
+      normCheckIn,
+      normCheckOut,
       userId
     );
-    const room = await Room.findOne({ roomType });
-    if (room.maxAdults < members) {
-      return res.status(400).json({ message: "Too many adults" });
-    }
-    if (availability[roomType].availableRooms <= 0) {
+
+    if (!availability[roomType] || availability[roomType].availableRooms <= 0) {
       return res.status(400).json({ message: "No rooms available" });
     }
     if (availability[roomType].availableRooms < quantity) {
@@ -27,23 +72,31 @@ export const addToCart = async (req, res) => {
           "only " + availability[roomType].availableRooms + " rooms available",
       });
     }
+
     const prevItem = await Cart_item.findOne({
       userId,
       roomType,
-      checkIn,
-      checkOut,
+      checkIn: normCheckIn,
+      checkOut: normCheckOut,
     });
     if (prevItem) {
-      prevItem.quantity += quantity;
-      prevItem.members += members;
+      const combinedQuantity = prevItem.quantity + quantity;
+      const combinedMembers = prevItem.members + members;
+      if (combinedMembers > maxAdults * combinedQuantity) {
+        return res.status(400).json({
+          message: `Too many guests for combined room count of ${combinedQuantity}`,
+        });
+      }
+      prevItem.quantity = combinedQuantity;
+      prevItem.members = combinedMembers;
       await prevItem.save();
       return res.json({ message: "Item already in cart" });
     }
     const cartItem = new Cart_item({
       userId,
       members,
-      checkIn,
-      checkOut,
+      checkIn: normCheckIn,
+      checkOut: normCheckOut,
       roomType,
       quantity,
     });
@@ -100,11 +153,7 @@ export const getCart = async (req, res) => {
           removedQuantity: curr - availability[roomType].availableRooms,
           checkIn: item.checkIn,
           checkOut: item.checkOut,
-          price: parseFloat(
-            days *
-              (availability[roomType].price -
-                availability[roomType].price * availability[roomType].discount)
-          ),
+          price: itemPrice,
           discount: availability[roomType].discount,
           members: item.members,
         });
@@ -164,11 +213,19 @@ export const changeMember = async (req, res) => {
     if (!roomType || !checkIn || !checkOut) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+
+    if (!isPositiveInteger(members)) {
+      return res.status(400).json({ message: "Members count must be a positive integer" });
+    }
+
+    const normCheckIn = normalizeToKolkataDateString(checkIn) || checkIn;
+    const normCheckOut = normalizeToKolkataDateString(checkOut) || checkOut;
+
     const cartItem = await Cart_item.findOne({
       userId,
       roomType,
-      checkIn,
-      checkOut,
+      checkIn: normCheckIn,
+      checkOut: normCheckOut,
     });
     const room = await Room.findOne({ roomType });
     if (!cartItem) {
@@ -176,10 +233,19 @@ export const changeMember = async (req, res) => {
         .status(404)
         .json({ message: "Cart item not found for the given criteria." });
     }
-    if (members > room.maxAdults) {
+    if (!room) {
+      return res.status(404).json({ message: "Room type not found" });
+    }
+
+    const maxAdults = room.maxAdults ?? room._doc?.maxAdults;
+    if (typeof maxAdults !== "number" || maxAdults <= 0) {
+      return res.status(400).json({ message: "Invalid room capacity configuration" });
+    }
+
+    if (members > maxAdults * cartItem.quantity) {
       return res
         .status(400)
-        .json({ message: "Maximum number of adults exceeded." });
+        .json({ message: `Maximum number of adults exceeded (${maxAdults * cartItem.quantity} max).` });
     }
     cartItem.members = members;
     await cartItem.save();
@@ -211,7 +277,7 @@ export const deletefromCart = async (req, res) => {
         .status(404)
         .json({ message: "Cart item not found for the given criteria ." });
     }
-    await Cart_item.findOneAndDelete({ userId, roomType, checkIn, checkOut });
+    await cartItem.deleteOne();
     return res
       .status(200)
       .json({ message: "Item removed from cart successfully." });

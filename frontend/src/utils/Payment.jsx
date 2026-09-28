@@ -1,13 +1,18 @@
 import axios from "axios";
 
-export const checkouthandler = async (amount, user, callback, options = {}) => {
+export const checkouthandler = async (bookingIdOrAmount, user, callback, options = {}) => {
   try {
-    const { bookingId } = options;
+    const bookingId = options.bookingId || (typeof bookingIdOrAmount === "string" ? bookingIdOrAmount : null);
+
     const {
       data: { order },
-    } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/payment/checkout`, {
-      amount,
-    }, { withCredentials: true });
+    } = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/payment/checkout`,
+      {
+        bookingId,
+      },
+      { withCredentials: true }
+    );
 
     const {
       data: { key },
@@ -20,7 +25,7 @@ export const checkouthandler = async (amount, user, callback, options = {}) => {
 
     const razor = new Razorpay({
       key,
-      amount: order.amount,
+      amount: order.amount, // Server-computed amount in paise
       currency: "INR",
       name: "Geeta HomeStay",
       description: "Room Booking Payment",
@@ -34,8 +39,6 @@ export const checkouthandler = async (amount, user, callback, options = {}) => {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              amount: order.amount,
-              bookingId,
             },
             { withCredentials: true }
           );
