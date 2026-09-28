@@ -76,7 +76,7 @@ export const googleAuth = async (req, res) => {
       try {
         const emailContent = emailTemplate(userInfo.name);
 
-        const info = await transporter.sendMail({
+        await transporter.sendMail({
           from: '"Geeta Home Stay" <geetahomestaykpg@gmail.com>',
           to: userInfo.email,
           subject: "Welcome to Geeta Home Stay!",
@@ -126,7 +126,7 @@ export const getMyprofile = async (req, res) => {
   }
 };
 
-export const logout = async (req, res, next) => {
+export const logout = async (req, res) => {
   try {
     res
       .status(200)

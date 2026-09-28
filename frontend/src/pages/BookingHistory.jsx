@@ -94,7 +94,7 @@ const BookingHistory = () => {
     try {
       setActiveBookingId(booking.bookingId);
       await checkouthandler(
-        booking.totalAmount,
+        booking.bookingId,
         user,
         async (paymentId) => {
           await axios.post(
