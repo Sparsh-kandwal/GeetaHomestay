@@ -104,30 +104,50 @@ export const processPaymentConfirmation = async ({
 
 export const checkout = async (req, res) => {
   try {
+    console.log("[checkout] === START /payment/checkout ===");
+    console.log("[checkout] req.body:", JSON.stringify(req.body));
+    console.log("[checkout] req.user:", JSON.stringify(req.user));
+
     const userId = req.user?.id;
     if (!userId) {
+      console.log("[checkout] FAIL: No userId in req.user");
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
+    console.log("[checkout] userId:", userId);
 
     const { bookingId } = req.body;
     if (!bookingId) {
+      console.log("[checkout] FAIL: Missing bookingId in request body");
       return res.status(400).json({ success: false, message: "Missing bookingId" });
     }
+    console.log("[checkout] bookingId:", bookingId);
 
     // Lookup pending bookings for the bookingId (supports document _id or group bookingId)
-    const query = mongoose.Types.ObjectId.isValid(bookingId)
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(bookingId);
+    console.log("[checkout] isValidObjectId:", isValidObjectId);
+
+    const query = isValidObjectId
       ? { $or: [{ bookingId }, { _id: bookingId }], paymentStatus: "pending" }
       : { bookingId, paymentStatus: "pending" };
+    console.log("[checkout] DB query:", JSON.stringify(query));
 
     const pendingBookings = await Booking.find(query);
+    console.log("[checkout] pendingBookings found:", pendingBookings?.length || 0);
+
     if (!pendingBookings || pendingBookings.length === 0) {
+      console.log("[checkout] FAIL: No pending bookings found for bookingId:", bookingId);
       return res
         .status(404)
         .json({ success: false, message: "No pending bookings found for this ID" });
     }
 
     // Verify ownership
-    if (pendingBookings[0].userId.toString() !== userId) {
+    const bookingUserId = pendingBookings[0].userId.toString();
+    console.log("[checkout] Ownership check: booking.userId=%s, req.user.id=%s, match=%s",
+      bookingUserId, userId, bookingUserId === userId);
+
+    if (bookingUserId !== userId) {
+      console.log("[checkout] FAIL: Ownership mismatch — blocking checkout");
       return res.status(403).json({
         success: false,
         message: "You are not authorized to checkout this booking",
@@ -135,13 +155,23 @@ export const checkout = async (req, res) => {
     }
 
     const groupBookingId = pendingBookings[0].bookingId;
+    console.log("[checkout] groupBookingId:", groupBookingId);
 
     // Server-side calculation of total from DB records (never trust client)
+    const individualAmounts = pendingBookings.map(b => ({
+      roomType: b.roomType,
+      totalAmount: b.totalAmount,
+      discount: b.discount,
+    }));
+    console.log("[checkout] Individual booking amounts:", JSON.stringify(individualAmounts));
+
     const expectedAmount = Math.round(
       pendingBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0)
     );
+    console.log("[checkout] expectedAmount (INR):", expectedAmount);
 
     if (isNaN(expectedAmount) || expectedAmount <= 0) {
+      console.log("[checkout] FAIL: Invalid expectedAmount:", expectedAmount);
       return res
         .status(400)
         .json({ success: false, message: "Invalid booking total amount" });
@@ -149,6 +179,7 @@ export const checkout = async (req, res) => {
 
     // Amount in paise: integer guaranteed
     const amountInPaise = Math.round(expectedAmount * 100);
+    console.log("[checkout] amountInPaise:", amountInPaise);
 
     const receipt = `rcpt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     const options = {
@@ -160,11 +191,20 @@ export const checkout = async (req, res) => {
         bookingId: groupBookingId.toString(),
       },
     };
+    console.log("[checkout] Razorpay order options:", JSON.stringify(options));
 
+    console.log("[checkout] Creating Razorpay order...");
     const order = await instance.orders.create(options);
+    console.log("[checkout] Razorpay order created:", JSON.stringify({
+      id: order.id,
+      status: order.status,
+      amount: order.amount,
+      currency: order.currency,
+    }));
 
     // Persist Payment record in "created" status linked to order, user, booking, and expectedAmount
-    await Payment.create({
+    console.log("[checkout] Persisting Payment record...");
+    const paymentRecord = await Payment.create({
       razorpay_order_id: order.id,
       user: userId,
       bookingId: groupBookingId,
@@ -173,14 +213,23 @@ export const checkout = async (req, res) => {
       status: "created",
       receipt,
     });
+    console.log("[checkout] Payment record created: _id=%s, razorpay_order_id=%s",
+      paymentRecord._id, paymentRecord.razorpay_order_id);
 
+    console.log("[checkout] === SUCCESS — returning order to client ===");
     res.status(200).json({
       success: true,
       order,
       expectedAmount,
     });
   } catch (error) {
-    console.error("checkout error:", error);
+    console.error("[checkout] === UNCAUGHT ERROR ===");
+    console.error("[checkout] Error name:", error.name);
+    console.error("[checkout] Error message:", error.message);
+    console.error("[checkout] Error stack:", error.stack);
+    if (error.response) {
+      console.error("[checkout] Razorpay API error response:", JSON.stringify(error.response));
+    }
     res.status(500).json({ success: false, error: error.message });
   }
 };
