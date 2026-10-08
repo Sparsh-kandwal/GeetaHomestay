@@ -5,27 +5,34 @@ import { transporter } from "../utils/MailClient.js";
 import { InvoiceTemplate } from "../constants/InvoiceTemplate.js";
 
 export const sendInvoiceForBookingId = async (bookingId) => {
-  const query = mongoose.Types.ObjectId.isValid(bookingId)
+  console.log("[sendInvoiceForBookingId] === START for bookingId:", bookingId);
+  const isValidObjectId = mongoose.Types.ObjectId.isValid(bookingId);
+  const query = isValidObjectId
     ? { $or: [{ bookingId }, { _id: bookingId }], paymentStatus: "confirmed" }
     : { bookingId, paymentStatus: "confirmed" };
 
+  console.log("[sendInvoiceForBookingId] Querying confirmed bookings:", JSON.stringify(query));
   const bookings = await Booking.find(query);
   if (bookings.length === 0) {
+    console.error("[sendInvoiceForBookingId] FAIL: No confirmed bookings found for bookingId:", bookingId);
     const error = new Error("No confirmed bookings found for this ID");
     error.code = "BOOKINGS_NOT_CONFIRMED";
     throw error;
   }
 
   if (bookings.every((booking) => booking.emailSent)) {
+    console.log("[sendInvoiceForBookingId] Invoices already sent for all bookings. Skipping.");
     return { alreadySent: true };
   }
 
   const user = await User.findById(bookings[0].userId);
   if (!user) {
+    console.error("[sendInvoiceForBookingId] FAIL: User not found for userId:", bookings[0].userId);
     const error = new Error("User not found");
     error.code = "USER_NOT_FOUND";
     throw error;
   }
+  console.log("[sendInvoiceForBookingId] Sending invoice email to user:", user.email);
 
   const actualGroupBookingId = bookings[0].bookingId;
 

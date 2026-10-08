@@ -18,9 +18,13 @@ export const authLimiter = rateLimit({
   max: 15,
   standardHeaders: true,
   legacyHeaders: false,
-  message: {
-    success: false,
-    message: "Too many authentication attempts. Please try again after 15 minutes.",
+  handler: (req, res) => {
+    const ip = getClientIp(req);
+    console.warn(`[rateLimiter] BLOCKED auth request from IP: ${ip} on ${req.method} ${req.originalUrl}`);
+    res.status(429).json({
+      success: false,
+      message: "Too many authentication attempts. Please try again after 15 minutes.",
+    });
   },
   keyGenerator: (req) => getClientIp(req),
 });
@@ -37,9 +41,13 @@ export const paymentLimiter = rateLimit({
   max: 30,
   standardHeaders: true,
   legacyHeaders: false,
-  message: {
-    success: false,
-    message: "Too many payment requests. Please try again after a few minutes.",
+  handler: (req, res) => {
+    const key = req.user?.id ? `${req.user.id}_${getClientIp(req)}` : getClientIp(req);
+    console.warn(`[rateLimiter] BLOCKED payment request key: ${key} on ${req.method} ${req.originalUrl}`);
+    res.status(429).json({
+      success: false,
+      message: "Too many payment requests. Please try again after a few minutes.",
+    });
   },
   keyGenerator: (req) => {
     const ip = getClientIp(req);
@@ -57,9 +65,13 @@ export const bookingLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  message: {
-    success: false,
-    message: "Too many booking attempts. Please try again after a few minutes.",
+  handler: (req, res) => {
+    const key = req.user?.id ? `${req.user.id}_${getClientIp(req)}` : getClientIp(req);
+    console.warn(`[rateLimiter] BLOCKED booking request key: ${key} on ${req.method} ${req.originalUrl}`);
+    res.status(429).json({
+      success: false,
+      message: "Too many booking attempts. Please try again after a few minutes.",
+    });
   },
   keyGenerator: (req) => {
     const ip = getClientIp(req);

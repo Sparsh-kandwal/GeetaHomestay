@@ -15,8 +15,13 @@ const PENDING_VISIBILITY_WINDOW_MS = 5 * 60 * 1000;
 
 const createOrder = async (req, res) => {
   try {
+    console.log("[createOrder] === START /bookroom ===");
+    console.log("[createOrder] req.body:", JSON.stringify(req.body));
+    console.log("[createOrder] req.user:", JSON.stringify(req.user));
+
     const userId = req.user?.id;
     if (!userId) {
+      console.warn("[createOrder] FAIL: Unauthorized — no req.user.id");
       return res.status(403).json({ message: "Unauthorized" });
     }
 
@@ -30,6 +35,8 @@ const createOrder = async (req, res) => {
     }).sort({ createdAt: -1 });
 
     if (activePendingBookings.length > 0) {
+      console.log("[createOrder] Existing active pending booking found (%d items, bookingId: %s)",
+        activePendingBookings.length, activePendingBookings[0].bookingId);
       return res.status(200).json({
         success: true,
         message: "Existing pending booking found",
@@ -39,7 +46,10 @@ const createOrder = async (req, res) => {
     }
 
     const cartItems = await Cart_item.find({ userId });
+    console.log("[createOrder] Cart items count for user %s: %d", userId, cartItems?.length || 0);
+
     if (!cartItems || cartItems.length === 0) {
+      console.warn("[createOrder] FAIL: Cart is empty for user:", userId);
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
@@ -140,12 +150,15 @@ const createOrder = async (req, res) => {
     }
 
     if (validationErrors.length > 0 || validatedItems.length !== cartItems.length) {
+      console.warn("[createOrder] FAIL: Cart pre-validation errors:", JSON.stringify(validationErrors));
       return res.status(400).json({
         success: false,
         message: "Some cart items failed validation",
         errors: validationErrors,
       });
     }
+
+    console.log("[createOrder] Phase 1 pre-validation PASSED for %d items", validatedItems.length);
 
     // =========================================================================
     // PHASE 2: Atomic All-or-Nothing Inventory Reservation
@@ -206,6 +219,8 @@ const createOrder = async (req, res) => {
             roomType,
             message: `No availability on ${formattedDate} (max ${totalRooms} rooms)`,
           });
+          console.warn("[createOrder] Inventory FULL on %s for roomType %s (max %d, requested %d)",
+            formattedDate, roomType, totalRooms, quantity);
           break;
         }
 
@@ -219,6 +234,7 @@ const createOrder = async (req, res) => {
 
     // If ANY date for ANY cart item was unavailable, rollback all reservations
     if (reservationFailed) {
+      console.warn("[createOrder] Reservation failed, rolling back %d reserved entries...", reservedEntries.length);
       for (const resv of reservedEntries) {
         await BookedDate.findOneAndUpdate(
           { date: resv.dateObj, roomType: resv.roomType },
@@ -238,6 +254,8 @@ const createOrder = async (req, res) => {
         errors: availabilityErrors,
       });
     }
+
+    console.log("[createOrder] Phase 2 inventory reservation PASSED");
 
     // =========================================================================
     // PHASE 3: Create Booking Records (All-or-Nothing Succeeded)
@@ -262,6 +280,8 @@ const createOrder = async (req, res) => {
       bookings.push(booking);
     }
 
+    console.log("[createOrder] === SUCCESS: Created %d booking records with group bookingId: %s ===",
+      bookings.length, bookingId);
     res.status(200).json({
       success: true,
       message: "Bookings created successfully",
@@ -269,7 +289,10 @@ const createOrder = async (req, res) => {
       hasPendingPayment: false,
     });
   } catch (error) {
-    console.error("createOrder error:", error);
+    console.error("[createOrder] === UNCAUGHT ERROR ===");
+    console.error("[createOrder] Error name:", error.name);
+    console.error("[createOrder] Error message:", error.message);
+    console.error("[createOrder] Error stack:", error.stack);
     res.status(500).json({ success: false, message: "Failed to create orders" });
   }
 };
