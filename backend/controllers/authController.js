@@ -133,7 +133,7 @@ export const logout = async (req, res) => {
       .clearCookie("accessToken", {
         httpOnly: true,
         secure: true,
-        sameSite: "strict",
+        sameSite: "none",
       })
       .json({
         success: true,

@@ -7,11 +7,20 @@ import authroutes from './routes/authrouter.js'
 import payment_routes from './routes/payment_routes.js'
 
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { razorpayWebhook } from './controllers/webhookController.js';
 dotenv.config();
 const app = express();
 
 app.set('trust proxy', 1);
+
+// HTTP Security Headers (HSTS, noSniff, frameguard, etc.)
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  })
+);
 
 // Webhook route MUST be mounted before express.json() and cors() so the raw body
 // is preserved for HMAC signature verification and Razorpay server-to-server calls are unblocked.
@@ -69,6 +78,19 @@ connectDB();
 app.use('/', routes);
 app.use('/auth', authroutes);
 app.use('/payment', payment_routes);
+
+// Centralized Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error("[ServerError]", err.name || "Error", err.message);
+  if (res.headersSent) {
+    return next(err);
+  }
+  const statusCode = err.status || err.statusCode || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: statusCode === 500 ? "Internal Server Error" : err.message,
+  });
+});
 
 app.listen(process.env.PORT || 5000, () => {
     console.log(`Server is listening on port: ${process.env.PORT || 5000}`);

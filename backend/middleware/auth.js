@@ -14,7 +14,7 @@ export const requireAuth = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, secretKey);
+    const decoded = jwt.verify(token, secretKey, { algorithms: ["HS256"] });
     req.user = decoded;
     console.log(`[requireAuth] Authenticated userId: ${decoded?.id} on ${req.method} ${req.originalUrl || req.url}`);
     next();
@@ -24,7 +24,7 @@ export const requireAuth = (req, res, next) => {
       res.clearCookie("accessToken", {
         httpOnly: true,
         secure: true,
-        sameSite: "strict",
+        sameSite: "none",
       });
       return res.status(401).json({ message: "Token expired" });
     } else {

@@ -308,17 +308,18 @@ UserProvider → RoomProvider → GoogleOAuthProvider → CartProvider → DateP
 
 ### Auth pattern
 
-- `requireAuth` middleware enforces strict JWT authentication from `req.cookies.accessToken` and returns 401 if missing or invalid. Attached to all non-public routes by default (cart, booking, availability, email, profile, and payment).
+- `requireAuth` middleware enforces strict JWT authentication from `req.cookies.accessToken` with pinned algorithm `{ algorithms: ["HS256"] }` and returns 401 if missing or invalid. Attached to all non-public routes by default (cart, booking, availability, email, profile, and payment).
 - `verifyToken` strictly aliases `requireAuth` so that any route importing `verifyToken` defaults to requiring login. No permissive/optional auth pattern is used.
+- Cookie lifecycle: Cookie issuing and clearing (`logout`, `TokenExpiredError`) are normalized to `{ httpOnly: true, secure: true, sameSite: "none" }` to ensure reliable cookie management across separate frontend (Vercel) and backend (Render) domains.
 - Only genuinely public, non-user-specific endpoints are unauthenticated: `GET /status`, `GET /allRooms`, `GET /testimonials`, `POST /auth/google`, and `GET /payment/getKey`.
 - Controllers for payment verification, rollback, status checks, and email invoicing extract `userId` strictly from `req.user.id` (JWT) and perform **explicit DB-level ownership verification**: they fetch the `Booking` document by `bookingId` from the database first, compare `booking.userId.toString()` against `req.user.id`, and return `403 Forbidden` if they do not match — before executing any mutation.
 - Frontend always sends `credentials: "include"` / `withCredentials: true` with fetch/axios.
 
-### Error handling
+### Security Headers & Error handling
 
-- Backend returns `{ message: "..." }` for errors; no standard error wrapper
-- Frontend uses `toast.error()` / `toast.success()` (mix of `react-toastify` and `react-hot-toast`)
-- No global error boundary on the frontend
+- Express applies `helmet` middleware for HTTP security headers (HSTS, noSniff, frameguard) configured with `crossOriginResourcePolicy: "cross-origin"` and `crossOriginOpenerPolicy: "same-origin-allow-popups"` for Google OAuth popup and cross-origin compatibility.
+- Centralized Express error-handling middleware is mounted at the end of the middleware chain in `app.js`, returning safe standardized `{ success: false, message: "..." }` responses without leaking stack traces.
+- Frontend uses `toast.error()` / `toast.success()` (mix of `react-toastify` and `react-hot-toast`). No global error boundary on the frontend.
 
 ### Styling
 
