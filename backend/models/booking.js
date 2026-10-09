@@ -11,7 +11,7 @@ const booking = new mongoose.Schema ({
     roomsBooked: {type: Number, required: true},   // Number of rooms booked
     totalAmount: {type: Number, required: true},   // Total amount paid
     discount: {type: Number, required: true, default: 0},   // Discount applied
-    paymentStatus: {type: String, required: true, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending'}, 
+    paymentStatus: {type: String, required: true, enum: ['pending', 'confirmed', 'cancelled', 'refunded'], default: 'pending'}, 
     emailSent: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
 });

@@ -271,6 +271,7 @@ BookedDate is a denormalized day-level occupancy counter (not linked by FK)
 | GET | `/payment/getKey` | No | Return Razorpay public key |
 | POST | `/payment/rollbackBooking` | JWT + ownership | `{bookingId}` → rollback failed booking. Accepts group `bookingId` or document `_id`. Fetches booking from DB, verifies `booking.userId === req.user.id`, returns 403 if mismatch. |
 | POST | `/payment/checkPaymentStatus` | JWT + ownership | `{paymentId, bookingId}` → checks ownership before Razorpay API call, verifies Razorpay payment belongs to stored order and expectedAmount matches, confirms via shared confirmation logic or rolls back if failed. |
+| POST | `/payment/webhook` | Webhook Signature (HMAC-SHA256 via `X-Razorpay-Signature`) | Asynchronous Razorpay events (`payment.captured`, `payment.failed`, `refund.processed`). Unparsed raw body consumed via `express.raw()`. Idempotent via `WebhookEvent` collection. Reuses `processPaymentConfirmation` for captured events. |
 
 ---
 
@@ -375,7 +376,7 @@ UserProvider → RoomProvider → GoogleOAuthProvider → CartProvider → DateP
 | **Room model field mismatch & guest cap [RESOLVED]** | Resolved: `models/room.js` schema updated to declare `roomType`, `maxAdults`, `discount`, and `totalRooms` with `strict: false`. Capacity checks fail closed (rejects if `maxAdults` undefined or invalid, or if guests exceed capacity). Date handling anchored to `Asia/Kolkata` with positive integer validations. |
 | **Inventory race condition & overbooking prevention [RESOLVED]** | Resolved: In `book.js`, eliminated the vulnerable check-then-reserve two-step. Implemented a 2-phase all-or-nothing reservation pipeline: (1) Pure pre-validation of all cart items; (2) Atomic reservation per night using `BookedDate.findOneAndUpdate` with conditional ceiling `{ quantity: { $lte: totalRooms - quantity } }` and `$inc: { quantity }` alongside compound unique index `{ date: 1, roomType: 1 }`. If any night of any room is full, all nights reserved during that request are rolled back atomically via compensation decrements and zero-count cleanup before returning HTTP 400. Booking records are only persisted once 100% of dates are secured. `rollbackBookings.js` updated to use atomic `$inc` decrements. |
 | **Rate limiting on auth, payment, and booking endpoints [RESOLVED]** | Resolved: Created `middleware/rateLimiter.js` with `express-rate-limit` using `ipKeyGenerator` and `trust proxy` enabled in `app.js`. Applied: (a) `authLimiter` (15 req/15min) on `/auth/google`; (b) `paymentLimiter` (30 req/5min per user+IP) on `/payment/checkout`, `/payment/paymentVerification`, `/payment/checkPaymentStatus`, `/payment/rollbackBooking`; (c) `bookingLimiter` (10 req/5min per user+IP) on `/bookroom` to prevent inventory exhaustion attacks. |
-| **Razorpay Webhook Integration [RECOMMENDED FOLLOW-UP]** | Recommended future enhancement: Implement a server-side Razorpay Webhook endpoint (`POST /payment/webhook`) with secret signature verification (`X-Razorpay-Signature`) to capture asynchronous payment events (`payment.captured`, `payment.failed`, `refund.processed`). This ensures bookings are confirmed even if a user closes the browser or network drops before the frontend triggers `paymentVerification`. |
+| **Razorpay Webhook Integration [RESOLVED]** | Resolved: Implemented `POST /payment/webhook` with `crypto.timingSafeEqual` signature verification over raw unparsed request body (`express.raw()`), `WebhookEvent` idempotency deduplication with unique index on `eventId`, payment amount validation against server `expectedAmount`, atomic state transitions (`created` → `processing`), reuse of shared `processPaymentConfirmation` helper, `rollbackBookings` on `payment.failed`, and stay-aware handling on `refund.processed`. Verified with end-to-end automated test suite. |
 | **Mixed toast libraries** | Both `react-toastify` and `react-hot-toast` are imported and used in different components. |
 | **No test suite** | `"test": "echo \"Error: no test specified\""` in both packages. |
 | **Welcome email** | The `isNewUser` flag in `authController.js` uses `user.wasNew` which is not a standard Mongoose property — the welcome email may never trigger after the first upsert. |
@@ -395,6 +396,7 @@ UserProvider → RoomProvider → GoogleOAuthProvider → CartProvider → DateP
 | `JWT_SECRET` | JWT signing key |
 | `RAZORPAY_KEY_ID` | Razorpay public key (test) |
 | `RAZORPAY_KEY_SECRET` | Razorpay secret key (test) |
+| `RAZORPAY_WEBHOOK_SECRET` | Razorpay webhook secret for HMAC-SHA256 signature verification |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `GOOGLE_REDIRECT_URI` | OAuth redirect (matches frontend URL) |
